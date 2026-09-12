@@ -1,1 +1,593 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arena Flegrea - Sistema Valutazione Minerali</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>🌋 ARENA FLEGREA</h1>
+        <p>Sistema Intelligente di Valutazione Minerali - Campi Flegrei</p>
+    </header>
 
+    <nav>
+        <button onclick="mostraSezione('dashboard')" class="nav-btn">
+            📊 Dashboard
+        </button>
+        <button onclick="mostraSezione('quick-add')" class="nav-btn">
+            ⚡ Quick Add
+        </button>
+        <button onclick="mostraSezione('database-prezzi')" class="nav-btn">
+            💾 Database
+        </button>
+        <button onclick="mostraSezione('valutatore')" class="nav-btn">
+            🎯 Valutatore
+        </button>
+        <button onclick="mostraSezione('aste')" class="nav-btn">
+            🔨 Aste
+        </button>
+        <button onclick="mostraSezione('settings')" class="nav-btn">
+            ⚙️ Impostazioni
+        </button>
+    </nav>
+
+    <main>
+        <!-- ========================================
+             DASHBOARD
+        ======================================== -->
+        <section id="dashboard" class="sezione attiva">
+            <h2>📊 Dashboard</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">💎</div>
+                    <div class="stat-content">
+                        <h3>Minerali Tracciati</h3>
+                        <p class="stat-number" id="stat-minerali">0</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-content">
+                        <h3>Prezzi nel Database</h3>
+                        <p class="stat-number" id="stat-prezzi">0</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">🔨</div>
+                    <div class="stat-content">
+                        <h3>Aste Monitorate</h3>
+                        <p class="stat-number" id="stat-aste">0</p>
+                    </div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-icon">📈</div>
+                    <div class="stat-content">
+                        <h3>Valutazioni Fatte</h3>
+                        <p class="stat-number" id="stat-valutazioni">0</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="dashboard-sections">
+                <div class="dashboard-card">
+                    <h3>🎯 Azione Rapida</h3>
+                    <p>Hai visto un'asta interessante su Catawiki?</p>
+                    <button onclick="mostraSezione('quick-add')" class="btn-primary">
+                        ⚡ Aggiungi Prezzo Veloce
+                    </button>
+                </div>
+
+                <div class="dashboard-card">
+                    <h3>📊 Ultimi Aggiornamenti</h3>
+                    <div id="ultimi-aggiornamenti"></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================
+             QUICK ADD (La stella del sistema!)
+        ======================================== -->
+        <section id="quick-add" class="sezione">
+            <h2>⚡ Quick Add - Aggiunta Rapida Prezzi</h2>
+            <p class="subtitle">Hai visto un'asta su Catawiki? Salvala in 30 secondi!</p>
+
+            <form id="form-quick-add" class="quick-form">
+                <div class="form-group">
+                    <label>🔍 Minerale</label>
+                    <input 
+                        type="text" 
+                        id="qa-minerale" 
+                        list="minerali-suggestions"
+                        placeholder="es. Sanidino, Leucite, Hauyne..."
+                        required
+                        autocomplete="off"
+                    >
+                    <datalist id="minerali-suggestions">
+                        <option value="Sanidino">
+                        <option value="Leucite">
+                        <option value="Hauyne">
+                        <option value="Phillipsite">
+                        <option value="Analcime">
+                        <option value="Nepheline">
+                        <option value="Biotite">
+                        <option value="Pirosseno">
+                    </datalist>
+                </div>
+
+                <div class="form-group">
+                    <label>📍 Località</label>
+                    <select id="qa-localita">
+                        <option value="Monte Nuovo">Monte Nuovo</option>
+                        <option value="Solfatara">Solfatara</option>
+                        <option value="Astroni">Astroni</option>
+                        <option value="Pisciarelli">Pisciarelli</option>
+                        <option value="Monte Somma">Monte Somma</option>
+                        <option value="Vesuvio">Vesuvio</option>
+                        <option value="Campi Flegrei (generico)">Campi Flegrei (generico)</option>
+                        <option value="Altra">Altra località...</option>
+                    </select>
+                    <input 
+                        type="text" 
+                        id="qa-localita-custom" 
+                        placeholder="Specifica altra località"
+                        style="display:none; margin-top:0.5rem;"
+                    >
+                </div>
+
+                <div class="mercati-tabs">
+                    <button type="button" class="tab-btn active" data-mercato="catawiki">
+                        💎 Catawiki
+                    </button>
+                    <button type="button" class="tab-btn" data-mercato="ebay">
+                        🛒 eBay
+                    </button>
+                    <button type="button" class="tab-btn" data-mercato="etsy">
+                        🎨 Etsy
+                    </button>
+                    <button type="button" class="tab-btn" data-mercato="heritage">
+                        🏛️ Heritage
+                    </button>
+                    <button type="button" class="tab-btn" data-mercato="dealer">
+                        🏪 Dealer
+                    </button>
+                </div>
+
+                <div class="mercato-form active" id="form-catawiki">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>💰 Prezzo Finale (€)</label>
+                            <input type="number" id="qa-catawiki-prezzo" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>📅 Data Asta</label>
+                            <input type="date" id="qa-catawiki-data">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>🔗 Link Asta</label>
+                        <input type="url" id="qa-catawiki-link" placeholder="https://www.catawiki.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>📝 Note (opzionale)</label>
+                        <textarea id="qa-catawiki-note" rows="2" placeholder="Dimensioni, qualità, particolarità..."></textarea>
+                    </div>
+                </div>
+
+                <div class="mercato-form" id="form-ebay">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>💰 Prezzo Vendita (€)</label>
+                            <input type="number" id="qa-ebay-prezzo" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>📅 Data Vendita</label>
+                            <input type="date" id="qa-ebay-data">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>🔗 Link</label>
+                        <input type="url" id="qa-ebay-link" placeholder="https://www.ebay.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>📝 Note</label>
+                        <textarea id="qa-ebay-note" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="mercato-form" id="form-etsy">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>💰 Prezzo Richiesto (€)</label>
+                            <input type="number" id="qa-etsy-prezzo" step="0.01" min="0">
+                            <small style="color:#666;">Verrà moltiplicato per 0.7 automaticamente</small>
+                        </div>
+                        <div class="form-group">
+                            <label>📅 Data Rilevazione</label>
+                            <input type="date" id="qa-etsy-data">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>🔗 Link</label>
+                        <input type="url" id="qa-etsy-link" placeholder="https://www.etsy.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>📝 Note</label>
+                        <textarea id="qa-etsy-note" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="mercato-form" id="form-heritage">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>💰 Prezzo (€)</label>
+                            <input type="number" id="qa-heritage-prezzo" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>📅 Data</label>
+                            <input type="date" id="qa-heritage-data">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>🔗 Link</label>
+                        <input type="url" id="qa-heritage-link">
+                    </div>
+                    <div class="form-group">
+                        <label>📝 Note</label>
+                        <textarea id="qa-heritage-note" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="mercato-form" id="form-dealer">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>💰 Prezzo Listino (€)</label>
+                            <input type="number" id="qa-dealer-prezzo" step="0.01" min="0">
+                        </div>
+                        <div class="form-group">
+                            <label>📅 Data</label>
+                            <input type="date" id="qa-dealer-data">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>🏪 Fonte</label>
+                        <input type="text" id="qa-dealer-fonte" placeholder="Nome dealer/sito">
+                    </div>
+                    <div class="form-group">
+                        <label>📝 Note</label>
+                        <textarea id="qa-dealer-note" rows="2"></textarea>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-primary btn-large">
+                        💾 Salva nel Database
+                    </button>
+                    <button type="button" onclick="document.getElementById('form-quick-add').reset()" class="btn-secondary">
+                        🔄 Cancella
+                    </button>
+                </div>
+            </form>
+
+            <div class="quick-tips">
+                <h4>💡 Tips:</h4>
+                <ul>
+                    <li>Compila solo i mercati che hai verificato</li>
+                    <li>Il link aiuta a ritrovare l'asta in futuro</li>
+                    <li>Più prezzi inserisci, più accurata sarà la valutazione</li>
+                    <li>Data di oggi pre-selezionata automaticamente</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- ========================================
+             DATABASE PREZZI
+        ======================================== -->
+        <section id="database-prezzi" class="sezione">
+            <h2>💾 Database Prezzi</h2>
+            
+            <div class="db-controls">
+                <input 
+                    type="text" 
+                    id="db-search" 
+                    placeholder="🔍 Cerca minerale o località..."
+                    class="search-input"
+                >
+                <button onclick="esportaDatabase()" class="btn-secondary">
+                    📥 Esporta JSON
+                </button>
+                <button onclick="document.getElementById('import-file').click()" class="btn-secondary">
+                    📤 Importa JSON
+                </button>
+                <input type="file" id="import-file" accept=".json" style="display:none;">
+            </div>
+
+            <div id="database-list"></div>
+
+            <div id="no-database" class="empty-state" style="display:none;">
+                <h3>📭 Database Vuoto</h3>
+                <p>Non hai ancora salvato nessun prezzo.</p>
+                <button onclick="mostraSezione('quick-add')" class="btn-primary">
+                    ⚡ Aggiungi Primo Prezzo
+                </button>
+            </div>
+        </section>
+
+        <!-- ========================================
+             VALUTATORE
+        ======================================== -->
+        <section id="valutatore" class="sezione">
+            <h2>🎯 Valutatore Intelligente</h2>
+            <p class="subtitle">Sistema di valutazione multi-mercato con algoritmo pesato</p>
+
+            <div class="valutatore-header">
+                <button onclick="caricaDaDatabase()" class="btn-secondary">
+                    📂 Carica da Database
+                </button>
+                <button onclick="resetValutatore()" class="btn-secondary">
+                    🔄 Reset
+                </button>
+            </div>
+
+            <form id="form-valutatore">
+                <div class="valutatore-grid">
+                    <!-- PREZZI MERCATI -->
+                    <div class="val-section">
+                        <h3>💰 Prezzi Mercati</h3>
+                        
+                        <div class="mercato-input">
+                            <label>
+                                <span class="mercato-badge catawiki">Catawiki</span>
+                                <span class="peso">40%</span>
+                            </label>
+                            <input type="number" id="val-catawiki" step="0.01" placeholder="€">
+                        </div>
+
+                        <div class="mercato-input">
+                            <label>
+                                <span class="mercato-badge ebay">eBay</span>
+                                <span class="peso">30%</span>
+                            </label>
+                            <input type="number" id="val-ebay" step="0.01" placeholder="€">
+                        </div>
+
+                        <div class="mercato-input">
+                            <label>
+                                <span class="mercato-badge etsy">Etsy</span>
+                                <span class="peso">15% ×0.7</span>
+                            </label>
+                            <input type="number" id="val-etsy" step="0.01" placeholder="€">
+                        </div>
+
+                        <div class="mercato-input">
+                            <label>
+                                <span class="mercato-badge heritage">Heritage</span>
+                                <span class="peso">10%</span>
+                            </label>
+                            <input type="number" id="val-heritage" step="0.01" placeholder="€">
+                        </div>
+
+                        <div class="mercato-input">
+                            <label>
+                                <span class="mercato-badge dealer">Dealer</span>
+                                <span class="peso">5%</span>
+                            </label>
+                            <input type="number" id="val-dealer" step="0.01" placeholder="€">
+                        </div>
+                    </div>
+
+                    <!-- CRITERI QUALITÀ -->
+                    <div class="val-section">
+                        <h3>⭐ Criteri Qualità (1-10)</h3>
+
+                        <div class="quality-input">
+                            <label>
+                                Cristallinità
+                                <span class="peso">25%</span>
+                            </label>
+                            <input type="range" id="val-cristallinita" min="1" max="10" value="5">
+                            <output>5</output>
+                        </div>
+
+                        <div class="quality-input">
+                            <label>
+                                Estetica
+                                <span class="peso">20%</span>
+                            </label>
+                            <input type="range" id="val-estetica" min="1" max="10" value="5">
+                            <output>5</output>
+                        </div>
+
+                        <div class="quality-input">
+                            <label>
+                                Rarità
+                                <span class="peso">20%</span>
+                            </label>
+                            <input type="range" id="val-rarita" min="1" max="10" value="5">
+                            <output>5</output>
+                        </div>
+
+                        <div class="quality-input">
+                            <label>
+                                Dimensioni
+                                <span class="peso">15%</span>
+                            </label>
+                            <input type="range" id="val-dimensioni" min="1" max="10" value="5">
+                            <output>5</output>
+                        </div>
+
+                        <div class="quality-input">
+                            <label>
+                                Integrità
+                                <span class="peso">10%</span>
+                            </label>
+                            <input type="range" id="val-integrita-score" min="1" max="10" value="5">
+                            <output>5</output>
+                        </div>
+
+                        <div class="quality-input">
+                            <label>
+                                Trasparenza
+                                <span class="peso">10%</span>
+                            </label>
+                            <input type="range" id="val-trasparenza" min="1" max="10" value="5">
+                            <output>5</output>
+                        </div>
+                    </div>
+
+                    <!-- FATTORI -->
+                    <div class="val-section">
+                        <h3>🔧 Fattori Correttivi</h3>
+
+                        <div class="form-group">
+                            <label>Località</label>
+                            <select id="val-localita"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Integrità Fisica</label>
+                            <select id="val-integrita"></select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Prezzo Richiesto (€)</label>
+                            <input type="number" id="val-prezzo-richiesto" step="0.01" placeholder="0.00" required>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary btn-large">
+                    🚀 CALCOLA VALORE
+                </button>
+            </form>
+
+            <div id="risultato-valutazione"></div>
+        </section>
+
+        <!-- ========================================
+             ASTE
+        ======================================== -->
+        <section id="aste" class="sezione">
+            <h2>🔨 Registro Aste</h2>
+            
+            <div class="aste-controls">
+                <input type="text" id="aste-search" placeholder="🔍 Cerca..." class="search-input">
+                <select id="aste-filter">
+                    <option value="tutte">Tutte</option>
+                    <option value="attiva">In corso</option>
+                    <option value="venduta">Vendute</option>
+                    <option value="invenduta">Invendute</option>
+                </select>
+                <button onclick="mostraFormAsta()" class="btn-primary">➕ Nuova Asta</button>
+            </div>
+
+            <div id="lista-aste"></div>
+
+            <!-- Form nuova asta (nascosto di default) -->
+            <div id="form-nuova-asta-container" style="display:none;">
+                <h3>➕ Aggiungi Asta</h3>
+                <form id="form-asta">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Minerale</label>
+                            <input type="text" id="asta-minerale" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Località</label>
+                            <input type="text" id="asta-localita" value="Campi Flegrei">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Prezzo Base (€)</label>
+                            <input type="number" id="asta-prezzo-base" step="0.01">
+                        </div>
+                        <div class="form-group">
+                            <label>Prezzo Finale (€)</label>
+                            <input type="number" id="asta-prezzo-finale" step="0.01">
+                        </div>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Stato</label>
+                            <select id="asta-stato">
+                                <option value="attiva">In corso</option>
+                                <option value="venduta">Venduta</option>
+                                <option value="invenduta">Invenduta</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Data</label>
+                            <input type="date" id="asta-data">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Link</label>
+                        <input type="url" id="asta-link">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Note</label>
+                        <textarea id="asta-note" rows="3"></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn-primary">💾 Salva</button>
+                        <button type="button" onclick="nascondiFormAsta()" class="btn-secondary">❌ Annulla</button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- ========================================
+             IMPOSTAZIONI
+        ======================================== -->
+        <section id="settings" class="sezione">
+            <h2>⚙️ Impostazioni</h2>
+
+            <div class="settings-grid">
+                <div class="setting-card">
+                    <h3>💾 Gestione Dati</h3>
+                    <button onclick="backupCompleto()" class="btn-secondary">
+                        📥 Backup Completo
+                    </button>
+                    <button onclick="ripristinaBackup()" class="btn-secondary">
+                        📤 Ripristina Backup
+                    </button>
+                    <button onclick="resetTutto()" class="btn-danger">
+                        🗑️ Reset Totale
+                    </button>
+                </div>
+
+                <div class="setting-card">
+                    <h3>📊 Statistiche Storage</h3>
+                    <p>Database Prezzi: <strong id="stat-db-size">0 KB</strong></p>
+                    <p>Aste: <strong id="stat-aste-size">0 KB</strong></p>
+                    <p>Valutazioni: <strong id="stat-val-size">0 KB</strong></p>
+                </div>
+
+                <div class="setting-card">
+                    <h3>ℹ️ Informazioni</h3>
+                    <p><strong>Versione:</strong> 1.0.0</p>
+                    <p><strong>Ultimo aggiornamento:</strong> <span id="ultimo-aggiornamento"></span></p>
+                    <p><strong>Developed by:</strong> Arena Flegrea Team</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <p>🌋 Arena Flegrea © 2024 | Sistema di Valutazione Minerali</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+</html>
