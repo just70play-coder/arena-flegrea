@@ -1,12 +1,7 @@
-// ========================================
-// ARENA FLEGREA - SISTEMA IBRIDO
-// ========================================
+// ===========================
+// CONFIGURAZIONE GLOBALE
+// ===========================
 
-let aste = [];
-let dbPrezzi = {};
-let conteggioValutazioni = 0;
-
-// CONFIGURAZIONE
 const CONFIG = {
     pesiMercato: {
         catawiki: 0.40,
@@ -26,786 +21,847 @@ const CONFIG = {
         trasparenza: 0.10
     },
     
-    // ===== NUOVO: Database Località per Minerale =====
+    // Location factors specifici per minerale
     localitaMinerali: {
         'diaspro': {
-            'Madagascar': 1.2,           // Famoso per diaspro rosso
-            'Australia': 1.15,           // Mookaite, altre varietà
-            'India': 1.1,
+            'Madagascar': 1.2,
+            'Egitto': 1.3,
+            'Australia': 1.15,
             'Brasile': 1.0,
-            'USA': 1.05,
-            'Egitto': 1.3,               // Diaspro egiziano pregiato
-            'Russia': 1.0,
+            'USA': 1.1,
+            'India': 0.95,
+            'Russia': 1.05,
             'Sudafrica': 1.1
         },
         'sanidino': {
-            'Monte Nuovo': 1.3,
-            'Solfatara': 1.4,
-            'Astroni': 1.2,
-            'Pisciarelli': 1.5,
-            'Eifel (Germania)': 1.2,    // Altra località famosa
-            'Vesuvio': 1.1
+            'Monte Nuovo': 1.4,
+            'Solfatara': 1.5,
+            'Pisciarelli': 1.6,
+            'Astroni': 1.3,
+            'Campi Flegrei': 1.3,
+            'Vesuvio': 1.2
         },
         'leucite': {
-            'Vesuvio': 1.3,
-            'Monte Somma': 1.35,
-            'Alban Hills': 1.2,
-            'Uganda': 0.9,
-            'Wyoming (USA)': 0.85
+            'Monte Somma': 1.5,
+            'Vesuvio': 1.4,
+            'Campi Flegrei': 1.3,
+            'Alban Hills': 1.2
         },
         'hauyne': {
-            'Monte Somma': 1.5,
-            'Eifel (Germania)': 1.4,
-            'Alban Hills': 1.3,
-            'Vesuvio': 1.35
+            'Laacher See': 1.6,
+            'Eifel': 1.5,
+            'Campi Flegrei': 1.4,
+            'Vesuvio': 1.3
         },
         'quarzo': {
-            'Arkansas (USA)': 1.2,
             'Brasile': 1.15,
             'Madagascar': 1.1,
-            'Alpi': 1.0,
-            'Himalaya': 1.25
+            'Alpi': 1.25,
+            'Arkansas': 1.2,
+            'Himalaya': 1.3,
+            'Messico': 1.0
+        },
+        'ametista': {
+            'Brasile': 1.0,
+            'Uruguay': 1.2,
+            'Zambia': 1.15,
+            'Russia': 1.1,
+            'Messico': 0.95
+        },
+        'citrino': {
+            'Brasile': 1.1,
+            'Madagascar': 1.15,
+            'Congo': 1.2,
+            'Zambia': 1.05
         }
-        // Aggiungi altri minerali...
     },
     
-    // Fattore località GENERICO (fallback se minerale non ha località specifica)
+    // Fattori località generici (fallback)
     fattoriLocalita: {
-        'Monte Nuovo': 1.3,
-        'Solfatara': 1.4,
-        'Astroni': 1.2,
-        'Pisciarelli': 1.5,
-        'Monte Somma': 1.15,
-        'Vesuvio': 1.1,
-        'Campi Flegrei (generico)': 1.0,
-        'Madagascar': 1.0,              // Default neutro
+        'Monte Nuovo': 1.4,
+        'Solfatara': 1.5,
+        'Pisciarelli': 1.6,
+        'Astroni': 1.3,
+        'Campi Flegrei': 1.3,
+        'Vesuvio': 1.2,
+        'Madagascar': 1.1,
         'Brasile': 1.0,
-        'India': 0.95,
-        'Cina': 0.85,
-        'Marocco': 1.0,
-        'USA': 0.95,
-        'Altra località': 0.9           // Località sconosciute
+        'altra località': 0.85
     },
     
     rangeIntegrita: {
         'Perfetta (100%)': 1.0,
         'Eccellente (90-99%)': 0.95,
-        'Molto buona (80-89%)': 0.88,
-        'Buona (70-79%)': 0.80,
-        'Discreta (60-69%)': 0.70,
-        'Sufficiente (50-59%)': 0.62,
-        'Parziale (40-49%)': 0.55
+        'Ottima (80-89%)': 0.85,
+        'Buona (70-79%)': 0.75,
+        'Discreta (60-69%)': 0.65,
+        'Danneggiata (<60%)': 0.55
     }
 };
 
-// ===== DIZIONARIO SINONIMI =====
+// ===========================
+// DIZIONARIO ALIAS MINERALI
+// ===========================
+
 const ALIAS_MINERALI = {
-    'diaspro': ['jasper', 'jaspis', 'diaspro rosso', 'red jasper', 'diaspro ocean', 'ocean jasper', 'diaspro paesaggio'],
-    'quarzo': ['quartz', 'cristallo di rocca', 'rock crystal'],
-    'ametista': ['amethyst'],
-    'citrino': ['citrine'],
-    'calcite': ['calcita', 'calcit'],
-    'fluorite': ['fluorita', 'fluorspar'],
-    'pirite': ['pyrite'],
+    'diaspro': ['jasper', 'jaspis', 'diaspro rosso', 'red jasper', 'ocean jasper', 'diaspro oceanico', 'picture jasper'],
+    'quarzo': ['quartz', 'cristallo di rocca', 'rock crystal', 'quarzo ialino'],
+    'ametista': ['amethyst', 'ametist'],
+    'citrino': ['citrine', 'citrin'],
+    'quarzo rosa': ['rose quartz', 'pink quartz'],
+    'quarzo fumé': ['smoky quartz', 'smokey quartz', 'morion'],
     'sanidino': ['sanidine'],
     'leucite': ['leucita', 'leucita'],
-    'hauyne': ['hauyna', 'haüyne'],
-    'phillipsite': ['phillipsita', 'phillipsite-K'],
-    'analcime': ['analcima', 'analcite'],
-    'nefelina': ['nepheline', 'nephelite']
+    'hauyne': ['hauyna', 'haüyne', 'hauynite'],
+    'pirite': ['pyrite', 'pirita'],
+    'calcite': ['calcita', 'calcite'],
+    'fluorite': ['fluorita', 'fluorite'],
+    'aragonite': ['aragonita', 'aragonite'],
+    'sodalite': ['sodalita', 'sodalite'],
+    'labradorite': ['labradorita', 'spectrolite'],
+    'opale': ['opal', 'opale di fuoco', 'fire opal'],
+    'tormalina': ['tourmaline', 'elbaite', 'schorl']
 };
 
-// Funzione normalizzazione
+// ===========================
+// DATABASE LOCALE
+// ===========================
+
+let dbPrezzi = {};
+
+// Carica database da localStorage
+function caricaDatabase() {
+    const saved = localStorage.getItem('arenaFlegreaPrezzi');
+    if (saved) {
+        try {
+            dbPrezzi = JSON.parse(saved);
+            console.log('Database caricato:', Object.keys(dbPrezzi).length, 'minerali');
+        } catch (e) {
+            console.error('Errore caricamento database:', e);
+            dbPrezzi = {};
+        }
+    }
+}
+
+// Salva database in localStorage
+function salvaDatabase() {
+    try {
+        localStorage.setItem('arenaFlegreaPrezzi', JSON.stringify(dbPrezzi));
+        console.log('Database salvato');
+    } catch (e) {
+        console.error('Errore salvataggio database:', e);
+        alert('Errore nel salvataggio dei dati. Memoria piena?');
+    }
+}
+
+// ===========================
+// UTILITY FUNCTIONS
+// ===========================
+
+// Normalizza nome minerale
 function normalizzaMinerale(input) {
-    const norm = input.toLowerCase().trim();
+    const inputLower = input.toLowerCase().trim();
     
     // Cerca negli alias
-    for (const [principale, sinonimi] of Object.entries(ALIAS_MINERALI)) {
-        if (principale === norm || sinonimi.includes(norm)) {
-            return principale.charAt(0).toUpperCase() + principale.slice(1); // Capitalizza
+    for (const [standard, aliases] of Object.entries(ALIAS_MINERALI)) {
+        if (inputLower === standard || aliases.includes(inputLower)) {
+            return standard;
         }
     }
     
-    // Se non trovato, ritorna input capitalizzato
+    // Se non trovato, ritorna l'input originale capitalizzato
     return input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();
 }
 
-// ========================================
-// INIZIALIZZAZIONE
-// ========================================
-
-window.addEventListener('load', function() {
-    caricaTuttiDati();
-    aggiornaDashboard();
-    mostraDatabasePrezzi();
-    mostraAste();
-    inizializzaValutatore();
-    aggiornaStatisticheStorage();
+// Ottiene fattore località (mineral-specific)
+function getFattoreLocalita(minerale, localita) {
+    const mineraleNorm = normalizzaMinerale(minerale);
+    const localitaMineraleDB = CONFIG.localitaMinerali[mineraleNorm];
     
-    const d = new Date().toLocaleDateString('it-IT', { 
-        day: '2-digit', 
-        month: 'long', 
-        year: 'numeric',
-        hour: '2-digit', 
-        minute: '2-digit' 
-    });
-    document.getElementById('ultimo-aggiornamento').textContent = d;
+    if (localitaMineraleDB && localitaMineraleDB[localita]) {
+        return localitaMineraleDB[localita];
+    }
     
-    // Data odierna in Quick Add
-    const oggi = new Date().toISOString().split('T')[0];
-    document.getElementById('qa-catawiki-data').value = oggi;
-    document.getElementById('qa-ebay-data').value = oggi;
-    document.getElementById('qa-etsy-data').value = oggi;
-    document.getElementById('qa-heritage-data').value = oggi;
-    document.getElementById('qa-dealer-data').value = oggi;
-    
-    // Range sliders live
-    document.querySelectorAll('#form-valutatore input[type="range"]').forEach(r => {
-        r.addEventListener('input', () => {
-            if (r.nextElementSibling && r.nextElementSibling.tagName === 'OUTPUT') {
-                r.nextElementSibling.textContent = r.value;
-            }
-        });
-    });
-});
-
-// ========================================
-// NAVIGAZIONE
-// ========================================
-
-function mostraSezione(id) {
-    document.querySelectorAll('.sezione').forEach(s => s.classList.remove('attiva'));
-    document.getElementById(id).classList.add('attiva');
-    
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-    event?.target?.classList.add('active') || document.querySelector(`[onclick="mostraSezione('${id}')"]`)?.classList.add('active');
+    // Fallback su fattori generici
+    return CONFIG.fattoriLocalita[localita] || CONFIG.fattoriLocalita['altra località'];
 }
 
-// ========================================
-// QUICK ADD - TABS
-// ========================================
+// Genera chiave univoca per database
+function generaChiave(minerale, localita) {
+    return `${normalizzaMinerale(minerale)}_${localita}`.toLowerCase().replace(/\s+/g, '_');
+}
 
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        this.classList.add('active');
-        
-        const m = this.dataset.mercato;
-        document.querySelectorAll('.mercato-form').forEach(f => f.classList.remove('active'));
-        document.getElementById('form-' + m).classList.add('active');
-    });
-});
-
-// Località custom
-document.getElementById('qa-localita').addEventListener('change', function() {
-    const custom = document.getElementById('qa-localita-custom');
-    custom.style.display = (this.value === 'Altra') ? 'block' : 'none';
-    if (this.value !== 'Altra') custom.value = '';
-});
-
-// ========================================
-// QUICK ADD - SALVATAGGIO
-// ========================================
-
-document.getElementById('form-quick-add').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    let minerale = document.getElementById('qa-minerale').value.trim();
-    if (!minerale) return;
-    
-    let localita = document.getElementById('qa-localita').value;
-    if (localita === 'Altra') {
-        localita = document.getElementById('qa-localita-custom').value.trim() || 'Altra località';
-    }
-    
-    const keyMinerale = minerale.toLowerCase().replace(/[^\w\s]/g, '').trim();
-    const keyLocalita = localita.toLowerCase().replace(/\s+/g, '_').replace(/[^\w_]/g, '');
-    const chiave = keyMinerale + '_' + keyLocalita;
-    
-    if (!dbPrezzi[chiave]) {
-        dbPrezzi[chiave] = {
-            minerale: minerale,
-            localita: localita,
-            campioni: [],
-            medie: {},
-            ultimoAggiornamento: null
-        };
-    }
-    
-    const nuovo = {
-        data: new Date().toISOString(),
-        prezzi: {}
-    };
-    
-    const mercati = [
-        ['catawiki', 'qa-catawiki-prezzo', 'qa-catawiki-link', 'qa-catawiki-note', 'qa-catawiki-data'],
-        ['ebay', 'qa-ebay-prezzo', 'qa-ebay-link', 'qa-ebay-note', 'qa-ebay-data'],
-        ['etsy', 'qa-etsy-prezzo', 'qa-etsy-link', 'qa-etsy-note', 'qa-etsy-data'],
-        ['heritage', 'qa-heritage-prezzo', 'qa-heritage-link', 'qa-heritage-note', 'qa-heritage-data'],
-        ['dealer', 'qa-dealer-prezzo', 'qa-dealer-link', 'qa-dealer-note', 'qa-dealer-data']
-    ];
-    
-    mercati.forEach(([m, pId, lId, nId, dId]) => {
-        const v = parseFloat(document.getElementById(pId)?.value);
-        if (!isNaN(v) && v > 0) {
-            nuovo.prezzi[m] = {
-                prezzo: v,
-                link: document.getElementById(lId)?.value || null,
-                note: document.getElementById(nId)?.value || null,
-                data: document.getElementById(dId)?.value || null
-            };
-        }
-    });
-    
-    if (Object.keys(nuovo.prezzi).length > 0) {
-        dbPrezzi[chiave].campioni.push(nuovo);
-        dbPrezzi[chiave].medie = calcolaMedie(dbPrezzi[chiave].campioni);
-        dbPrezzi[chiave].ultimoAggiornamento = new Date().toISOString();
-        
-        salvaDBPrezzi();
-        mostraDatabasePrezzi();
-        aggiornaDashboard();
-        aggiornaStatisticheStorage();
-        
-        mostraNotifica('✅ Prezzo salvato nel Database!', 'success');
-        
-        // Reset solo prezzi, tiene minerale+località
-        ['catawiki','ebay','etsy','heritage','dealer'].forEach(m => {
-            document.getElementById(`qa-${m}-prezzo`).value = '';
-            const l = document.getElementById(`qa-${m}-link`); if (l) l.value = '';
-            const n = document.getElementById(`qa-${m}-note`); if (n) n.value = '';
-        });
-    } else {
-        mostraNotifica('⚠️ Inserisci almeno un prezzo', 'error');
-    }
-});
-
-// ========================================
-// CALCOLO MEDIE
-// ========================================
-
+// Calcola medie per mercato
 function calcolaMedie(campioni) {
     const medie = {};
-    ['catawiki','ebay','etsy','heritage','dealer'].forEach(m => {
-        const arr = campioni.map(c => c.prezzi[m]?.prezzo).filter(x => x > 0);
-        if (arr.length > 0) {
-            const sum = arr.reduce((a,b)=>a+b,0);
-            medie[m] = {
-                media: sum/arr.length,
-                min: Math.min(...arr),
-                max: Math.max(...arr),
-                n: arr.length
+    const mercati = ['catawiki', 'ebay', 'etsy', 'heritage', 'dealer'];
+    
+    mercati.forEach(mercato => {
+        const campioniMercato = campioni.filter(c => c.mercato === mercato);
+        
+        if (campioniMercato.length > 0) {
+            const prezzi = campioniMercato.map(c => c.prezzo);
+            const pesi = campioniMercato.map(c => c.peso).filter(p => p > 0);
+            const prezziGrammo = campioniMercato.map(c => c.prezzogrammo).filter(pg => pg > 0);
+            
+            medie[mercato] = {
+                mediaPrezzo: prezzi.reduce((a, b) => a + b, 0) / prezzi.length,
+                mediaPeso: pesi.length > 0 ? pesi.reduce((a, b) => a + b, 0) / pesi.length : 0,
+                mediaPrezzoGrammo: prezziGrammo.length > 0 ? prezziGrammo.reduce((a, b) => a + b, 0) / prezziGrammo.length : 0,
+                min: Math.min(...prezzi),
+                max: Math.max(...prezzi),
+                n: campioniMercato.length
             };
         }
     });
+    
     return medie;
 }
 
-// ========================================
-// DATABASE PREZZI
-// ========================================
+// Calcola media ponderata mercati
+function calcolaMediaPonderata(medie, usaPesoGrammo = false) {
+    let somma = 0;
+    let pesoTotale = 0;
+    
+    for (const [mercato, dati] of Object.entries(medie)) {
+        if (CONFIG.pesiMercato[mercato]) {
+            let valore = usaPesoGrammo ? dati.mediaPrezzoGrammo : dati.mediaPrezzo;
+            
+            // Applica correzione Etsy
+            if (mercato === 'etsy') {
+                valore *= CONFIG.fattoreCorrezioneEtsy;
+            }
+            
+            somma += valore * CONFIG.pesiMercato[mercato];
+            pesoTotale += CONFIG.pesiMercato[mercato];
+        }
+    }
+    
+    return pesoTotale > 0 ? somma / pesoTotale : 0;
+}
 
-function mostraDatabasePrezzi() {
-    const el = document.getElementById('database-list');
-    const vuoto = document.getElementById('no-database');
-    const q = (document.getElementById('db-search')?.value || '').toLowerCase();
+// Calcola score qualità
+function calcolaScoreQualita(valori) {
+    let score = 0;
     
-    const keys = Object.keys(dbPrezzi).sort();
+    for (const [criterio, peso] of Object.entries(CONFIG.criteriQualita)) {
+        const valore = valori[criterio] || 5; // default 5/10
+        score += (valore / 10) * peso;
+    }
     
-    const filtrati = keys.filter(k => {
-        const d = dbPrezzi[k];
-        return !q || d.minerale.toLowerCase().includes(q) || d.localita.toLowerCase().includes(q);
+    return score * 10; // ritorna 0-10
+}
+
+// ===========================
+// QUICK ADD - GESTIONE FORM
+// ===========================
+
+function inizializzaQuickAdd() {
+    const form = document.getElementById('quickAddForm');
+    const pesoInput = document.getElementById('qa-peso');
+    const prezzoInput = document.getElementById('qa-prezzo');
+    const euroGrammoSpan = document.getElementById('qa-eurogrammo');
+    
+    // Calcolo live €/grammo
+    function aggiornaEuroGrammo() {
+        const peso = parseFloat(pesoInput.value);
+        const prezzo = parseFloat(prezzoInput.value);
+        
+        if (peso > 0 && prezzo > 0) {
+            const euroGrammo = prezzo / peso;
+            euroGrammoSpan.textContent = euroGrammo.toFixed(2);
+        } else {
+            euroGrammoSpan.textContent = '0.00';
+        }
+    }
+    
+    pesoInput.addEventListener('input', aggiornaEuroGrammo);
+    prezzoInput.addEventListener('input', aggiornaEuroGrammo);
+    
+    // Submit form
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        aggiungiPrezzoQuick();
     });
+}
+
+function aggiungiPrezzoQuick() {
+    const minerale = document.getElementById('qa-minerale').value.trim();
+    const localita = document.getElementById('qa-localita').value.trim();
+    const peso = parseFloat(document.getElementById('qa-peso').value);
+    const prezzo = parseFloat(document.getElementById('qa-prezzo').value);
+    const mercato = document.getElementById('qa-mercato').value;
+    const dimensioni = document.getElementById('qa-dimensioni').value.trim();
+    const link = document.getElementById('qa-link').value.trim();
+    const note = document.getElementById('qa-note').value.trim();
     
-    if (filtrati.length === 0) {
-        el.innerHTML = '';
-        vuoto.style.display = 'block';
+    // Validazione
+    if (!minerale || !localita || peso <= 0 || prezzo <= 0) {
+        alert('Compila tutti i campi obbligatori (minerale, località, peso, prezzo)');
         return;
     }
     
-    vuoto.style.display = 'none';
+    const mineraleNorm = normalizzaMinerale(minerale);
+    const chiave = generaChiave(mineraleNorm, localita);
+    const prezzogrammo = prezzo / peso;
     
-    el.innerHTML = filtrati.map(k => {
-        const d = dbPrezzi[k];
-        const m = d.medie || {};
-        const upd = d.ultimoAggiornamento ? new Date(d.ultimoAggiornamento).toLocaleDateString('it-IT') : '—';
-        
-        let medHtml = '';
-        Object.entries(m).forEach(([merc, s]) => {
-            medHtml += `
-                <div class="media-item">
-                    <div class="mercato">${merc}</div>
-                    <div class="prezzo">€${s.media.toFixed(2)}</div>
-                    <small>${s.n} · ${s.min.toFixed(0)}–${s.max.toFixed(0)}</small>
-                </div>
-            `;
-        });
-        
-        return `
-            <div class="db-card" data-key="${k}">
-                <div class="db-card-header">
-                    <div class="db-title">
-                        <h4>${d.minerale} – ${d.localita}</h4>
-                        <small>Ultimo aggiornamento: ${upd} • ${d.campioni.length} rilevazioni</small>
-                    </div>
-                    <div class="db-actions">
-                        <button class="btn-icon" title="Usa nel Valutatore" onclick="usaPrezziDatabase('${k}')">🎯</button>
-                        <button class="btn-icon" title="Elimina" onclick="eliminaVoceDB('${k}')">🗑️</button>
-                    </div>
-                </div>
-                <div class="medie-grid">${medHtml}</div>
-                <button class="btn-usa-db" onclick="usaPrezziDatabase('${k}')">🎯 Usa nel Valutatore</button>
-            </div>
-        `;
-    }).join('');
-}
-
-document.getElementById('db-search')?.addEventListener('input', mostraDatabasePrezzi);
-
-function usaPrezziDatabase(k) {
-    const d = dbPrezzi[k];
-    const m = d.medie || {};
-    
-    mostraSezione('valutatore');
-    
-    setTimeout(() => {
-        document.getElementById('val-catawiki').value = m.catawiki ? m.catawiki.media.toFixed(2) : '';
-        document.getElementById('val-ebay').value = m.ebay ? m.ebay.media.toFixed(2) : '';
-        document.getElementById('val-etsy').value = m.etsy ? m.etsy.media.toFixed(2) : '';
-        document.getElementById('val-heritage').value = m.heritage ? m.heritage.media.toFixed(2) : '';
-        document.getElementById('val-dealer').value = m.dealer ? m.dealer.media.toFixed(2) : '';
-        
-        mostraNotifica(`✅ ${d.minerale} caricato nel valutatore`, 'success');
-    }, 60);
-}
-
-function eliminaVoceDB(k) {
-    if (confirm('Eliminare TUTTI i prezzi di questa voce dal database?')) {
-        delete dbPrezzi[k];
-        salvaDBPrezzi();
-        mostraDatabasePrezzi();
-        aggiornaDashboard();
-        aggiornaStatisticheStorage();
-        mostraNotifica('🗑️ Voce eliminata', 'info');
+    // Crea/aggiorna entry database
+    if (!dbPrezzi[chiave]) {
+        dbPrezzi[chiave] = {
+            minerale: mineraleNorm,
+            localita: localita,
+            tipologiaPrezzo: 'peso', // default peso, può essere cambiato dopo
+            campioni: [],
+            medie: {}
+        };
     }
-}
-
-// ========================================
-// ESPORTA/IMPORTA DB
-// ========================================
-
-function esportaDatabase() {
-    const blob = new Blob([JSON.stringify(dbPrezzi, null, 2)], {type: 'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'arena-flegrea-database-prezzi_' + new Date().toISOString().slice(0,10) + '.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    mostraNotifica('📥 Database esportato', 'success');
-}
-
-document.getElementById('import-file').addEventListener('change', function(e) {
-    const f = e.target.files[0];
-    if (!f) return;
-    const r = new FileReader();
-    r.onload = ev => {
-        try {
-            const obj = JSON.parse(ev.target.result);
-            if (obj && typeof obj === 'object') {
-                dbPrezzi = obj;
-                salvaDBPrezzi();
-                mostraDatabasePrezzi();
-                aggiornaDashboard();
-                aggiornaStatisticheStorage();
-                mostraNotifica('📤 Database importato con successo!', 'success');
-            } else throw new Error();
-        } catch (err) {
-            alert('File JSON non valido');
-        }
-        e.target.value = '';
+    
+    // Aggiungi campione
+    const campione = {
+        prezzo: prezzo,
+        peso: peso,
+        prezzogrammo: prezzogrammo,
+        dimensioni: dimensioni,
+        mercato: mercato,
+        data: new Date().toISOString().split('T')[0],
+        link: link,
+        note: note
     };
-    r.readAsText(f);
-});
+    
+    dbPrezzi[chiave].campioni.push(campione);
+    
+    // Ricalcola medie
+    dbPrezzi[chiave].medie = calcolaMedie(dbPrezzi[chiave].campioni);
+    
+    // Salva
+    salvaDatabase();
+    
+    // Feedback
+    alert(`✓ Prezzo aggiunto!\n${mineraleNorm} - ${localita}\n€${prezzo.toFixed(2)} / ${peso}g = €${prezzogrammo.toFixed(2)}/g`);
+    
+    // Reset form
+    document.getElementById('quickAddForm').reset();
+    document.getElementById('qa-eurogrammo').textContent = '0.00';
+    
+    // Aggiorna visualizzazione database
+    mostraDatabase();
+}
 
-// ========================================
-// VALUTATORE
-// ========================================
+// ===========================
+// VALUTATORE QUICK MODE
+// ===========================
 
 function inizializzaValutatore() {
-    const sl = document.getElementById('val-localita');
-    if (sl && sl.options.length <= 0) {
-        Object.keys(CONFIG.fattoriLocalita).forEach(loc => {
-            const o = document.createElement('option');
-            o.value = loc;
-            o.textContent = loc + ' (×' + CONFIG.fattoriLocalita[loc] + ')';
-            sl.appendChild(o);
-        });
+    const form = document.getElementById('valutatoreForm');
+    const pesoInput = document.getElementById('val-peso');
+    const prezzoInput = document.getElementById('val-prezzo');
+    const euroGrammoSpan = document.getElementById('val-eurogrammo');
+    
+    // Calcolo live €/grammo
+    function aggiornaEuroGrammo() {
+        const peso = parseFloat(pesoInput.value);
+        const prezzo = parseFloat(prezzoInput.value);
+        
+        if (peso > 0 && prezzo > 0) {
+            const euroGrammo = prezzo / peso;
+            euroGrammoSpan.textContent = euroGrammo.toFixed(2);
+        } else {
+            euroGrammoSpan.textContent = '0.00';
+        }
     }
-    const si = document.getElementById('val-integrita');
-    if (si && si.options.length <= 0) {
-        Object.keys(CONFIG.rangeIntegrita).forEach(intg => {
-            const o = document.createElement('option');
-            o.value = intg;
-            o.textContent = intg + ' (×' + CONFIG.rangeIntegrita[intg] + ')';
-            si.appendChild(o);
-        });
+    
+    pesoInput.addEventListener('input', aggiornaEuroGrammo);
+    prezzoInput.addEventListener('input', aggiornaEuroGrammo);
+    
+    // Submit
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        eseguiValutazione();
+    });
+}
+
+function eseguiValutazione() {
+    const minerale = document.getElementById('val-minerale').value.trim();
+    const localita = document.getElementById('val-localita').value.trim();
+    const peso = parseFloat(document.getElementById('val-peso').value);
+    const prezzo = parseFloat(document.getElementById('val-prezzo').value);
+    
+    // Validazione
+    if (!minerale || !localita || peso <= 0 || prezzo <= 0) {
+        alert('Compila tutti i campi (minerale, località, peso, prezzo)');
+        return;
+    }
+    
+    const mineraleNorm = normalizzaMinerale(minerale);
+    const chiave = generaChiave(mineraleNorm, localita);
+    
+    // Verifica se esiste database per questo minerale/località
+    const datiDB = dbPrezzi[chiave];
+    
+    if (!datiDB || Object.keys(datiDB.medie).length === 0) {
+        alert(`⚠ Nessun dato storico per ${mineraleNorm} - ${localita}\n\nAggiungi prima dei prezzi nel Quick Add per creare un database di riferimento.`);
+        return;
+    }
+    
+    // Calcola valore stimato
+    const valoreStimato = calcolaValoreStimato(mineraleNorm, localita, peso, datiDB);
+    
+    // Calcola raccomandazione
+    const percentuale = (prezzo / valoreStimato) * 100;
+    const raccomandazione = generaRaccomandazione(percentuale);
+    
+    // Mostra risultati
+    mostraRisultatiValutazione({
+        minerale: mineraleNorm,
+        localita: localita,
+        peso: peso,
+        prezzo: prezzo,
+        prezzogrammo: prezzo / peso,
+        valoreStimato: valoreStimato,
+        percentuale: percentuale,
+        raccomandazione: raccomandazione,
+        datiDB: datiDB
+    });
+}
+
+function calcolaValoreStimato(minerale, localita, peso, datiDB) {
+    const medie = datiDB.medie;
+    
+    // Determina se usare prezzo/grammo o prezzo totale
+    let mediaPonderata;
+    const hasPrezzoGrammo = Object.values(medie).some(m => m.mediaPrezzoGrammo > 0);
+    
+    if (hasPrezzoGrammo) {
+        // Calcola media ponderata €/g e moltiplica per peso
+        const mediaPrezzoGrammo = calcolaMediaPonderata(medie, true);
+        mediaPonderata = mediaPrezzoGrammo * peso;
+    } else {
+        // Usa prezzo totale
+        mediaPonderata = calcolaMediaPonderata(medie, false);
+    }
+    
+    // Applica fattori
+    const fattoreLocalita = getFattoreLocalita(minerale, localita);
+    const scoreQualita = 5; // default, utente può modificare in futuro
+    const fattoreQualita = scoreQualita / 10;
+    const fattoreIntegrita = 0.95; // default "Eccellente"
+    
+    const valore = mediaPonderata * fattoreLocalita * fattoreQualita * fattoreIntegrita;
+    
+    return valore;
+}
+
+function generaRaccomandazione(percentuale) {
+    if (percentuale <= 60) {
+        return {
+            testo: 'ACQUISTO ECCELLENTE',
+            classe: 'eccellente',
+            emoji: '🌟'
+        };
+    } else if (percentuale <= 80) {
+        return {
+            testo: 'BUON ACQUISTO',
+            classe: 'buono',
+            emoji: '✓'
+        };
+    } else if (percentuale <= 100) {
+        return {
+            testo: 'PREZZO CORRETTO',
+            classe: 'corretto',
+            emoji: '='
+        };
+    } else if (percentuale <= 120) {
+        return {
+            testo: 'SOPRAVVALUTATO',
+            classe: 'sopravvalutato',
+            emoji: '⚠'
+        };
+    } else {
+        return {
+            testo: 'SCONSIGLIATO',
+            classe: 'sconsigliato',
+            emoji: '✗'
+        };
     }
 }
 
-function caricaDaDatabase() {
-    mostraSezione('database-prezzi');
-    mostraNotifica('📂 Seleziona una voce → "Usa nel Valutatore"', 'info');
-}
-
-function resetValutatore() {
-    document.getElementById('form-valutatore').reset();
-    document.querySelectorAll('#form-valutatore output').forEach(o => o.textContent = '5');
-    document.getElementById('risultato-valutazione').innerHTML = '';
-}
-
-document.getElementById('form-valutatore').addEventListener('submit', function(e) {
-    e.preventDefault();
+function mostraRisultatiValutazione(risultati) {
+    const container = document.getElementById('risultatiValutazione');
     
-    const dati = {
-        mercati: {
-            catawiki: parseFloat(document.getElementById('val-catawiki').value)||0,
-            ebay: parseFloat(document.getElementById('val-ebay').value)||0,
-            etsy: parseFloat(document.getElementById('val-etsy').value)||0,
-            heritage: parseFloat(document.getElementById('val-heritage').value)||0,
-            dealer: parseFloat(document.getElementById('val-dealer').value)||0
-        },
-        qualita: {
-            cristallinita: +document.getElementById('val-cristallinita').value,
-            estetica: +document.getElementById('val-estetica').value,
-            rarita: +document.getElementById('val-rarita').value,
-            dimensioni: +document.getElementById('val-dimensioni').value,
-            integrita: +document.getElementById('val-integrita-score').value,
-            trasparenza: +document.getElementById('val-trasparenza').value
-        },
-        localita: document.getElementById('val-localita').value,
-        integrita: document.getElementById('val-integrita').value
-    };
-    
-    const r = calcolaValoreStimato(dati);
-    const pr = parseFloat(document.getElementById('val-prezzo-richiesto').value)||0;
-    const cns = generaConsiglio(pr, r.valoreStimato);
-    
-    mostraRisultato(r, pr, cns);
-    
-    conteggioValutazioni++;
-    localStorage.setItem('arena-flegrea-val-count', conteggioValutazioni.toString());
-    aggiornaDashboard();
-});
-
-function calcolaValoreStimato(d) {
-    let vm = 0;
-    if (d.mercati.catawiki>0) vm += d.mercati.catawiki * CONFIG.pesiMercato.catawiki;
-    if (d.mercati.ebay>0) vm += d.mercati.ebay * CONFIG.pesiMercato.ebay;
-    if (d.mercati.etsy>0) vm += (d.mercati.etsy * CONFIG.fattoreCorrezioneEtsy) * CONFIG.pesiMercato.etsy;
-    if (d.mercati.heritage>0) vm += d.mercati.heritage * CONFIG.pesiMercato.heritage;
-    if (d.mercati.dealer>0) vm += d.mercati.dealer * CONFIG.pesiMercato.dealer;
-    
-    const attivi = Object.keys(CONFIG.pesiMercato).filter(k=>d.mercati[k]>0).reduce((s,k)=>s+CONFIG.pesiMercato[k],0);
-    if (attivi>0) vm = vm/attivi;
-    
-    let sq = 0;
-    sq += (d.qualita.cristallinita||5)*CONFIG.criteriQualita.cristallinita;
-    sq += (d.qualita.estetica||5)*CONFIG.criteriQualita.estetica;
-    sq += (d.qualita.rarita||5)*CONFIG.criteriQualita.rarita;
-    sq += (d.qualita.dimensioni||5)*CONFIG.criteriQualita.dimensioni;
-    sq += (d.qualita.integrita||5)*CONFIG.criteriQualita.integrita;
-    sq += (d.qualita.trasparenza||5)*CONFIG.criteriQualita.trasparenza;
-    
-    const fl = CONFIG.fattoriLocalita[d.localita] || 0.85;
-    const fi = CONFIG.rangeIntegrita[d.integrita] || 0.62;
-    
-    const vs = vm * (sq/10) * fl * fi;
-    
-    return {valoreStimato:vs, valoreMercati:vm, scoreQualita:sq, fattoreLocalita:fl, fattoreIntegrita:fi};
-}
-
-function generaConsiglio(pr, vs) {
-    if (vs <= 0) return {azione:'INSERISCI DATI', colore:'#9e9e9e', icona:'ℹ️', testo:'Mancano prezzi di mercato', pct:0};
-    const pct = (pr/vs)*100;
-    if (pct <= 60) return {azione:'ACQUISTO ECCELLENTE', colore:'#00c853', icona:'🎯', testo:'Affare molto interessante', pct};
-    if (pct <= 80) return {azione:'BUON ACQUISTO', colore:'#64dd17', icona:'✅', testo:'Opportunità vantaggiosa', pct};
-    if (pct <= 100) return {azione:'PREZZO CORRETTO', colore:'#ffd600', icona:'👍', testo:'In linea con valore stimato', pct};
-    if (pct <= 120) return {azione:'SOPRAVVALUTATO', colore:'#ff6f00', icona:'⚠️', testo:'Prezzo sopra valore stimato', pct};
-    return {azione:'SCONSIGLIATO', colore:'#d50000', icona:'❌', testo:'Eccessivamente caro rispetto al mercato', pct};
-}
-
-function mostraRisultato(r, pr, c) {
-    const box = document.getElementById('risultato-valutazione');
-    const diff = (pr - r.valoreStimato);
-    
-    box.innerHTML = `
-        <div class="risultato-box">
-            <div class="valore-principale">
-                <h3>💎 VALORE STIMATO</h3>
-                <div class="prezzo-grande">€${r.valoreStimato.toFixed(2)}</div>
-            </div>
+    const html = `
+        <div class="risultato-card raccomandazione-${risultati.raccomandazione.classe}">
+            <h3>${risultati.raccomandazione.emoji} ${risultati.raccomandazione.testo}</h3>
             
-            <div class="consiglio-box" style="background:${c.colore}15; border-left:5px solid ${c.colore}">
-                <div class="consiglio-icona">${c.icona}</div>
-                <div class="consiglio-testo">
-                    <h3 style="color:${c.colore}">${c.azione}</h3>
-                    <p>${c.testo}</p>
-                    <p style="font-weight:700; margin-top:.4rem">Prezzo richiesto = <strong>${c.pct.toFixed(0)}%</strong> del valore stimato</p>
+            <div class="risultato-principale">
+                <div class="valore-riga">
+                    <span>Prezzo proposto:</span>
+                    <strong>€${risultati.prezzo.toFixed(2)}</strong>
+                </div>
+                <div class="valore-riga">
+                    <span>Valore stimato:</span>
+                    <strong>€${risultati.valoreStimato.toFixed(2)}</strong>
+                </div>
+                <div class="valore-riga percentuale">
+                    <span>Rapporto:</span>
+                    <strong>${risultati.percentuale.toFixed(1)}%</strong>
                 </div>
             </div>
             
-            <div class="confronto-prezzi">
-                <div class="prezzo-item">
-                    <span>Prezzo Richiesto</span>
-                    <strong style="color:#c62828">€${pr.toFixed(2)}</strong>
-                </div>
-                <div class="prezzo-item">
-                    <span>Valore Stimato</span>
-                    <strong style="color:#2e7d32">€${r.valoreStimato.toFixed(2)}</strong>
-                </div>
-                <div class="prezzo-item">
-                    <span>Differenza</span>
-                    <strong style="color:${diff>=0?'#c62828':'#2e7d32'}">${diff>=0?'+':''}€${diff.toFixed(2)}</strong>
-                </div>
-                <div class="prezzo-item">
-                    <span>Score Qualità</span>
-                    <strong>${r.scoreQualita.toFixed(2)}/10</strong>
-                </div>
-            </div>
-            
-            <div class="breakdown">
-                <h4>📊 Breakdown Calcolo</h4>
-                <div class="breakdown-item">
-                    <span>Media Ponderata Mercati</span>
-                    <strong>€${r.valoreMercati.toFixed(2)}</strong>
-                </div>
-                <div class="breakdown-item">
-                    <span>× Score Qualità / 10</span>
-                    <strong>× ${(r.scoreQualita/10).toFixed(3)}</strong>
-                </div>
-                <div class="breakdown-item">
-                    <span>× Fattore Località</span>
-                    <strong>× ${r.fattoreLocalita}</strong>
-                </div>
-                <div class="breakdown-item">
-                    <span>× Fattore Integrità</span>
-                    <strong>× ${r.fattoreIntegrita}</strong>
-                </div>
-                <div class="formula-finale">
-                    <strong>Formula:</strong> €${r.valoreMercati.toFixed(2)} × ${(r.scoreQualita/10).toFixed(2)} × ${r.fattoreLocalita} × ${r.fattoreIntegrita} = <strong style="color:#667eea">€${r.valoreStimato.toFixed(2)}</strong>
-                </div>
-            </div>
-            
-            <div class="azioni-risultato">
-                <button class="btn-copia" onclick="copiaRisultatoValutazione()">📋 Copia Risultato</button>
-                <button class="btn-reset-val" onclick="resetValutatore()">🔄 Nuova</button>
+            <div class="dettagli-valutazione">
+                <h4>Dettagli</h4>
+                <p><strong>Minerale:</strong> ${risultati.minerale}</p>
+                <p><strong>Località:</strong> ${risultati.localita}</p>
+                <p><strong>Peso:</strong> ${risultati.peso}g</p>
+                <p><strong>€/grammo proposto:</strong> €${risultati.prezzogrammo.toFixed(2)}/g</p>
+                
+                <h4>Database storico (${risultati.datiDB.campioni.length} campioni)</h4>
+                ${generaTabellaStorico(risultati.datiDB.medie)}
             </div>
         </div>
     `;
     
-    box.scrollIntoView({behavior:'smooth', block:'start'});
+    container.innerHTML = html;
+    container.style.display = 'block';
 }
 
-function copiaRisultatoValutazione() {
-    const pr = parseFloat(document.getElementById('val-prezzo-richiesto').value)||0;
-    const txt = `ARENA FLEGREA - Valutazione
-Valore stimato: €${document.querySelector('.prezzo-grande')?.textContent.replace('€','') || '0,00'}
-Prezzo richiesto: €${pr.toFixed(2)}
-Rapporto: ${document.querySelector('.consiglio-testo strong')?.textContent || ''}
-Consiglio: ${document.querySelector('.consiglio-testo h3')?.textContent || ''}`;
-    navigator.clipboard.writeText(txt).then(()=>mostraNotifica('📋 Copiato negli appunti','success'));
-}
-
-// ========================================
-// ASTE
-// ========================================
-
-function mostraFormAsta() {
-    document.getElementById('form-nuova-asta-container').style.display='block';
-}
-
-function nascondiFormAsta() {
-    document.getElementById('form-nuova-asta-container').style.display='none';
-    document.getElementById('form-asta').reset();
-}
-
-document.getElementById('form-asta').addEventListener('submit', function(e){
-    e.preventDefault();
-    const a = {
-        id: Date.now(),
-        minerale: document.getElementById('asta-minerale').value,
-        localita: document.getElementById('asta-localita').value,
-        prezzoBase: parseFloat(document.getElementById('asta-prezzo-base').value)||0,
-        prezzoFinale: parseFloat(document.getElementById('asta-prezzo-finale').value)||0,
-        stato: document.getElementById('asta-stato').value,
-        data: document.getElementById('asta-data').value,
-        link: document.getElementById('asta-link').value,
-        note: document.getElementById('asta-note').value,
-        ts: new Date().toISOString()
-    };
-    aste.push(a);
-    salvaAste();
-    this.reset();
-    nascondiFormAsta();
-    mostraAste();
-    aggiornaDashboard();
-    mostraNotifica('✅ Asta salvata','success');
-});
-
-function mostraAste() {
-    const c = document.getElementById('lista-aste');
-    const f = document.getElementById('aste-filter').value;
-    const s = (document.getElementById('aste-search').value||'').toLowerCase();
+function generaTabellaStorico(medie) {
+    let html = '<table class="tabella-storico"><thead><tr><th>Mercato</th><th>€ medio</th><th>€/g medio</th><th>n</th></tr></thead><tbody>';
     
-    const list = aste.filter(x => {
-        const m1 = f==='tutte'||x.stato===f;
-        const m2 = !s || x.minerale.toLowerCase().includes(s) || x.localita.toLowerCase().includes(s);
-        return m1&&m2;
-    }).sort((a,b)=>new Date(b.ts)-new Date(a.ts));
+    for (const [mercato, dati] of Object.entries(medie)) {
+        html += `
+            <tr>
+                <td>${mercato.charAt(0).toUpperCase() + mercato.slice(1)}</td>
+                <td>€${dati.mediaPrezzo.toFixed(2)}</td>
+                <td>${dati.mediaPrezzoGrammo > 0 ? '€' + dati.mediaPrezzoGrammo.toFixed(2) + '/g' : '-'}</td>
+                <td>${dati.n}</td>
+            </tr>
+        `;
+    }
     
-    if (list.length===0){
-        c.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:#999;padding:2rem;">Nessuna asta trovata</p>';
+    html += '</tbody></table>';
+    return html;
+}
+
+// ===========================
+// VISUALIZZAZIONE DATABASE
+// ===========================
+
+function mostraDatabase() {
+    const container = document.getElementById('databaseView');
+    
+    if (Object.keys(dbPrezzi).length === 0) {
+        container.innerHTML = '<p class="empty-state">Nessun dato nel database. Aggiungi prezzi con Quick Add!</p>';
         return;
     }
     
-    c.innerHTML = list.map(x => `
-        <div class="asta-card">
-            <h3>${x.minerale}</h3>
-            <p>📍 ${x.localita}</p>
-            <div class="asta-prezzo">€${(x.prezzoFinale||x.prezzoBase||0).toFixed(2)}</div>
-            <span class="badge ${x.stato}">${x.stato.toUpperCase()}</span>
-            ${x.data ? `<div class="asta-meta">📅 ${new Date(x.data).toLocaleDateString('it-IT')}</div>` : ''}
-            ${x.note ? `<div class="asta-note">📝 ${x.note}</div>` : ''}
-            ${x.link ? `<a href="${x.link}" target="_blank" class="link-asta">🔗 Vedi su Catawiki</a>` : ''}
-            <button class="asta-del" onclick="eliminaAsta(${x.id})" title="Elimina">🗑️</button>
-        </div>
-    `).join('');
-}
-
-function eliminaAsta(id){
-    if (confirm('Eliminare questa asta?')){
-        aste = aste.filter(x=>x.id!==id);
-        salvaAste();
-        mostraAste();
-        aggiornaDashboard();
-        mostraNotifica('🗑️ Asta eliminata','info');
+    let html = '<div class="database-lista">';
+    
+    for (const [chiave, dati] of Object.entries(dbPrezzi)) {
+        const numCampioni = dati.campioni.length;
+        const numMercati = Object.keys(dati.medie).length;
+        
+        // Calcola media generale
+        const mediaGenerale = calcolaMediaPonderata(dati.medie, false);
+        const mediaPrezzoGrammo = calcolaMediaPonderata(dati.medie, true);
+        
+        html += `
+            <div class="database-card">
+                <div class="database-header">
+                    <h3>${dati.minerale}</h3>
+                    <span class="badge">${dati.localita}</span>
+                </div>
+                <div class="database-stats">
+                    <div class="stat">
+                        <span class="stat-label">Campioni</span>
+                        <span class="stat-value">${numCampioni}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">Mercati</span>
+                        <span class="stat-value">${numMercati}</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-label">€ medio</span>
+                        <span class="stat-value">€${mediaGenerale.toFixed(2)}</span>
+                    </div>
+                    ${mediaPrezzoGrammo > 0 ? `
+                    <div class="stat">
+                        <span class="stat-label">€/g medio</span>
+                        <span class="stat-value">€${mediaPrezzoGrammo.toFixed(2)}/g</span>
+                    </div>
+                    ` : ''}
+                </div>
+                <button onclick="mostraDettagliMinerale('${chiave}')" class="btn-dettagli">
+                    Dettagli →
+                </button>
+            </div>
+        `;
     }
-}
-
-document.getElementById('aste-filter')?.addEventListener('change', mostraAste);
-document.getElementById('aste-search')?.addEventListener('input', mostraAste);
-
-// ========================================
-// DASHBOARD & STORAGE
-// ========================================
-
-function caricaTuttiDati(){
-    const d1 = localStorage.getItem('arena-flegrea-prezzi-db');
-    if (d1) dbPrezzi = JSON.parse(d1);
-    const d2 = localStorage.getItem('arena-flegrea-aste');
-    if (d2) aste = JSON.parse(d2);
-    const d3 = localStorage.getItem('arena-flegrea-val-count');
-    if (d3) conteggioValutazioni = parseInt(d3)||0;
-}
-
-function salvaDBPrezzi(){ localStorage.setItem('arena-flegrea-prezzi-db', JSON.stringify(dbPrezzi)); }
-function salvaAste(){ localStorage.setItem('arena-flegrea-aste', JSON.stringify(aste)); }
-
-function aggiornaDashboard(){
-    const keys = Object.keys(dbPrezzi);
-    let totCampioni = 0;
-    keys.forEach(k=> totCampioni += (dbPrezzi[k].campioni||[]).length);
     
-    const v = aste.filter(a=>a.stato==='venduta').length;
-    const i = aste.filter(a=>a.stato==='invenduta').length;
-    const ac= aste.filter(a=>a.stato==='attiva').length;
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function mostraDettagliMinerale(chiave) {
+    const dati = dbPrezzi[chiave];
+    if (!dati) return;
     
-    document.getElementById('stat-minerali').textContent = keys.length;
-    document.getElementById('stat-prezzi').textContent = totCampioni;
-    document.getElementById('stat-aste').textContent = aste.length;
-    document.getElementById('stat-valutazioni').textContent = conteggioValutazioni;
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+            <h2>${dati.minerale} - ${dati.localita}</h2>
+            
+            <h3>Medie per mercato</h3>
+            ${generaTabellaStorico(dati.medie)}
+            
+            <h3>Tutti i campioni (${dati.campioni.length})</h3>
+            <table class="tabella-storico">
+                <thead>
+                    <tr>
+                        <th>Data</th>
+                        <th>Mercato</th>
+                        <th>Prezzo</th>
+                        <th>Peso</th>
+                        <th>€/g</th>
+                        <th>Note</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${dati.campioni.map(c => `
+                        <tr>
+                            <td>${c.data}</td>
+                            <td>${c.mercato}</td>
+                            <td>€${c.prezzo.toFixed(2)}</td>
+                            <td>${c.peso}g</td>
+                            <td>€${c.prezzogrammo.toFixed(2)}/g</td>
+                            <td>${c.note || '-'}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            
+            <button onclick="this.parentElement.parentElement.remove()" class="btn-primary">Chiudi</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
 }
 
-function aggiornaStatisticheStorage(){
-    function kb(k){ const s = localStorage.getItem(k)||''; return (new Blob([s]).size/1024).toFixed(1)+' KB'; }
-    document.getElementById('stat-db-size').textContent = kb('arena-flegrea-prezzi-db');
-    document.getElementById('stat-aste-size').textContent = kb('arena-flegrea-aste');
-    document.getElementById('stat-val-size').textContent = kb('arena-flegrea-val-count');
+// ===========================
+// IMPORT CSV GOOGLE SHEET
+// ===========================
+
+function inizializzaImport() {
+    const form = document.getElementById('importForm');
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        importaCSV();
+    });
 }
 
-// ========================================
-// IMPOSTAZIONI
-// ========================================
-
-function backupCompleto(){
-    const b = {
-        versione: '1.0.0',
-        data: new Date().toISOString(),
-        dbPrezzi,
-        aste,
-        conteggioValutazioni
+function importaCSV() {
+    const fileInput = document.getElementById('csvFile');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        alert('Seleziona un file CSV');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const csv = e.target.result;
+        parseCSV(csv);
     };
-    const blob = new Blob([JSON.stringify(b,null,2)], {type:'application/json'});
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'arena-flegrea-backup-completo_'+new Date().toISOString().slice(0,10)+'.json';
-    a.click();
-    URL.revokeObjectURL(url);
-    mostraNotifica('💾 Backup completo esportato','success');
+    reader.readAsText(file);
 }
 
-function ripristinaBackup(){
-    const inp = document.createElement('input');
-    inp.type='file';
-    inp.accept='.json';
-    inp.onchange = e => {
-        const f = e.target.files[0];
-        if(!f) return;
-        const r = new FileReader();
-        r.onload = ev => {
-            try {
-                const obj = JSON.parse(ev.target.result);
-                if (obj.dbPrezzi) dbPrezzi = obj.dbPrezzi;
-                if (obj.aste) aste = obj.aste;
-                if (typeof obj.conteggioValutazioni === 'number') conteggioValutazioni = obj.conteggioValutazioni;
-                salvaDBPrezzi(); salvaAste();
-                localStorage.setItem('arena-flegrea-val-count', conteggioValutazioni.toString());
-                mostraDatabasePrezzi(); mostraAste(); aggiornaDashboard(); aggiornaStatisticheStorage();
-                mostraNotifica('📤 Backup ripristinato con successo!','success');
-            } catch(err){ alert('File backup non valido'); }
+function parseCSV(csv) {
+    const righe = csv.split('\n');
+    const header = righe[0].split(',').map(h => h.trim());
+    
+    // Trova indici colonne (formato Google Sheet)
+    const indici = {
+        minerale: header.indexOf('Minerale'),
+        localita: header.indexOf('Provenienza'),
+        peso: header.indexOf('Peso (g)'),
+        prezzo: header.indexOf('Costo (€)'),
+        dimensioni: header.indexOf('Misure (mm)'),
+        data: header.indexOf('Data di acquisizione'),
+        venditore: header.indexOf('Venditore'),
+        link: header.indexOf('Link Cartella'),
+        note: header.indexOf('Note')
+    };
+    
+    let importati = 0;
+    let saltati = 0;
+    
+    for (let i = 1; i < righe.length; i++) {
+        const riga = righe[i].split(',');
+        
+        if (riga.length < 5) continue; // riga vuota
+        
+        const minerale = riga[indici.minerale]?.trim();
+        const localita = riga[indici.localita]?.trim();
+        const peso = parseFloat(riga[indici.peso]);
+        const prezzo = parseFloat(riga[indici.prezzo]);
+        
+        // Validazione
+        if (!minerale || !localita || !peso || peso <= 0 || !prezzo || prezzo <= 0) {
+            saltati++;
+            continue;
+        }
+        
+        const mineraleNorm = normalizzaMinerale(minerale);
+        const chiave = generaChiave(mineraleNorm, localita);
+        const prezzogrammo = prezzo / peso;
+        
+        // Determina mercato dal venditore
+        const venditore = riga[indici.venditore]?.toLowerCase() || '';
+        let mercato = 'dealer'; // default
+        if (venditore.includes('catawiki')) mercato = 'catawiki';
+        else if (venditore.includes('ebay')) mercato = 'ebay';
+        else if (venditore.includes('etsy')) mercato = 'etsy';
+        
+        // Crea/aggiorna entry
+        if (!dbPrezzi[chiave]) {
+            dbPrezzi[chiave] = {
+                minerale: mineraleNorm,
+                localita: localita,
+                tipologiaPrezzo: 'peso',
+                campioni: [],
+                medie: {}
+            };
+        }
+        
+        // Aggiungi campione
+        const campione = {
+            prezzo: prezzo,
+            peso: peso,
+            prezzogrammo: prezzogrammo,
+            dimensioni: riga[indici.dimensioni]?.trim() || '',
+            mercato: mercato,
+            data: riga[indici.data]?.trim() || new Date().toISOString().split('T')[0],
+            link: riga[indici.link]?.trim() || '',
+            note: riga[indici.note]?.trim() || ''
         };
-        r.readAsText(f);
-    };
-    inp.click();
+        
+        dbPrezzi[chiave].campioni.push(campione);
+        importati++;
+    }
+    
+    // Ricalcola medie per tutti
+    for (const chiave of Object.keys(dbPrezzi)) {
+        dbPrezzi[chiave].medie = calcolaMedie(dbPrezzi[chiave].campioni);
+    }
+    
+    salvaDatabase();
+    mostraDatabase();
+    
+    alert(`✓ Import completato!\n\n${importati} campioni importati\n${saltati} righe saltate`);
+    document.getElementById('importForm').reset();
 }
 
-function resetTutto(){
-    if (confirm('⚠️ ATTENZIONE: Vuoi ELIMINARE TUTTI i dati?\n\n- Database Prezzi\n- Registro Aste\n- Conteggio Valutazioni\n\nQuesta azione è IRREVERSIBILE')) {
-        if (confirm('Confermi davvero?')) {
-            localStorage.removeItem('arena-flegrea-prezzi-db');
-            localStorage.removeItem('arena-flegrea-aste');
-            localStorage.removeItem('arena-flegrea-val-count');
-            dbPrezzi={}; aste=[]; conteggioValutazioni=0;
-            mostraDatabasePrezzi(); mostraAste(); aggiornaDashboard(); aggiornaStatisticheStorage();
-            document.getElementById('risultato-valutazione').innerHTML='';
-            mostraNotifica('🗑️ Tutti i dati eliminati','info');
+// ===========================
+// GESTIONE BACKUP
+// ===========================
+
+function esportaBackup() {
+    const dataStr = JSON.stringify(dbPrezzi, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `arena_flegrea_backup_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+}
+
+function importaBackup() {
+    const fileInput = document.getElementById('backupFile');
+    const file = fileInput.files[0];
+    
+    if (!file) {
+        alert('Seleziona un file di backup');
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            const backup = JSON.parse(e.target.result);
+            
+            if (confirm('Vuoi sovrascrivere il database attuale con il backup?')) {
+                dbPrezzi = backup;
+                salvaDatabase();
+                mostraDatabase();
+                alert('✓ Backup ripristinato con successo!');
+            }
+        } catch (error) {
+            alert('Errore nel file di backup: ' + error.message);
+        }
+    };
+    reader.readAsText(file);
+}
+
+function resetDatabase() {
+    if (confirm('⚠ ATTENZIONE: Vuoi eliminare TUTTI i dati?\n\nQuesta operazione è irreversibile!\n\nTi consiglio di esportare un backup prima.')) {
+        if (confirm('Sei assolutamente sicuro? Tutti i prezzi salvati verranno persi.')) {
+            dbPrezzi = {};
+            localStorage.removeItem('arenaFlegreaPrezzi');
+            mostraDatabase();
+            alert('Database resettato.');
         }
     }
 }
 
-// ========================================
-// NOTIFICHE
-// ========================================
+// ===========================
+// NAVIGAZIONE TAB
+// ===========================
 
-function mostraNotifica(msg, tipo='info'){
-    const n = document.createElement('div');
-    n.className = 'notifica notifica-'+tipo;
-    n.textContent = msg;
-    document.body.appendChild(n);
-    setTimeout(()=>{
-        n.style.animation='slideOutRight .25s';
-        setTimeout(()=>n.remove(),250);
-    },2200);
+function mostraTab(tabName) {
+    // Nascondi tutte le tab
+    const tabs = document.querySelectorAll('.tab-content');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Rimuovi active da bottoni
+    const bottoni = document.querySelectorAll('.tab-button');
+    bottoni.forEach(btn => btn.classList.remove('active'));
+    
+    // Mostra tab selezionata
+    document.getElementById(tabName).classList.add('active');
+    event.target.classList.add('active');
+    
+    // Aggiorna database view se necessario
+    if (tabName === 'database') {
+        mostraDatabase();
+    }
 }
+
+// ===========================
+// INIZIALIZZAZIONE APP
+// ===========================
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🌋 Arena Flegrea - Inizializzazione...');
+    
+    // Carica database
+    caricaDatabase();
+    
+    // Inizializza componenti
+    inizializzaQuickAdd();
+    inizializzaValutatore();
+    inizializzaImport();
+    
+    // Mostra database
+    mostraDatabase();
+    
+    console.log('✓ Sistema pronto');
+});
+
+// Esporta funzioni globali per onclick HTML
+window.mostraTab = mostraTab;
+window.mostraDettagliMinerale = mostraDettagliMinerale;
+window.esportaBackup = esportaBackup;
+window.importaBackup = importaBackup;
+window.resetDatabase = resetDatabase;
