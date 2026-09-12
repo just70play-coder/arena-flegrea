@@ -1,684 +1,605 @@
-/* ===========================
-   ARENA FLEGREA - STYLE.CSS
-   Tema Arena.ai
-   =========================== */
+// ===========================
+// CONFIGURAZIONE
+// ===========================
 
-:root {
-    --primary-color: #6366f1;
-    --primary-hover: #8183f4;
-    --secondary-color: #a5b4fc;
-    --success-color: #10b981;
-    --warning-color: #f59e0b;
-    --danger-color: #ef4444;
+const CONFIG = {
+    pesiMercato: {
+        catawiki: 0.40,
+        ebay: 0.30,
+        etsy: 0.15,
+        heritage: 0.10,
+        dealer: 0.05
+    },
+    fattoreCorrezioneEtsy: 0.7,
     
-    --background: #0f0f0f;
-    --background-elevated: #1a1a1a;
-    --card-bg: #171717;
-    --card-bg-hover: #1f1f1f;
+    localitaMinerali: {
+        'diaspro': {
+            'Madagascar': 1.2,
+            'Egitto': 1.3,
+            'Australia': 1.15,
+            'Brasile': 1.0
+        },
+        'sanidino': {
+            'Monte Nuovo': 1.4,
+            'Solfatara': 1.5,
+            'Pisciarelli': 1.6,
+            'Vesuvio': 1.2
+        },
+        'quarzo': {
+            'Brasile': 1.15,
+            'Madagascar': 1.1,
+            'Alpi': 1.25
+        }
+    },
     
-    --text-primary: #f5f5f5;
-    --text-secondary: #a3a3a3;
-    --text-muted: #737373;
-    
-    --border-color: #262626;
-    --border-color-light: #333333;
-    
-    --shadow: 0 1px 3px rgba(0,0,0,0.5);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.6);
-    
-    --input-bg: #0a0a0a;
-    --input-border: #262626;
-    --input-focus: #6366f1;
-}
-
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
-
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
-    background: var(--background);
-    color: var(--text-primary);
-    line-height: 1.6;
-}
-
-.container {
-    max-width: 1200px;
-    margin: 0 auto;
-    padding: 20px;
-}
-
-/* ===========================
-   HEADER
-   =========================== */
-
-header {
-    background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
-    padding: 2rem 0;
-    margin-bottom: 2rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
-    text-align: center;
-    font-weight: 700;
-    background: linear-gradient(135deg, #6366f1 0%, #a5b4fc 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
-
-header p {
-    text-align: center;
-    font-size: 1rem;
-    color: var(--text-secondary);
-}
-
-/* ===========================
-   NAVIGATION
-   =========================== */
-
-nav {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 2rem;
-    background: var(--card-bg);
-    padding: 8px;
-    border-radius: 12px;
-    border: 1px solid var(--border-color);
-    flex-wrap: wrap;
-}
-
-.nav-btn {
-    flex: 1;
-    min-width: 120px;
-    padding: 10px 16px;
-    background: transparent;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    font-weight: 500;
-    color: var(--text-secondary);
-    transition: all 0.2s ease;
-}
-
-.nav-btn:hover {
-    background: var(--background-elevated);
-    color: var(--text-primary);
-}
-
-.nav-btn.active {
-    background: var(--primary-color);
-    color: white;
-}
-
-/* ===========================
-   SEZIONI
-   =========================== */
-
-.sezione {
-    display: none;
-    animation: fadeIn 0.3s ease;
-}
-
-.sezione.active {
-    display: block;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-/* ===========================
-   CARDS
-   =========================== */
-
-.card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 24px;
-    margin-bottom: 20px;
-    border: 1px solid var(--border-color);
-}
-
-.card h2 {
-    color: var(--text-primary);
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
-    font-weight: 600;
-}
-
-.card h3 {
-    color: var(--text-primary);
-    margin-top: 1.5rem;
-    margin-bottom: 0.75rem;
-    font-size: 1.2rem;
-    font-weight: 600;
-}
-
-.subtitle {
-    color: var(--text-secondary);
-    font-size: 0.95rem;
-    margin-bottom: 1.5rem;
-}
-
-/* ===========================
-   DASHBOARD
-   =========================== */
-
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background: var(--background-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-}
-
-.stat-icon {
-    font-size: 2.5rem;
-}
-
-.stat-content h3 {
-    font-size: 0.85rem;
-    color: var(--text-secondary);
-    margin: 0 0 8px 0;
-    font-weight: 500;
-}
-
-.stat-number {
-    font-size: 1.8rem;
-    font-weight: 700;
-    color: var(--primary-color);
-    margin: 0;
-}
-
-.dashboard-actions {
-    display: flex;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-
-/* ===========================
-   FORMS
-   =========================== */
-
-.form-row {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-    margin-bottom: 16px;
-}
-
-.form-group {
-    display: flex;
-    flex-direction: column;
-}
-
-label {
-    font-weight: 500;
-    margin-bottom: 8px;
-    color: var(--text-primary);
-    font-size: 0.9rem;
-}
-
-.required {
-    color: var(--danger-color);
-}
-
-input[type="text"],
-input[type="number"],
-input[type="date"],
-input[type="url"],
-input[type="file"],
-select,
-textarea {
-    padding: 10px 14px;
-    border: 1px solid var(--input-border);
-    border-radius: 8px;
-    font-size: 0.95rem;
-    transition: all 0.2s ease;
-    font-family: inherit;
-    background: var(--input-bg);
-    color: var(--text-primary);
-}
-
-input:focus,
-select:focus,
-textarea:focus {
-    outline: none;
-    border-color: var(--input-focus);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
-}
-
-input::placeholder,
-textarea::placeholder {
-    color: var(--text-muted);
-}
-
-textarea {
-    resize: vertical;
-    min-height: 60px;
-}
-
-select {
-    cursor: pointer;
-    appearance: none;
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23a3a3a3' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 14px center;
-    padding-right: 40px;
-}
-
-.peso-display {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 12px 16px;
-    background: var(--background-elevated);
-    border-radius: 8px;
-    margin-bottom: 16px;
-    border: 1px solid var(--border-color);
-}
-
-.peso-display strong {
-    color: var(--primary-color);
-    font-size: 1.2rem;
-}
-
-.form-actions {
-    display: flex;
-    gap: 12px;
-    margin-top: 20px;
-}
-
-/* ===========================
-   BUTTONS
-   =========================== */
-
-button,
-.btn-primary,
-.btn-secondary {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
-    font-size: 0.95rem;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease;
-    font-family: inherit;
-}
-
-.btn-primary {
-    background: var(--primary-color);
-    color: white;
-}
-
-.btn-primary:hover {
-    background: var(--primary-hover);
-    transform: translateY(-1px);
-}
-
-.btn-secondary {
-    background: var(--card-bg);
-    color: var(--text-primary);
-    border: 1px solid var(--border-color);
-}
-
-.btn-secondary:hover {
-    background: var(--card-bg-hover);
-}
-
-.btn-danger {
-    background: var(--danger-color);
-    color: white;
-}
-
-.btn-danger:hover {
-    background: #dc2626;
-}
-
-.btn-large {
-    padding: 12px 24px;
-    font-size: 1rem;
-}
-
-.btn-dettagli {
-    background: transparent;
-    color: var(--primary-color);
-    border: 1px solid var(--primary-color);
-    padding: 8px 16px;
-    font-size: 0.85rem;
-}
-
-.btn-dettagli:hover {
-    background: var(--primary-color);
-    color: white;
-}
-
-/* ===========================
-   DATABASE
-   =========================== */
-
-.db-controls {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-.search-input {
-    flex: 1;
-    min-width: 200px;
-}
-
-.database-lista {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 16px;
-}
-
-.database-card {
-    background: var(--background-elevated);
-    border: 1px solid var(--border-color);
-    border-radius: 12px;
-    padding: 20px;
-    transition: all 0.2s ease;
-}
-
-.database-card:hover {
-    border-color: var(--primary-color);
-    transform: translateY(-2px);
-}
-
-.database-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-}
-
-.database-header h3 {
-    margin: 0;
-    font-size: 1.1rem;
-}
-
-.badge {
-    background: var(--primary-color);
-    color: white;
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 0.75rem;
-    font-weight: 500;
-}
-
-.database-stats {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
-    margin-bottom: 16px;
-}
-
-.stat {
-    padding: 10px;
-    background: var(--card-bg);
-    border-radius: 8px;
-    border: 1px solid var(--border-color);
-}
-
-.stat-label {
-    font-size: 0.7rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-bottom: 4px;
-}
-
-.stat-value {
-    font-size: 1rem;
-    font-weight: 600;
-    color: var(--text-primary);
-}
-
-/* ===========================
-   VALUTAZIONE
-   =========================== */
-
-.risultato-card {
-    background: var(--card-bg);
-    border-radius: 12px;
-    padding: 24px;
-    margin-top: 24px;
-    border: 1px solid var(--border-color);
-    border-left-width: 4px;
-}
-
-.risultato-card h3 {
-    font-size: 1.5rem;
-    margin: 0 0 20px 0;
-}
-
-.risultato-principale {
-    background: var(--background-elevated);
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    border: 1px solid var(--border-color);
-}
-
-.valore-riga {
-    display: flex;
-    justify-content: space-between;
-    padding: 12px 0;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.valore-riga:last-child {
-    border-bottom: none;
-}
-
-.valore-riga strong {
-    font-size: 1.2rem;
-}
-
-.valore-riga.percentuale strong {
-    font-size: 1.4rem;
-    color: var(--primary-color);
-}
-
-.raccomandazione-eccellente { border-left-color: #10b981; }
-.raccomandazione-eccellente h3 { color: #10b981; }
-
-.raccomandazione-buono { border-left-color: #22c55e; }
-.raccomandazione-buono h3 { color: #22c55e; }
-
-.raccomandazione-corretto { border-left-color: #6366f1; }
-.raccomandazione-corretto h3 { color: #6366f1; }
-
-.raccomandazione-sopravvalutato { border-left-color: #f59e0b; }
-.raccomandazione-sopravvalutato h3 { color: #f59e0b; }
-
-.raccomandazione-sconsigliato { border-left-color: #ef4444; }
-.raccomandazione-sconsigliato h3 { color: #ef4444; }
-
-.dettagli-valutazione h4 {
-    color: var(--text-primary);
-    margin-top: 16px;
-    margin-bottom: 8px;
-}
-
-.dettagli-valutazione p {
-    color: var(--text-secondary);
-    margin-bottom: 6px;
-    font-size: 0.9rem;
-}
-
-/* ===========================
-   TABELLE
-   =========================== */
-
-.tabella-storico {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 12px;
-    background: var(--card-bg);
-    border-radius: 8px;
-    overflow: hidden;
-    border: 1px solid var(--border-color);
-}
-
-.tabella-storico thead {
-    background: var(--background-elevated);
-}
-
-.tabella-storico th {
-    padding: 12px;
-    text-align: left;
-    font-weight: 600;
-    font-size: 0.8rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-}
-
-.tabella-storico td {
-    padding: 12px;
-    font-size: 0.9rem;
-    border-bottom: 1px solid var(--border-color);
-}
-
-.tabella-storico tbody tr:hover {
-    background: var(--background-elevated);
-}
-
-.tabella-storico tbody tr:last-child td {
-    border-bottom: none;
-}
-
-/* ===========================
-   MODAL
-   =========================== */
-
-.modal {
-    position: fixed;
-    z-index: 1000;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0,0,0,0.9);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.modal-content {
-    background: var(--card-bg);
-    padding: 30px;
-    border-radius: 12px;
-    max-width: 900px;
-    max-height: 80vh;
-    overflow-y: auto;
-    border: 1px solid var(--border-color);
-    position: relative;
-}
-
-.modal-close {
-    position: absolute;
-    right: 20px;
-    top: 20px;
-    font-size: 2rem;
-    color: var(--text-secondary);
-    cursor: pointer;
-}
-
-.modal-close:hover {
-    color: var(--danger-color);
-}
-
-/* ===========================
-   EMPTY STATE
-   =========================== */
-
-.empty-state {
-    text-align: center;
-    padding: 60px 20px;
-    color: var(--text-secondary);
-}
-
-/* ===========================
-   SETTINGS
-   =========================== */
-
-.settings-actions {
-    display: flex;
-    gap: 12px;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-}
-
-/* ===========================
-   SCROLLBAR
-   =========================== */
-
-::-webkit-scrollbar {
-    width: 10px;
-}
-
-::-webkit-scrollbar-track {
-    background: var(--background);
-}
-
-::-webkit-scrollbar-thumb {
-    background: var(--border-color);
-    border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-    background: var(--primary-color);
-}
-
-/* ===========================
-   RESPONSIVE
-   =========================== */
-
-@media (max-width: 768px) {
-    header h1 {
-        font-size: 1.8rem;
+    fattoriLocalita: {
+        'Monte Nuovo': 1.4,
+        'Solfatara': 1.5,
+        'Madagascar': 1.1,
+        'Brasile': 1.0,
+        'altra località': 0.85
     }
-    
-    nav {
-        flex-direction: column;
-    }
-    
-    .nav-btn {
-        width: 100%;
-    }
-    
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
-    
-    .form-row {
-        grid-template-columns: 1fr;
-    }
-    
-    .database-lista {
-        grid-template-columns: 1fr;
+};
+
+const ALIAS_MINERALI = {
+    'diaspro': ['jasper', 'jaspis'],
+    'quarzo': ['quartz', 'cristallo di rocca'],
+    'sanidino': ['sanidine'],
+    'leucite': ['leucita'],
+    'hauyne': ['hauyna', 'haüyne']
+};
+
+let dbPrezzi = {};
+
+// ===========================
+// DATABASE
+// ===========================
+
+function caricaDatabase() {
+    const saved = localStorage.getItem('arenaFlegreaPrezzi');
+    if (saved) {
+        try {
+            dbPrezzi = JSON.parse(saved);
+            console.log('✓ Database caricato:', Object.keys(dbPrezzi).length, 'minerali');
+        } catch (e) {
+            console.error('Errore caricamento:', e);
+            dbPrezzi = {};
+        }
     }
 }
 
-.hidden { display: none; }
+function salvaDatabase() {
+    try {
+        localStorage.setItem('arenaFlegreaPrezzi', JSON.stringify(dbPrezzi));
+        aggiornaStatistiche();
+    } catch (e) {
+        alert('Errore salvataggio database');
+    }
+}
+
+// ===========================
+// UTILITY
+// ===========================
+
+function normalizzaMinerale(input) {
+    const inputLower = input.toLowerCase().trim();
+    
+    for (const [standard, aliases] of Object.entries(ALIAS_MINERALI)) {
+        if (inputLower === standard || aliases.includes(inputLower)) {
+            return standard;
+        }
+    }
+    
+    return input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();
+}
+
+function getFattoreLocalita(minerale, localita) {
+    const mineraleNorm = normalizzaMinerale(minerale);
+    const localitaMineraleDB = CONFIG.localitaMinerali[mineraleNorm];
+    
+    if (localitaMineraleDB && localitaMineraleDB[localita]) {
+        return localitaMineraleDB[localita];
+    }
+    
+    return CONFIG.fattoriLocalita[localita] || CONFIG.fattoriLocalita['altra località'];
+}
+
+function generaChiave(minerale, localita) {
+    return `${normalizzaMinerale(minerale)}_${localita}`.toLowerCase().replace(/\s+/g, '_');
+}
+
+function calcolaMedie(campioni) {
+    const medie = {};
+    const mercati = ['catawiki', 'ebay', 'etsy', 'heritage', 'dealer'];
+    
+    mercati.forEach(mercato => {
+        const campioniMercato = campioni.filter(c => c.mercato === mercato);
+        
+        if (campioniMercato.length > 0) {
+            const prezzi = campioniMercato.map(c => c.prezzo);
+            const pesi = campioniMercato.map(c => c.peso).filter(p => p > 0);
+            const prezziGrammo = campioniMercato.map(c => c.prezzogrammo).filter(pg => pg > 0);
+            
+            medie[mercato] = {
+                mediaPrezzo: prezzi.reduce((a, b) => a + b, 0) / prezzi.length,
+                mediaPeso: pesi.length > 0 ? pesi.reduce((a, b) => a + b, 0) / pesi.length : 0,
+                mediaPrezzoGrammo: prezziGrammo.length > 0 ? prezziGrammo.reduce((a, b) => a + b, 0) / prezziGrammo.length : 0,
+                min: Math.min(...prezzi),
+                max: Math.max(...prezzi),
+                n: campioniMercato.length
+            };
+        }
+    });
+    
+    return medie;
+}
+
+function calcolaMediaPonderata(medie, usaPesoGrammo = false) {
+    let somma = 0;
+    let pesoTotale = 0;
+    
+    for (const [mercato, dati] of Object.entries(medie)) {
+        if (CONFIG.pesiMercato[mercato]) {
+            let valore = usaPesoGrammo ? dati.mediaPrezzoGrammo : dati.mediaPrezzo;
+            
+            if (mercato === 'etsy') {
+                valore *= CONFIG.fattoreCorrezioneEtsy;
+            }
+            
+            somma += valore * CONFIG.pesiMercato[mercato];
+            pesoTotale += CONFIG.pesiMercato[mercato];
+        }
+    }
+    
+    return pesoTotale > 0 ? somma / pesoTotale : 0;
+}
+
+// ===========================
+// NAVIGAZIONE
+// ===========================
+
+function mostraSezione(nomeSezione) {
+    // Nascondi tutte
+    document.querySelectorAll('.sezione').forEach(s => s.classList.remove('active'));
+    
+    // Rimuovi active da nav
+    document.querySelectorAll('.nav-btn').forEach(btn => btn.classList.remove('active'));
+    
+    // Mostra sezione
+    const sezione = document.getElementById(nomeSezione);
+    if (sezione) {
+        sezione.classList.add('active');
+    }
+    
+    // Attiva bottone
+    event.target.classList.add('active');
+    
+    // Aggiorna database se necessario
+    if (nomeSezione === 'database-prezzi') {
+        mostraDatabase();
+    }
+    
+    if (nomeSezione === 'dashboard') {
+        aggiornaStatistiche();
+    }
+}
+
+// ===========================
+// QUICK ADD
+// ===========================
+
+function inizializzaQuickAdd() {
+    const form = document.getElementById('form-quick-add');
+    const pesoInput = document.getElementById('qa-peso');
+    const prezzoInput = document.getElementById('qa-prezzo');
+    const euroGrammoSpan = document.getElementById('qa-eurogrammo');
+    
+    function aggiornaEuroGrammo() {
+        const peso = parseFloat(pesoInput.value);
+        const prezzo = parseFloat(prezzoInput.value);
+        
+        if (peso > 0 && prezzo > 0) {
+            euroGrammoSpan.textContent = (prezzo / peso).toFixed(2);
+        } else {
+            euroGrammoSpan.textContent = '0.00';
+        }
+    }
+    
+    pesoInput.addEventListener('input', aggiornaEuroGrammo);
+    prezzoInput.addEventListener('input', aggiornaEuroGrammo);
+    
+    // Set data odierna
+    document.getElementById('qa-data').valueAsDate = new Date();
+    
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const minerale = document.getElementById('qa-minerale').value.trim();
+        const localita = document.getElementById('qa-localita').value.trim();
+        const peso = parseFloat(pesoInput.value);
+        const prezzo = parseFloat(prezzoInput.value);
+        const mercato = document.getElementById('qa-mercato').value;
+        
+        if (!minerale || !localita || peso <= 0 || prezzo <= 0) {
+            alert('Compila tutti i campi obbligatori!');
+            return;
+        }
+        
+        const mineraleNorm = normalizzaMinerale(minerale);
+        const chiave = generaChiave(mineraleNorm, localita);
+        const prezzogrammo = prezzo / peso;
+        
+        if (!dbPrezzi[chiave]) {
+            dbPrezzi[chiave] = {
+                minerale: mineraleNorm,
+                localita: localita,
+                campioni: [],
+                medie: {}
+            };
+        }
+        
+        dbPrezzi[chiave].campioni.push({
+            prezzo: prezzo,
+            peso: peso,
+            prezzogrammo: prezzogrammo,
+            dimensioni: document.getElementById('qa-dimensioni').value.trim(),
+            mercato: mercato,
+            data: document.getElementById('qa-data').value,
+            link: document.getElementById('qa-link').value.trim(),
+            note: document.getElementById('qa-note').value.trim()
+        });
+        
+        dbPrezzi[chiave].medie = calcolaMedie(dbPrezzi[chiave].campioni);
+        
+        salvaDatabase();
+        
+        alert(`✓ Prezzo salvato!\n${mineraleNorm} - ${localita}\n€${prezzo.toFixed(2)} / ${peso}g = €${prezzogrammo.toFixed(2)}/g`);
+        
+        form.reset();
+        euroGrammoSpan.textContent = '0.00';
+        document.getElementById('qa-data').valueAsDate = new Date();
+    });
+}
+
+function resetQuickAdd() {
+    document.getElementById('form-quick-add').reset();
+    document.getElementById('qa-eurogrammo').textContent = '0.00';
+    document.getElementById('qa-data').valueAsDate = new Date();
+}
+
+// ===========================
+// VALUTATORE
+// ===========================
+
+function inizializzaValutatore() {
+    const form = document.getElementById('form-valutatore');
+    const pesoInput = document.getElementById('val-peso');
+    const prezzoInput = document.getElementById('val-prezzo');
+    const euroGrammoSpan = document.getElementById('val-eurogrammo');
+    
+    function aggiornaEuroGrammo() {
+        const peso = parseFloat(pesoInput.value);
+        const prezzo = parseFloat(prezzoInput.value);
+        
+        if (peso > 0 && prezzo > 0) {
+            euroGrammoSpan.textContent = (prezzo / peso).toFixed(2);
+        } else {
+            euroGrammoSpan.textContent = '0.00';
+        }
+    }
+    
+    pesoInput.addEventListener('input', aggiornaEuroGrammo);
+    prezzoInput.addEventListener('input', aggiornaEuroGrammo);
+    
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
+        
+        const minerale = document.getElementById('val-minerale').value.trim();
+        const localita = document.getElementById('val-localita').value.trim();
+        const peso = parseFloat(pesoInput.value);
+        const prezzo = parseFloat(prezzoInput.value);
+        
+        if (!minerale || !localita || peso <= 0 || prezzo <= 0) {
+            alert('Compila tutti i campi!');
+            return;
+        }
+        
+        const mineraleNorm = normalizzaMinerale(minerale);
+        const chiave = generaChiave(mineraleNorm, localita);
+        const datiDB = dbPrezzi[chiave];
+        
+        if (!datiDB || Object.keys(datiDB.medie).length === 0) {
+            alert(`⚠ Nessun dato per ${mineraleNorm} - ${localita}\n\nAggiungi prima dei prezzi nel Quick Add!`);
+            return;
+        }
+        
+        const valoreStimato = calcolaValoreStimato(mineraleNorm, localita, peso, datiDB);
+        const percentuale = (prezzo / valoreStimato) * 100;
+        const raccomandazione = generaRaccomandazione(percentuale);
+        
+        mostraRisultatiValutazione({
+            minerale: mineraleNorm,
+            localita: localita,
+            peso: peso,
+            prezzo: prezzo,
+            prezzogrammo: prezzo / peso,
+            valoreStimato: valoreStimato,
+            percentuale: percentuale,
+            raccomandazione: raccomandazione,
+            datiDB: datiDB
+        });
+    });
+}
+
+function calcolaValoreStimato(minerale, localita, peso, datiDB) {
+    const medie = datiDB.medie;
+    
+    let mediaPonderata;
+    const hasPrezzoGrammo = Object.values(medie).some(m => m.mediaPrezzoGrammo > 0);
+    
+    if (hasPrezzoGrammo) {
+        const mediaPrezzoGrammo = calcolaMediaPonderata(medie, true);
+        mediaPonderata = mediaPrezzoGrammo * peso;
+    } else {
+        mediaPonderata = calcolaMediaPonderata(medie, false);
+    }
+    
+    const fattoreLocalita = getFattoreLocalita(minerale, localita);
+    const fattoreQualita = 0.5; // default 5/10
+    const fattoreIntegrita = 0.95;
+    
+    return mediaPonderata * fattoreLocalita * fattoreQualita * fattoreIntegrita;
+}
+
+function generaRaccomandazione(percentuale) {
+    if (percentuale <= 60) return { testo: 'ACQUISTO ECCELLENTE', classe: 'eccellente', emoji: '🌟' };
+    if (percentuale <= 80) return { testo: 'BUON ACQUISTO', classe: 'buono', emoji: '✓' };
+    if (percentuale <= 100) return { testo: 'PREZZO CORRETTO', classe: 'corretto', emoji: '=' };
+    if (percentuale <= 120) return { testo: 'SOPRAVVALUTATO', classe: 'sopravvalutato', emoji: '⚠' };
+    return { testo: 'SCONSIGLIATO', classe: 'sconsigliato', emoji: '✗' };
+}
+
+function mostraRisultatiValutazione(r) {
+    const container = document.getElementById('risultato-valutazione');
+    
+    container.innerHTML = `
+        <div class="risultato-card raccomandazione-${r.raccomandazione.classe}">
+            <h3>${r.raccomandazione.emoji} ${r.raccomandazione.testo}</h3>
+            
+            <div class="risultato-principale">
+                <div class="valore-riga">
+                    <span>Prezzo proposto:</span>
+                    <strong>€${r.prezzo.toFixed(2)}</strong>
+                </div>
+                <div class="valore-riga">
+                    <span>Valore stimato:</span>
+                    <strong>€${r.valoreStimato.toFixed(2)}</strong>
+                </div>
+                <div class="valore-riga percentuale">
+                    <span>Rapporto:</span>
+                    <strong>${r.percentuale.toFixed(1)}%</strong>
+                </div>
+            </div>
+            
+            <div class="dettagli-valutazione">
+                <h4>Dettagli</h4>
+                <p><strong>Minerale:</strong> ${r.minerale}</p>
+                <p><strong>Località:</strong> ${r.localita}</p>
+                <p><strong>Peso:</strong> ${r.peso}g</p>
+                <p><strong>€/grammo:</strong> €${r.prezzogrammo.toFixed(2)}/g</p>
+                
+                <h4>Database (${r.datiDB.campioni.length} campioni)</h4>
+                ${generaTabellaStorico(r.datiDB.medie)}
+            </div>
+        </div>
+    `;
+}
+
+function generaTabellaStorico(medie) {
+    let html = '<table class="tabella-storico"><thead><tr><th>Mercato</th><th>€ medio</th><th>€/g medio</th><th>n</th></tr></thead><tbody>';
+    
+    for (const [mercato, dati] of Object.entries(medie)) {
+        html += `
+            <tr>
+                <td>${mercato.toUpperCase()}</td>
+                <td>€${dati.mediaPrezzo.toFixed(2)}</td>
+                <td>${dati.mediaPrezzoGrammo > 0 ? '€' + dati.mediaPrezzoGrammo.toFixed(2) + '/g' : '-'}</td>
+                <td>${dati.n}</td>
+            </tr>
+        `;
+    }
+    
+    html += '</tbody></table>';
+    return html;
+}
+
+// ===========================
+// DATABASE
+// ===========================
+
+function mostraDatabase() {
+    const container = document.getElementById('database-list');
+    
+    if (Object.keys(dbPrezzi).length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>Database vuoto. Aggiungi prezzi con Quick Add!</p></div>';
+        return;
+    }
+    
+    let html = '<div class="database-lista">';
+    
+    for (const [chiave, dati] of Object.entries(dbPrezzi)) {
+        const mediaGenerale = calcolaMediaPonderata(dati.medie, false);
+        const mediaPrezzoGrammo = calcolaMediaPonderata(dati.medie, true);
+        
+        html += `
+            <div class="database-card">
+                <div class="database-header">
+                    <h3>${dati.minerale}</h3>
+                    <span class="badge">${dati.localita}</span>
+                </div>
+                <div class="database-stats">
+                    <div class="stat">
+                        <div class="stat-label">Campioni</div>
+                        <div class="stat-value">${dati.campioni.length}</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-label">€ Medio</div>
+                        <div class="stat-value">€${mediaGenerale.toFixed(2)}</div>
+                    </div>
+                    ${mediaPrezzoGrammo > 0 ? `
+                    <div class="stat">
+                        <div class="stat-label">€/g Medio</div>
+                        <div class="stat-value">€${mediaPrezzoGrammo.toFixed(2)}/g</div>
+                    </div>
+                    ` : ''}
+                </div>
+                <button onclick="mostraDettagliMinerale('${chiave}')" class="btn-dettagli">
+                    Vedi Dettagli →
+                </button>
+            </div>
+        `;
+    }
+    
+    html += '</div>';
+    container.innerHTML = html;
+}
+
+function mostraDettagliMinerale(chiave) {
+    const dati = dbPrezzi[chiave];
+    if (!dati) return;
+    
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
+    
+    modal.innerHTML = `
+        <div class="modal-content">
+            <span class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</span>
+            <h2>${dati.minerale} - ${dati.localita}</h2>
+            
+            <h3>Medie per mercato</h3>
+            ${generaTabellaStorico(dati.medie)}
+            
+            <h3>Campioni (${dati.campioni.length})</h3>
+            <table class="tabella-storico">
+                <thead>
+                    <tr><th>Data</th><th>Mercato</th><th>€</th><th>Peso</th><th>€/g</th></tr>
+                </thead>
+                <tbody>
+                    ${dati.campioni.map(c => `
+                        <tr>
+                            <td>${c.data}</td>
+                            <td>${c.mercato}</td>
+                            <td>€${c.prezzo.toFixed(2)}</td>
+                            <td>${c.peso}g</td>
+                            <td>€${c.prezzogrammo.toFixed(2)}/g</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+            
+            <button onclick="this.parentElement.parentElement.remove()" class="btn-primary" style="margin-top:20px;">Chiudi</button>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// ===========================
+// STATISTICHE DASHBOARD
+// ===========================
+
+function aggiornaStatistiche() {
+    const numMinerali = Object.keys(dbPrezzi).length;
+    let numPrezzi = 0;
+    let pesoTotale = 0;
+    
+    for (const dati of Object.values(dbPrezzi)) {
+        numPrezzi += dati.campioni.length;
+        pesoTotale += dati.campioni.reduce((sum, c) => sum + c.peso, 0);
+    }
+    
+    document.getElementById('stat-minerali').textContent = numMinerali;
+    document.getElementById('stat-prezzi').textContent = numPrezzi;
+    document.getElementById('stat-peso-totale').textContent = pesoTotale.toFixed(1) + 'g';
+    
+    // Storage
+    const storageSize = new Blob([JSON.stringify(dbPrezzi)]).size;
+    const storageSizeKB = (storageSize / 1024).toFixed(2);
+    const storageEl = document.getElementById('storage-size');
+    if (storageEl) storageEl.textContent = storageSizeKB + ' KB';
+}
+
+// ===========================
+// BACKUP
+// ===========================
+
+function esportaBackup() {
+    const dataStr = JSON.stringify(dbPrezzi, null, 2);
+    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const url = URL.createObjectURL(dataBlob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `arena_flegrea_backup_${new Date().toISOString().split('T')[0]}.json`;
+    link.click();
+}
+
+function esportaDatabase() {
+    esportaBackup();
+}
+
+function resetDatabase() {
+    if (confirm('⚠ ATTENZIONE!\n\nEliminare TUTTI i dati?\n\nOperazione irreversibile!')) {
+        if (confirm('Confermi di voler eliminare tutto?')) {
+            dbPrezzi = {};
+            localStorage.removeItem('arenaFlegreaPrezzi');
+            mostraDatabase();
+            aggiornaStatistiche();
+            alert('✓ Database resettato');
+        }
+    }
+}
+
+// ===========================
+// INIZIALIZZAZIONE
+// ===========================
+
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('🌋 Arena Flegrea - Inizializzazione...');
+    
+    caricaDatabase();
+    inizializzaQuickAdd();
+    inizializzaValutatore();
+    aggiornaStatistiche();
+    
+    // Import backup
+    document.getElementById('import-backup')?.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const backup = JSON.parse(ev.target.result);
+                if (confirm('Sovrascrivere database attuale?')) {
+                    dbPrezzi = backup;
+                    salvaDatabase();
+                    mostraDatabase();
+                    alert('✓ Backup ripristinato!');
+                }
+            } catch (err) {
+                alert('Errore nel file di backup');
+            }
+        };
+        reader.readAsText(file);
+    });
+    
+    console.log('✓ Sistema pronto!');
+});
+
+window.mostraSezione = mostraSezione;
+window.mostraDettagliMinerale = mostraDettagliMinerale;
+window.esportaBackup = esportaBackup;
+window.esportaDatabase = esportaDatabase;
+window.resetDatabase = resetDatabase;
+window.resetQuickAdd = resetQuickAdd;
