@@ -26,6 +26,50 @@ const CONFIG = {
         trasparenza: 0.10
     },
     
+    // ===== NUOVO: Database Località per Minerale =====
+    localitaMinerali: {
+        'diaspro': {
+            'Madagascar': 1.2,           // Famoso per diaspro rosso
+            'Australia': 1.15,           // Mookaite, altre varietà
+            'India': 1.1,
+            'Brasile': 1.0,
+            'USA': 1.05,
+            'Egitto': 1.3,               // Diaspro egiziano pregiato
+            'Russia': 1.0,
+            'Sudafrica': 1.1
+        },
+        'sanidino': {
+            'Monte Nuovo': 1.3,
+            'Solfatara': 1.4,
+            'Astroni': 1.2,
+            'Pisciarelli': 1.5,
+            'Eifel (Germania)': 1.2,    // Altra località famosa
+            'Vesuvio': 1.1
+        },
+        'leucite': {
+            'Vesuvio': 1.3,
+            'Monte Somma': 1.35,
+            'Alban Hills': 1.2,
+            'Uganda': 0.9,
+            'Wyoming (USA)': 0.85
+        },
+        'hauyne': {
+            'Monte Somma': 1.5,
+            'Eifel (Germania)': 1.4,
+            'Alban Hills': 1.3,
+            'Vesuvio': 1.35
+        },
+        'quarzo': {
+            'Arkansas (USA)': 1.2,
+            'Brasile': 1.15,
+            'Madagascar': 1.1,
+            'Alpi': 1.0,
+            'Himalaya': 1.25
+        }
+        // Aggiungi altri minerali...
+    },
+    
+    // Fattore località GENERICO (fallback se minerale non ha località specifica)
     fattoriLocalita: {
         'Monte Nuovo': 1.3,
         'Solfatara': 1.4,
@@ -34,7 +78,13 @@ const CONFIG = {
         'Monte Somma': 1.15,
         'Vesuvio': 1.1,
         'Campi Flegrei (generico)': 1.0,
-        'Altra località': 0.85
+        'Madagascar': 1.0,              // Default neutro
+        'Brasile': 1.0,
+        'India': 0.95,
+        'Cina': 0.85,
+        'Marocco': 1.0,
+        'USA': 0.95,
+        'Altra località': 0.9           // Località sconosciute
     },
     
     rangeIntegrita: {
