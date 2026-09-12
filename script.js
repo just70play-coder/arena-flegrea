@@ -98,6 +98,38 @@ const CONFIG = {
     }
 };
 
+// ===== DIZIONARIO SINONIMI =====
+const ALIAS_MINERALI = {
+    'diaspro': ['jasper', 'jaspis', 'diaspro rosso', 'red jasper', 'diaspro ocean', 'ocean jasper', 'diaspro paesaggio'],
+    'quarzo': ['quartz', 'cristallo di rocca', 'rock crystal'],
+    'ametista': ['amethyst'],
+    'citrino': ['citrine'],
+    'calcite': ['calcita', 'calcit'],
+    'fluorite': ['fluorita', 'fluorspar'],
+    'pirite': ['pyrite'],
+    'sanidino': ['sanidine'],
+    'leucite': ['leucita', 'leucita'],
+    'hauyne': ['hauyna', 'haüyne'],
+    'phillipsite': ['phillipsita', 'phillipsite-K'],
+    'analcime': ['analcima', 'analcite'],
+    'nefelina': ['nepheline', 'nephelite']
+};
+
+// Funzione normalizzazione
+function normalizzaMinerale(input) {
+    const norm = input.toLowerCase().trim();
+    
+    // Cerca negli alias
+    for (const [principale, sinonimi] of Object.entries(ALIAS_MINERALI)) {
+        if (principale === norm || sinonimi.includes(norm)) {
+            return principale.charAt(0).toUpperCase() + principale.slice(1); // Capitalizza
+        }
+    }
+    
+    // Se non trovato, ritorna input capitalizzato
+    return input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();
+}
+
 // ========================================
 // INIZIALIZZAZIONE
 // ========================================
