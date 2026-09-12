@@ -8,479 +8,327 @@
 </head>
 <body>
     <header>
-        <h1>🌋 ARENA FLEGREA</h1>
-        <p>Sistema Intelligente di Valutazione Minerali con Analisi Peso</p>
+        <div class="container">
+            <h1>🌋 ARENA FLEGREA</h1>
+            <p>Sistema Intelligente di Valutazione Minerali con Analisi Peso</p>
+        </div>
     </header>
 
-    <nav>
-        <button onclick="mostraSezione('dashboard')" class="nav-btn active">📊 Dashboard</button>
-        <button onclick="mostraSezione('quick-add')" class="nav-btn">⚡ Quick Add</button>
-        <button onclick="mostraSezione('database-prezzi')" class="nav-btn">💾 Database</button>
-        <button onclick="mostraSezione('valutatore')" class="nav-btn">🎯 Valutatore</button>
-        <button onclick="mostraSezione('aste')" class="nav-btn">🔨 Aste</button>
-        <button onclick="mostraSezione('settings')" class="nav-btn">⚙️ Impostazioni</button>
-    </nav>
+    <div class="container">
+        <nav>
+            <button onclick="mostraSezione('dashboard')" class="nav-btn active">📊 Dashboard</button>
+            <button onclick="mostraSezione('quick-add')" class="nav-btn">⚡ Quick Add</button>
+            <button onclick="mostraSezione('database-prezzi')" class="nav-btn">💾 Database</button>
+            <button onclick="mostraSezione('valutatore')" class="nav-btn">🎯 Valutatore</button>
+            <button onclick="mostraSezione('aste')" class="nav-btn">🔨 Aste</button>
+            <button onclick="mostraSezione('settings')" class="nav-btn">⚙️ Impostazioni</button>
+        </nav>
 
-    <main>
-        <!-- DASHBOARD -->
-        <section id="dashboard" class="sezione attiva">
-            <h2>📊 Dashboard</h2>
-            
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">💎</div>
-                    <div class="stat-content">
-                        <h3>Minerali Tracciati</h3>
-                        <p class="stat-number" id="stat-minerali">0</p>
+        <main>
+            <!-- DASHBOARD -->
+            <section id="dashboard" class="sezione active">
+                <div class="card">
+                    <h2>📊 Dashboard</h2>
+                    
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">💎</div>
+                            <div class="stat-content">
+                                <h3>Minerali Tracciati</h3>
+                                <p class="stat-number" id="stat-minerali">0</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">💰</div>
+                            <div class="stat-content">
+                                <h3>Prezzi Salvati</h3>
+                                <p class="stat-number" id="stat-prezzi">0</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">⚖️</div>
+                            <div class="stat-content">
+                                <h3>Peso Totale</h3>
+                                <p class="stat-number" id="stat-peso-totale">0g</p>
+                            </div>
+                        </div>
+                        
+                        <div class="stat-card">
+                            <div class="stat-icon">📈</div>
+                            <div class="stat-content">
+                                <h3>Valutazioni</h3>
+                                <p class="stat-number" id="stat-valutazioni">0</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-actions">
+                        <button onclick="mostraSezione('quick-add')" class="btn-primary btn-large">
+                            ⚡ Aggiungi Prezzo Veloce
+                        </button>
+                        <button onclick="mostraSezione('valutatore')" class="btn-secondary btn-large">
+                            🎯 Valuta Asta
+                        </button>
                     </div>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">💰</div>
-                    <div class="stat-content">
-                        <h3>Prezzi nel Database</h3>
-                        <p class="stat-number" id="stat-prezzi">0</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">⚖️</div>
-                    <div class="stat-content">
-                        <h3>Peso Totale Catalogato</h3>
-                        <p class="stat-number" id="stat-peso-totale">0g</p>
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">📈</div>
-                    <div class="stat-content">
-                        <h3>Valutazioni Fatte</h3>
-                        <p class="stat-number" id="stat-valutazioni">0</p>
-                    </div>
-                </div>
-            </div>
+            </section>
 
-            <div class="dashboard-sections">
-                <div class="dashboard-card">
-                    <h3>🎯 Azione Rapida</h3>
-                    <p>Hai visto un'asta interessante su Catawiki?</p>
-                    <button onclick="mostraSezione('quick-add')" class="btn-primary">
-                        ⚡ Aggiungi Prezzo Veloce
-                    </button>
+            <!-- QUICK ADD -->
+            <section id="quick-add" class="sezione">
+                <div class="card">
+                    <h2>⚡ Quick Add - Aggiunta Rapida</h2>
+                    <p class="subtitle">Salva prezzi da aste in 30 secondi!</p>
+
+                    <form id="form-quick-add">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>🔍 Minerale <span class="required">*</span></label>
+                                <input 
+                                    type="text" 
+                                    id="qa-minerale" 
+                                    list="minerali-suggestions"
+                                    placeholder="es. Sanidino, Diaspro..."
+                                    required
+                                >
+                                <datalist id="minerali-suggestions">
+                                    <option value="Sanidino">
+                                    <option value="Leucite">
+                                    <option value="Hauyne">
+                                    <option value="Diaspro">
+                                    <option value="Quarzo">
+                                    <option value="Ametista">
+                                    <option value="Citrino">
+                                </datalist>
+                            </div>
+
+                            <div class="form-group">
+                                <label>📍 Località <span class="required">*</span></label>
+                                <input 
+                                    type="text" 
+                                    id="qa-localita" 
+                                    placeholder="es. Monte Nuovo, Madagascar..."
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>💰 Prezzo (€) <span class="required">*</span></label>
+                                <input 
+                                    type="number" 
+                                    id="qa-prezzo" 
+                                    step="0.01" 
+                                    min="0"
+                                    placeholder="45.00"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label>⚖️ Peso (g) <span class="required">*</span></label>
+                                <input 
+                                    type="number" 
+                                    id="qa-peso" 
+                                    step="0.1" 
+                                    min="0"
+                                    placeholder="150.5"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label>🏪 Mercato</label>
+                                <select id="qa-mercato">
+                                    <option value="catawiki">Catawiki</option>
+                                    <option value="ebay">eBay</option>
+                                    <option value="etsy">Etsy</option>
+                                    <option value="heritage">Heritage</option>
+                                    <option value="dealer">Dealer</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="peso-display">
+                            <span>💡 Prezzo al grammo:</span>
+                            <strong>€<span id="qa-eurogrammo">0.00</span>/g</strong>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>📏 Dimensioni (opzionale)</label>
+                                <input 
+                                    type="text" 
+                                    id="qa-dimensioni" 
+                                    placeholder="45x30x22mm"
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label>📅 Data</label>
+                                <input 
+                                    type="date" 
+                                    id="qa-data"
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>🔗 Link (opzionale)</label>
+                            <input 
+                                type="url" 
+                                id="qa-link" 
+                                placeholder="https://..."
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label>📝 Note (conservazione, qualità...)</label>
+                            <textarea 
+                                id="qa-note" 
+                                rows="2" 
+                                placeholder="es. Cristalli prismatici, ottima trasparenza"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary btn-large">
+                                💾 Salva nel Database
+                            </button>
+                            <button type="button" onclick="resetQuickAdd()" class="btn-secondary">
+                                🔄 Cancella
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </section>
 
-                <div class="dashboard-card">
-                    <h3>📊 Top Minerali per €/g</h3>
-                    <div id="top-prezzi-grammo"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- QUICK ADD -->
-        <section id="quick-add" class="sezione">
-            <h2>⚡ Quick Add - Aggiunta Rapida</h2>
-            <p class="subtitle">Salva prezzi da Catawiki in 30 secondi!</p>
-
-            <form id="form-quick-add" class="quick-form">
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>🔍 Minerale</label>
+            <!-- DATABASE PREZZI -->
+            <section id="database-prezzi" class="sezione">
+                <div class="card">
+                    <h2>💾 Database Prezzi</h2>
+                    
+                    <div class="db-controls">
                         <input 
                             type="text" 
-                            id="qa-minerale" 
-                            list="minerali-suggestions"
-                            placeholder="es. Sanidino, Diaspro..."
-                            required
-                            autocomplete="off"
+                            id="db-search" 
+                            placeholder="🔍 Cerca minerale..."
+                            class="search-input"
                         >
-                        <datalist id="minerali-suggestions">
-                            <option value="Sanidino">
-                            <option value="Leucite">
-                            <option value="Hauyne">
-                            <option value="Diaspro">
-                            <option value="Quarzo">
-                            <option value="Ametista">
-                            <option value="Citrino">
-                            <option value="Fluorite">
-                            <option value="Calcite">
-                            <option value="Pirite">
-                        </datalist>
+                        <button onclick="esportaDatabase()" class="btn-secondary">
+                            📥 Esporta JSON
+                        </button>
                     </div>
 
-                    <div class="form-group">
-                        <label>📍 Località</label>
-                        <select id="qa-localita">
-                            <option value="Monte Nuovo">Monte Nuovo</option>
-                            <option value="Solfatara">Solfatara</option>
-                            <option value="Vesuvio">Vesuvio</option>
-                            <option value="Madagascar">Madagascar</option>
-                            <option value="Brasile">Brasile</option>
-                            <option value="India">India</option>
-                            <option value="Cina">Cina</option>
-                            <option value="USA">USA</option>
-                            <option value="Messico">Messico</option>
-                            <option value="Altra">Altra località...</option>
-                        </select>
-                        <input 
-                            type="text" 
-                            id="qa-localita-custom" 
-                            placeholder="Specifica località"
-                            style="display:none; margin-top:0.5rem;"
-                        >
+                    <div id="database-list"></div>
+                </div>
+            </section>
+
+            <!-- VALUTATORE -->
+            <section id="valutatore" class="sezione">
+                <div class="card">
+                    <h2>🎯 Valutatore Quick Mode</h2>
+                    <p class="subtitle">Sistema automatico con analisi peso</p>
+
+                    <form id="form-valutatore">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>🔍 Minerale <span class="required">*</span></label>
+                                <input 
+                                    type="text" 
+                                    id="val-minerale" 
+                                    placeholder="es. Diaspro"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label>📍 Località <span class="required">*</span></label>
+                                <input 
+                                    type="text" 
+                                    id="val-localita" 
+                                    placeholder="es. Madagascar"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>💰 Prezzo Asta (€) <span class="required">*</span></label>
+                                <input 
+                                    type="number" 
+                                    id="val-prezzo" 
+                                    step="0.01"
+                                    placeholder="45.00"
+                                    required
+                                >
+                            </div>
+
+                            <div class="form-group">
+                                <label>⚖️ Peso (g) <span class="required">*</span></label>
+                                <input 
+                                    type="number" 
+                                    id="val-peso" 
+                                    step="0.1"
+                                    placeholder="150.5"
+                                    required
+                                >
+                            </div>
+                        </div>
+
+                        <div class="peso-display">
+                            <span>💡 Prezzo al grammo:</span>
+                            <strong>€<span id="val-eurogrammo">0.00</span>/g</strong>
+                        </div>
+
+                        <button type="submit" class="btn-primary btn-large">
+                            🚀 VALUTA AUTOMATICAMENTE
+                        </button>
+                    </form>
+
+                    <div id="risultato-valutazione"></div>
+                </div>
+            </section>
+
+            <!-- ASTE -->
+            <section id="aste" class="sezione">
+                <div class="card">
+                    <h2>🔨 Monitoraggio Aste</h2>
+                    <div class="empty-state">
+                        <p>Sezione in sviluppo - Tracciamento aste Catawiki in tempo reale</p>
                     </div>
                 </div>
+            </section>
 
-                <div class="mercati-tabs">
-                    <button type="button" class="tab-btn active" data-mercato="catawiki">💎 Catawiki</button>
-                    <button type="button" class="tab-btn" data-mercato="ebay">🛒 eBay</button>
-                    <button type="button" class="tab-btn" data-mercato="etsy">🎨 Etsy</button>
-                    <button type="button" class="tab-btn" data-mercato="heritage">🏛️ Heritage</button>
-                    <button type="button" class="tab-btn" data-mercato="dealer">🏪 Dealer</button>
-                </div>
+            <!-- IMPOSTAZIONI -->
+            <section id="settings" class="sezione">
+                <div class="card">
+                    <h2>⚙️ Impostazioni</h2>
 
-                <!-- CATAWIKI -->
-                <div class="mercato-form active" id="form-catawiki">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>💰 Prezzo Finale (€)</label>
-                            <input type="number" id="qa-catawiki-prezzo" step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>⚖️ Peso (grammi)</label>
-                            <input type="number" id="qa-catawiki-peso" step="0.1" min="0" placeholder="150.5">
-                        </div>
-                        <div class="form-group">
-                            <label>📅 Data Asta</label>
-                            <input type="date" id="qa-catawiki-data">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>📏 Dimensioni (opzionale)</label>
-                        <input type="text" id="qa-catawiki-dimensioni" placeholder="es. 45x30x22mm">
-                    </div>
-                    <div class="form-group">
-                        <label>🔗 Link Asta</label>
-                        <input type="url" id="qa-catawiki-link" placeholder="https://www.catawiki.com/...">
-                    </div>
-                    <div class="form-group">
-                        <label>📝 Note (conservazione, qualità...)</label>
-                        <textarea id="qa-catawiki-note" rows="2" placeholder="es. Cristalli prismatici, ottima trasparenza"></textarea>
-                    </div>
-                    <div class="prezzo-grammo-preview" id="preview-catawiki" style="display:none;">
-                        <strong>💡 Prezzo al grammo:</strong> <span id="pg-catawiki">€0.00/g</span>
-                    </div>
-                </div>
-
-                <!-- EBAY -->
-                <div class="mercato-form" id="form-ebay">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>💰 Prezzo Vendita (€)</label>
-                            <input type="number" id="qa-ebay-prezzo" step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>⚖️ Peso (grammi)</label>
-                            <input type="number" id="qa-ebay-peso" step="0.1" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>📅 Data Vendita</label>
-                            <input type="date" id="qa-ebay-data">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>📏 Dimensioni</label>
-                        <input type="text" id="qa-ebay-dimensioni" placeholder="mm">
-                    </div>
-                    <div class="form-group">
-                        <label>🔗 Link</label>
-                        <input type="url" id="qa-ebay-link">
-                    </div>
-                    <div class="form-group">
-                        <label>📝 Note</label>
-                        <textarea id="qa-ebay-note" rows="2"></textarea>
-                    </div>
-                    <div class="prezzo-grammo-preview" id="preview-ebay" style="display:none;">
-                        <strong>💡 Prezzo al grammo:</strong> <span id="pg-ebay">€0.00/g</span>
-                    </div>
-                </div>
-
-                <!-- ETSY -->
-                <div class="mercato-form" id="form-etsy">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>💰 Prezzo Richiesto (€)</label>
-                            <input type="number" id="qa-etsy-prezzo" step="0.01" min="0">
-                            <small>Verrà ×0.7 automaticamente</small>
-                        </div>
-                        <div class="form-group">
-                            <label>⚖️ Peso (grammi)</label>
-                            <input type="number" id="qa-etsy-peso" step="0.1" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>📅 Data</label>
-                            <input type="date" id="qa-etsy-data">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>📏 Dimensioni</label>
-                        <input type="text" id="qa-etsy-dimensioni">
-                    </div>
-                    <div class="form-group">
-                        <label>🔗 Link</label>
-                        <input type="url" id="qa-etsy-link">
-                    </div>
-                    <div class="form-group">
-                        <label>📝 Note</label>
-                        <textarea id="qa-etsy-note" rows="2"></textarea>
-                    </div>
-                </div>
-
-                <!-- HERITAGE -->
-                <div class="mercato-form" id="form-heritage">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>💰 Prezzo (€)</label>
-                            <input type="number" id="qa-heritage-prezzo" step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>⚖️ Peso (grammi)</label>
-                            <input type="number" id="qa-heritage-peso" step="0.1" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>📅 Data</label>
-                            <input type="date" id="qa-heritage-data">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>📏 Dimensioni</label>
-                        <input type="text" id="qa-heritage-dimensioni">
-                    </div>
-                    <div class="form-group">
-                        <label>🔗 Link</label>
-                        <input type="url" id="qa-heritage-link">
-                    </div>
-                    <div class="form-group">
-                        <label>📝 Note</label>
-                        <textarea id="qa-heritage-note" rows="2"></textarea>
-                    </div>
-                </div>
-
-                <!-- DEALER -->
-                <div class="mercato-form" id="form-dealer">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>💰 Prezzo Listino (€)</label>
-                            <input type="number" id="qa-dealer-prezzo" step="0.01" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>⚖️ Peso (grammi)</label>
-                            <input type="number" id="qa-dealer-peso" step="0.1" min="0">
-                        </div>
-                        <div class="form-group">
-                            <label>📅 Data</label>
-                            <input type="date" id="qa-dealer-data">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label>📏 Dimensioni</label>
-                        <input type="text" id="qa-dealer-dimensioni">
-                    </div>
-                    <div class="form-group">
-                        <label>🏪 Fonte</label>
-                        <input type="text" id="qa-dealer-fonte" placeholder="Nome dealer">
-                    </div>
-                    <div class="form-group">
-                        <label>📝 Note</label>
-                        <textarea id="qa-dealer-note" rows="2"></textarea>
-                    </div>
-                </div>
-
-                <div class="form-actions">
-                    <button type="submit" class="btn-primary btn-large">💾 Salva nel Database</button>
-                    <button type="button" onclick="resetQuickAdd()" class="btn-secondary">🔄 Cancella</button>
-                </div>
-            </form>
-
-            <div class="quick-tips">
-                <h4>💡 Tips:</h4>
-                <ul>
-                    <li><strong>Peso:</strong> Sempre richiesto per calcoli €/grammo precisi</li>
-                    <li><strong>Dimensioni:</strong> Opzionale ma utile per specimen (Sanidino, Leucite)</li>
-                    <li><strong>Note:</strong> Conservazione, qualità cristalli, particolarità</li>
-                    <li>Sistema rileva automaticamente se minerale venduto a peso o a pezzo</li>
-                </ul>
-            </div>
-        </section>
-
-        <!-- DATABASE PREZZI -->
-        <section id="database-prezzi" class="sezione">
-            <h2>💾 Database Prezzi</h2>
-            
-            <div class="db-controls">
-                <input 
-                    type="text" 
-                    id="db-search" 
-                    placeholder="🔍 Cerca minerale o località..."
-                    class="search-input"
-                >
-                <button onclick="esportaDatabase()" class="btn-secondary">📥 Esporta JSON</button>
-                <button onclick="document.getElementById('import-file').click()" class="btn-secondary">
-                    📤 Importa JSON
-                </button>
-                <input type="file" id="import-file" accept=".json" style="display:none;">
-            </div>
-
-            <div id="database-list"></div>
-
-            <div id="no-database" class="empty-state" style="display:none;">
-                <h3>📭 Database Vuoto</h3>
-                <p>Non hai ancora salvato nessun prezzo.</p>
-                <button onclick="mostraSezione('quick-add')" class="btn-primary">
-                    ⚡ Aggiungi Primo Prezzo
-                </button>
-            </div>
-        </section>
-
-        <!-- VALUTATORE -->
-        <section id="valutatore" class="sezione">
-            <h2>🎯 Valutatore Intelligente</h2>
-            <p class="subtitle">Sistema con analisi peso automatica</p>
-
-            <div class="valutatore-mode-selector">
-                <button class="mode-btn active" onclick="switchValutatoreMode('quick')">
-                    ⚡ Modalità Quick
-                </button>
-                <button class="mode-btn" onclick="switchValutatoreMode('avanzata')">
-                    🔬 Modalità Avanzata
-                </button>
-            </div>
-
-            <!-- QUICK MODE -->
-            <div id="valutatore-quick" class="valutatore-mode active">
-                <form id="form-valutatore-quick">
-                    <div class="quick-valutatore-grid">
-                        <div class="form-group">
-                            <label>🔍 Minerale</label>
-                            <input 
-                                type="text" 
-                                id="vq-minerale" 
-                                list="minerali-db-list"
-                                placeholder="es. Diaspro, Quarzo..."
-                                required
-                            >
-                            <datalist id="minerali-db-list"></datalist>
-                        </div>
-
-                        <div class="form-group">
-                            <label>📍 Località</label>
-                            <input 
-                                type="text" 
-                                id="vq-localita" 
-                                list="localita-db-list"
-                                placeholder="es. Madagascar..."
-                                required
-                            >
-                            <datalist id="localita-db-list"></datalist>
-                        </div>
-
-                        <div class="form-group">
-                            <label>⚖️ Peso Asta (grammi)</label>
-                            <input 
-                                type="number" 
-                                id="vq-peso" 
-                                step="0.1" 
-                                placeholder="150.5"
-                                required
-                            >
-                        </div>
-
-                        <div class="form-group">
-                            <label>💰 Prezzo Attuale (€)</label>
-                            <input 
-                                type="number" 
-                                id="vq-prezzo" 
-                                step="0.01" 
-                                placeholder="45.00"
-                                required
-                            >
-                        </div>
-
-                        <div class="form-group">
-                            <label>📏 Dimensioni (opzionale)</label>
-                            <input 
-                                type="text" 
-                                id="vq-dimensioni" 
-                                placeholder="45x30mm"
-                            >
-                        </div>
-                    </div>
-
-                    <div class="info-box">
-                        💡 Il sistema calcola automaticamente se il minerale è venduto a <strong>€/grammo</strong> o <strong>a pezzo</strong> in base ai dati nel database.
-                    </div>
-
-                    <button type="submit" class="btn-primary btn-large">
-                        🚀 VALUTA AUTOMATICAMENTE
-                    </button>
-                </form>
-
-                <div id="vq-db-status"></div>
-            </div>
-
-            <!-- AVANZATA (mantengo struttura base per ora) -->
-            <div id="valutatore-avanzata" class="valutatore-mode">
-                <p style="text-align:center; padding:2rem; color:#666;">
-                    Modalità avanzata in sviluppo - Usa Quick per ora
-                </p>
-            </div>
-
-            <div id="risultato-valutazione"></div>
-        </section>
-
-        <!-- ASTE (mantengo base) -->
-        <section id="aste" class="sezione">
-            <h2>🔨 Registro Aste</h2>
-            <p style="text-align:center; padding:2rem; color:#666;">
-                Sezione in sviluppo
-            </p>
-        </section>
-
-        <!-- IMPOSTAZIONI -->
-        <section id="settings" class="sezione">
-            <h2>⚙️ Impostazioni</h2>
-
-            <div class="settings-grid">
-                <div class="setting-card">
                     <h3>💾 Gestione Dati</h3>
-                    <button onclick="backupCompleto()" class="btn-secondary">
-                        📥 Backup Completo
-                    </button>
-                    <button onclick="ripristinaBackup()" class="btn-secondary">
-                        📤 Ripristina Backup
-                    </button>
-                    <button onclick="resetTutto()" class="btn-danger">
-                        🗑️ Reset Totale
-                    </button>
-                </div>
+                    <div class="settings-actions">
+                        <button onclick="esportaBackup()" class="btn-secondary">
+                            📥 Esporta Backup
+                        </button>
+                        <button onclick="document.getElementById('import-backup').click()" class="btn-secondary">
+                            📤 Importa Backup
+                        </button>
+                        <input type="file" id="import-backup" accept=".json" style="display:none;">
+                        <button onclick="resetDatabase()" class="btn-danger">
+                            🗑️ Reset Database
+                        </button>
+                    </div>
 
-                <div class="setting-card">
-                    <h3>📊 Statistiche Storage</h3>
-                    <p>Database: <strong id="stat-db-size">0 KB</strong></p>
-                    <p>Valutazioni: <strong id="stat-val-size">0 KB</strong></p>
-                </div>
-
-                <div class="setting-card">
                     <h3>ℹ️ Info Sistema</h3>
                     <p><strong>Versione:</strong> 2.0 Weight-Aware</p>
-                    <p><strong>Aggiornato:</strong> <span id="ultimo-aggiornamento"></span></p>
+                    <p><strong>Storage usato:</strong> <span id="storage-size">0 KB</span></p>
                 </div>
-            </div>
-        </section>
-    </main>
-
-    <footer>
-        <p>🌋 Arena Flegrea © 2024 | Sistema Valutazione con Analisi Peso v2.0</p>
-    </footer>
+            </section>
+        </main>
+    </div>
 
     <script src="script.js"></script>
 </body>
