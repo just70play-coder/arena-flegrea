@@ -9,7 +9,7 @@
 <body>
     <header>
         <div class="container">
-            <h1>🌋 ARENA FLEGREA</h1>
+            <h1>⚒️ ARENA FLEGREA</h1>
             <p>Sistema Intelligente di Valutazione Minerali con Analisi Peso</p>
         </div>
     </header>
@@ -18,7 +18,7 @@
         <nav>
             <button onclick="mostraSezione('dashboard')" class="nav-btn active">📊 Dashboard</button>
             <button onclick="mostraSezione('quick-add')" class="nav-btn">⚡ Quick Add</button>
-            <button onclick="mostraSezione('database-prezzi')" class="nav-btn">💾 Database</button>
+            <button onclick="mostraSezione('database-prezzi')" class="nav-btn">💎 Database</button>
             <button onclick="mostraSezione('valutatore')" class="nav-btn">🎯 Valutatore</button>
             <button onclick="mostraSezione('aste')" class="nav-btn">🔨 Aste</button>
             <button onclick="mostraSezione('settings')" class="nav-btn">⚙️ Impostazioni</button>
@@ -56,7 +56,7 @@
                         </div>
                         
                         <div class="stat-card">
-                            <div class="stat-icon">📈</div>
+                            <div class="stat-icon">🎯</div>
                             <div class="stat-content">
                                 <h3>Valutazioni</h3>
                                 <p class="stat-number" id="stat-valutazioni">0</p>
@@ -84,7 +84,7 @@
                     <form id="form-quick-add">
                         <div class="form-row">
                             <div class="form-group">
-                                <label>🔍 Minerale <span class="required">*</span></label>
+                                <label>Minerale <span class="required">*</span></label>
                                 <input 
                                     type="text" 
                                     id="qa-minerale" 
@@ -104,7 +104,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label>📍 Località <span class="required">*</span></label>
+                                <label>Località <span class="required">*</span></label>
                                 <input 
                                     type="text" 
                                     id="qa-localita" 
@@ -116,7 +116,7 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>💰 Prezzo (€) <span class="required">*</span></label>
+                                <label>Prezzo (€) <span class="required">*</span></label>
                                 <input 
                                     type="number" 
                                     id="qa-prezzo" 
@@ -128,7 +128,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label>⚖️ Peso (g) <span class="required">*</span></label>
+                                <label>Peso (g) <span class="required">*</span></label>
                                 <input 
                                     type="number" 
                                     id="qa-peso" 
@@ -140,7 +140,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label>🏪 Mercato</label>
+                                <label>Mercato</label>
                                 <select id="qa-mercato">
                                     <option value="catawiki">Catawiki</option>
                                     <option value="ebay">eBay</option>
@@ -152,13 +152,13 @@
                         </div>
 
                         <div class="peso-display">
-                            <span>💡 Prezzo al grammo:</span>
+                            <span>⚖️ Prezzo al grammo:</span>
                             <strong>€<span id="qa-eurogrammo">0.00</span>/g</strong>
                         </div>
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>📏 Dimensioni (opzionale)</label>
+                                <label>Dimensioni (opzionale)</label>
                                 <input 
                                     type="text" 
                                     id="qa-dimensioni" 
@@ -167,7 +167,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label>📅 Data</label>
+                                <label>Data</label>
                                 <input 
                                     type="date" 
                                     id="qa-data"
@@ -176,7 +176,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>🔗 Link (opzionale)</label>
+                            <label>Link (opzionale)</label>
                             <input 
                                 type="url" 
                                 id="qa-link" 
@@ -185,7 +185,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>📝 Note (conservazione, qualità...)</label>
+                            <label>Note (conservazione, qualità...)</label>
                             <textarea 
                                 id="qa-note" 
                                 rows="2" 
@@ -208,7 +208,7 @@
             <!-- DATABASE PREZZI -->
             <section id="database-prezzi" class="sezione">
                 <div class="card">
-                    <h2>💾 Database Prezzi</h2>
+                    <h2>💎 Database Prezzi</h2>
                     
                     <div class="db-controls">
                         <input 
@@ -235,7 +235,7 @@
                     <form id="form-valutatore">
                         <div class="form-row">
                             <div class="form-group">
-                                <label>🔍 Minerale <span class="required">*</span></label>
+                                <label>Minerale <span class="required">*</span></label>
                                 <input 
                                     type="text" 
                                     id="val-minerale" 
@@ -245,7 +245,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label>📍 Località <span class="required">*</span></label>
+                                <label>Località <span class="required">*</span></label>
                                 <input 
                                     type="text" 
                                     id="val-localita" 
@@ -257,7 +257,7 @@
 
                         <div class="form-row">
                             <div class="form-group">
-                                <label>💰 Prezzo Asta (€) <span class="required">*</span></label>
+                                <label>Prezzo Asta (€) <span class="required">*</span></label>
                                 <input 
                                     type="number" 
                                     id="val-prezzo" 
@@ -268,7 +268,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label>⚖️ Peso (g) <span class="required">*</span></label>
+                                <label>Peso (g) <span class="required">*</span></label>
                                 <input 
                                     type="number" 
                                     id="val-peso" 
@@ -280,12 +280,12 @@
                         </div>
 
                         <div class="peso-display">
-                            <span>💡 Prezzo al grammo:</span>
+                            <span>⚖️ Prezzo al grammo:</span>
                             <strong>€<span id="val-eurogrammo">0.00</span>/g</strong>
                         </div>
 
                         <button type="submit" class="btn-primary btn-large">
-                            🚀 VALUTA AUTOMATICAMENTE
+                            🎯 VALUTA AUTOMATICAMENTE
                         </button>
                     </form>
 
@@ -308,13 +308,13 @@
                 <div class="card">
                     <h2>⚙️ Impostazioni</h2>
 
-                    <h3>💾 Gestione Dati</h3>
+                    <h3>📂 Gestione Dati</h3>
                     <div class="settings-actions">
                         <button onclick="esportaBackup()" class="btn-secondary">
-                            📥 Esporta Backup
+                            📤 Esporta Backup
                         </button>
                         <button onclick="document.getElementById('import-backup').click()" class="btn-secondary">
-                            📤 Importa Backup
+                            📥 Importa Backup
                         </button>
                         <input type="file" id="import-backup" accept=".json" style="display:none;">
                         <button onclick="resetDatabase()" class="btn-danger">
