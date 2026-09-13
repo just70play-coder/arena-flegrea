@@ -88,15 +88,23 @@ function salvaDatabase() {
 // ===========================
 
 function normalizzaMinerale(input) {
-    const inputLower = input.toLowerCase().trim();
-    
-    for (const [standard, aliases] of Object.entries(ALIAS_MINERALI)) {
-        if (inputLower === standard || aliases.includes(inputLower)) {
-            return standard;
-        }
-    }
-    
-    return input.charAt(0).toUpperCase() + input.slice(1).toLowerCase();
+ const inputLower = input.toLowerCase().trim()
+  .replace(/[\/\\'"]/g, '') // Rimuove caratteri speciali
+  .replace(/\s+/g, ' ');    // Normalizza spazi
+ 
+ // Cerca corrispondenza esatta o parziale
+ for (const [standard, aliases] of Object.entries(ALIAS_MINERALI)) {
+  if (inputLower === standard) return standard;
+  
+  for (const alias of aliases) {
+   if (inputLower === alias || inputLower.includes(alias)) {
+    return standard;
+   }
+  }
+ }
+ 
+ // Capitalizza se non trovato
+ return inputLower.charAt(0).toUpperCase() + inputLower.slice(1);
 }
 
 function getFattoreLocalita(minerale, localita) {
