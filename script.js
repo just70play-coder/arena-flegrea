@@ -42,7 +42,7 @@ const CONFIG = {
 };
 
 const ALIAS_MINERALI = {
- 'diaspro rosso': ['jasper red', 'jaspis', 'diaspro rosso', 'red jasper', 'jasper rosso', 'ocean jasper', 'picture jasper', 'fire jasper', 'vivid jasper'],
+ 'diaspro rosso': ['jasper red', 'jaspis', 'red jasper', 'jasper rosso', 'ocean jasper', 'picture jasper', 'fire jasper', 'vivid jasper'],
  'quarzo': ['quartz', 'cristallo di rocca', 'rock crystal', 'clear quartz', 'vivid quartz'],
  'ametista': ['amethyst', 'ametista viola', 'purple amethyst', 'vivid amethyst'],
  'citrino': ['citrine', 'citrino naturale'],
