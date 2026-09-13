@@ -739,6 +739,46 @@ function resetDatabase() {
 }
 
 // ===========================
+// PULISCI BACKSLASH
+// ===========================
+function pulisciBackslash() {
+ if (!confirm('🔧 Vuoi pulire i backslash dalle località?\n\n(Es: "Madagascar\\" → "Madagascar")')) {
+  return;
+ }
+ 
+ let modificati = 0;
+ const vecchieChiavi = Object.keys(dbPrezzi);
+ 
+ vecchieChiavi.forEach(chiaveVecchia => {
+  const dati = dbPrezzi[chiaveVecchia];
+  
+  // Sanitizza località
+  const localitaPulita = dati.localita.replace(/\\/g, '');
+  
+  if (localitaPulita !== dati.localita) {
+   dati.localita = localitaPulita;
+   
+   // Rigenera chiave corretta
+   const chiaveNuova = generaChiave(dati.minerale, localitaPulita);
+   
+   if (chiaveNuova !== chiaveVecchia) {
+    dbPrezzi[chiaveNuova] = dati;
+    delete dbPrezzi[chiaveVecchia];
+    modificati++;
+   }
+  }
+ });
+ 
+ if (modificati > 0) {
+  salvaDatabase();
+  alert(`✅ ${modificati} località pulite!\n\nRicarica la pagina.`);
+  location.reload();
+ } else {
+  alert('✅ Nessun backslash trovato nel database!');
+ }
+}
+
+// ===========================
 // INIZIALIZZAZIONE
 // ===========================
 
@@ -783,3 +823,4 @@ window.resetDatabase = resetDatabase;
 window.resetQuickAdd = resetQuickAdd;
 window.modificaCampione = modificaCampione;
 window.eliminaCampione = eliminaCampione;
+window.pulisciBackslash = pulisciBackslash;
