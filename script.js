@@ -42,11 +42,17 @@ const CONFIG = {
 };
 
 const ALIAS_MINERALI = {
-    'diaspro': ['jasper', 'jaspis'],
-    'quarzo': ['quartz', 'cristallo di rocca'],
-    'sanidino': ['sanidine'],
-    'leucite': ['leucita'],
-    'hauyne': ['hauyna', 'haüyne']
+ 'diaspro': ['jasper', 'jaspis', 'diaspro rosso', 'red jasper', 'jasper rosso', 'ocean jasper', 'picture jasper', 'fire jasper'],
+ 'quarzo': ['quartz', 'cristallo di rocca', 'rock crystal', 'clear quartz', 'cristallo di quarzo', 'cluster quarzo', 'Cluster of Crystalline Quartz'],
+ 'ametista': ['amethyst', 'ametista viola', 'purple amethyst', 'Vivid Amethyst'],
+ 'citrino': ['citrine', 'citrino naturale', 'Citrino Cluster di cristallo', 'Vivid Citrine'],
+ 'calcite': ['calcite', 'calcita'],
+ 'fluorite': ['fluorite', 'fluorita', 'fluorspar'],
+ 'sanidino': ['sanidine', 'sanidina'],
+ 'leucite': ['leucita', 'leucite crystal'],
+ 'hauyne': ['hauyna', 'haüyne', 'hauynite'],
+ 'agata': ['agate', 'agata muschiata', 'moss agate'],
+ 'opale': ['opal', 'opale di fuoco', 'fire opal']
 };
 
 let dbPrezzi = {};
