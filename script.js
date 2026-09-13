@@ -236,8 +236,8 @@ function inizializzaQuickAdd() {
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         
-        const minerale = document.getElementById('qa-minerale').value.trim();
-        const localita = document.getElementById('qa-localita').value.trim();
+        const minerale = normalizzaMinerale(document.getElementById('qa-minerale').value);
+        const localita = sanitizzaLocalita(document.getElementById('qa-localita').value);
         const peso = parseFloat(pesoInput.value);
         const prezzo = parseFloat(prezzoInput.value);
         const mercato = document.getElementById('qa-mercato').value;
