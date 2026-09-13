@@ -662,6 +662,125 @@ button,
 }
 
 /* ===========================
+   CAMPIONI LISTA NEL MODAL
+   =========================== */
+
+.campioni-lista {
+ display: grid;
+ gap: 12px;
+ max-height: 500px;
+ overflow-y: auto;
+ padding: 10px;
+ background: var(--background);
+ border-radius: 8px;
+ margin-top: 12px;
+}
+
+.campione-card {
+ background: var(--card-bg);
+ border: 1px solid var(--border-color);
+ border-radius: 8px;
+ padding: 16px;
+ transition: border-color 0.2s;
+}
+
+.campione-card:hover {
+ border-color: var(--primary-color);
+}
+
+.campione-header {
+ display: flex;
+ justify-content: space-between;
+ align-items: center;
+ margin-bottom: 12px;
+ padding-bottom: 8px;
+ border-bottom: 1px solid var(--border-color);
+}
+
+.campione-data {
+ color: var(--text-secondary);
+ font-size: 0.85rem;
+ font-weight: 500;
+}
+
+.campione-body {
+ margin-bottom: 12px;
+}
+
+.campione-row {
+ padding: 6px 0;
+ font-size: 0.9rem;
+ color: var(--text-secondary);
+}
+
+.campione-row strong {
+ color: var(--text-primary);
+ margin-right: 8px;
+}
+
+.campione-note {
+ background: var(--background-elevated);
+ padding: 12px;
+ border-radius: 6px;
+ margin-top: 8px;
+ font-size: 0.85rem;
+ color: var(--text-secondary);
+ font-style: italic;
+ border-left: 3px solid var(--primary-color);
+}
+
+.link-asta {
+ color: var(--primary-color);
+ text-decoration: none;
+ font-weight: 500;
+}
+
+.link-asta:hover {
+ text-decoration: underline;
+}
+
+.campione-actions {
+ display: flex;
+ gap: 8px;
+ margin-top: 12px;
+ padding-top: 12px;
+ border-top: 1px solid var(--border-color);
+}
+
+.btn-edit,
+.btn-delete {
+ flex: 1;
+ padding: 8px 12px;
+ border: none;
+ border-radius: 6px;
+ cursor: pointer;
+ font-size: 0.85rem;
+ font-weight: 600;
+ transition: all 0.2s;
+ font-family: inherit;
+}
+
+.btn-edit {
+ background: var(--primary-color);
+ color: white;
+}
+
+.btn-edit:hover {
+ background: var(--primary-hover);
+ transform: translateY(-1px);
+}
+
+.btn-delete {
+ background: var(--danger-color);
+ color: white;
+}
+
+.btn-delete:hover {
+ background: #dc2626;
+ transform: translateY(-1px);
+}
+
+/* ===========================
    RESPONSIVE
    =========================== */
 

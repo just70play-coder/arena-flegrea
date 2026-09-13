@@ -502,29 +502,185 @@ function mostraDettagliMinerale(chiave) {
             <h3>Medie per mercato</h3>
             ${generaTabellaStorico(dati.medie)}
             
-            <h3>Campioni (${dati.campioni.length})</h3>
-            <table class="tabella-storico">
-                <thead>
-                    <tr><th>Data</th><th>Mercato</th><th>€</th><th>Peso</th><th>€/g</th></tr>
-                </thead>
-                <tbody>
-                    ${dati.campioni.map(c => `
-                        <tr>
-                            <td>${c.data}</td>
-                            <td>${c.mercato}</td>
-                            <td>€${c.prezzo.toFixed(2)}</td>
-                            <td>${c.peso}g</td>
-                            <td>€${c.prezzogrammo.toFixed(2)}/g</td>
-                        </tr>
-                    `).join('')}
-                </tbody>
-            </table>
+            <h3>📦 Campioni registrati (${dati.campioni.length})</h3>
+<div class="campioni-lista">
+ ${dati.campioni.map((c, idx) => `
+  <div class="campione-card">
+   <div class="campione-header">
+    <span class="campione-data">📅 ${c.data}</span>
+    <span class="badge">${c.mercato.toUpperCase()}</span>
+   </div>
+   
+   <div class="campione-body">
+    <div class="campione-row">
+     <strong>💰 Prezzo:</strong> €${c.prezzo.toFixed(2)}
+    </div>
+    <div class="campione-row">
+     <strong>⚖️ Peso:</strong> ${c.peso}g
+    </div>
+    <div class="campione-row">
+     <strong>📏 €/grammo:</strong> €${c.prezzogrammo.toFixed(2)}/g
+    </div>
+    ${c.dimensioni ? `<div class="campione-row"><strong>📐 Dimensioni:</strong> ${c.dimensioni}</div>` : ''}
+    ${c.note ? `<div class="campione-note">📝 ${c.note}</div>` : ''}
+    ${c.link ? `<div class="campione-row"><a href="${c.link}" target="_blank" class="link-asta">🔗 Vedi asta originale</a></div>` : ''}
+   </div>
+   
+   <div class="campione-actions">
+    <button onclick="modificaCampione('${chiave}', ${idx})" class="btn-edit">
+     ✏️ Modifica
+    </button>
+    <button onclick="eliminaCampione('${chiave}', ${idx})" class="btn-delete">
+     🗑️ Elimina
+    </button>
+   </div>
+  </div>
+ `).join('')}
+</div>
             
             <button onclick="this.parentElement.parentElement.remove()" class="btn-primary" style="margin-top:20px;">Chiudi</button>
         </div>
     `;
     
     document.body.appendChild(modal);
+}
+
+// ===========================
+// MODIFICA CAMPIONE (con cambio minerale)
+// ===========================
+function modificaCampione(chiave, idx) {
+ const dati = dbPrezzi[chiave];
+ const campione = dati.campioni[idx];
+ 
+ // 1. Chiedi minerale e località
+ const nuovoMineraleRaw = prompt('💎 Minerale:', dati.minerale);
+ if (nuovoMineraleRaw === null) return; // Annullato
+ 
+ const nuovaLocalitaRaw = prompt('📍 Località:', dati.localita);
+ if (nuovaLocalitaRaw === null) return;
+ 
+ // 2. Chiedi prezzo e peso
+ const nuovoPrezzo = prompt('💰 Prezzo (€):', campione.prezzo);
+ if (nuovoPrezzo === null) return;
+ 
+ const nuovoPeso = prompt('⚖️ Peso (g):', campione.peso);
+ if (nuovoPeso === null) return;
+ 
+ const nuoveNote = prompt('📝 Note:', campione.note || '');
+ if (nuoveNote === null) return;
+ 
+ // Validazione valori numerici
+ const prezzoNum = parseFloat(nuovoPrezzo);
+ const pesoNum = parseFloat(nuovoPeso);
+ 
+ if (isNaN(prezzoNum) || prezzoNum <= 0) {
+  alert('❌ Prezzo non valido!');
+  return;
+ }
+ 
+ if (isNaN(pesoNum) || pesoNum <= 0) {
+  alert('❌ Peso non valido!');
+  return;
+ }
+ 
+ // Normalizza minerale e località
+ const nuovoMinerale = normalizzaMinerale(nuovoMineraleRaw);
+ const nuovaLocalita = sanitizzaLocalita(nuovaLocalitaRaw);
+ const nuovaChiave = generaChiave(nuovoMinerale, nuovaLocalita);
+ 
+ // Aggiorna i dati specifici del campione
+ campione.prezzo = prezzoNum;
+ campione.peso = pesoNum;
+ campione.prezzogrammo = prezzoNum / pesoNum;
+ campione.note = nuoveNote;
+ 
+ // Controlla se minerale o località sono cambiati rispetto al gruppo attuale
+ if (nuovaChiave !== chiave) {
+  // Rimuovi il campione dal gruppo di origine
+  dati.campioni.splice(idx, 1);
+  
+  if (dati.campioni.length === 0) {
+   // Se non ci sono più campioni, elimina il vecchio gruppo
+   delete dbPrezzi[chiave];
+  } else {
+   // Altrimenti ricalcola le medie del vecchio gruppo
+   dati.medie = calcolaMedie(dati.campioni);
+  }
+  
+  // Inserisci il campione nella destinazione corretta
+  if (!dbPrezzi[nuovaChiave]) {
+   dbPrezzi[nuovaChiave] = {
+    minerale: nuovoMinerale,
+    localita: nuovaLocalita,
+    campioni: [],
+    medie: {}
+   };
+  }
+  
+  dbPrezzi[nuovaChiave].campioni.push(campione);
+  dbPrezzi[nuovaChiave].medie = calcolaMedie(dbPrezzi[nuovaChiave].campioni);
+  
+  chiave = nuovaChiave;
+ } else {
+  // Se è cambiato solo prezzo/peso/note nel gruppo corrente
+  dati.medie = calcolaMedie(dati.campioni);
+ }
+ 
+ salvaDatabase();
+ alert('✅ Campione aggiornato con successo!');
+ 
+ // Ricarica la vista modal
+ const modal = document.querySelector('.modal');
+ if (modal) modal.remove();
+ 
+ if (dbPrezzi[chiave]) {
+  mostraDettagliMinerale(chiave);
+ } else {
+  mostraDatabase();
+ }
+}
+
+// ===========================
+// ELIMINA CAMPIONE
+// ===========================
+function eliminaCampione(chiave, idx) {
+ const dati = dbPrezzi[chiave];
+ const campione = dati.campioni[idx];
+ 
+ // Conferma
+ const conferma = confirm(
+  `🗑️ ELIMINARE QUESTO CAMPIONE?\n\n` +
+  `Minerale: ${dati.minerale}\n` +
+  `Località: ${dati.localita}\n` +
+  `Prezzo: €${campione.prezzo.toFixed(2)}\n` +
+  `Peso: ${campione.peso}g\n\n` +
+  `Questa azione è IRREVERSIBILE!`
+ );
+ 
+ if (!conferma) return;
+ 
+ // Rimuovi campione
+ dati.campioni.splice(idx, 1);
+ 
+ // Se era l'ultimo, elimina minerale intero
+ if (dati.campioni.length === 0) {
+  delete dbPrezzi[chiave];
+  salvaDatabase();
+  alert('🗑️ Ultimo campione eliminato.\n\nMinerale rimosso dal database.');
+  document.querySelector('.modal').remove();
+  mostraDatabase();
+  return;
+ }
+ 
+ // Altrimenti ricalcola medie
+ dati.medie = calcolaMedie(dati.campioni);
+ salvaDatabase();
+ 
+ alert('✅ Campione eliminato!');
+ 
+ // Ricarica modal
+ document.querySelector('.modal').remove();
+ mostraDettagliMinerale(chiave);
 }
 
 // ===========================
@@ -625,3 +781,5 @@ window.esportaBackup = esportaBackup;
 window.esportaDatabase = esportaDatabase;
 window.resetDatabase = resetDatabase;
 window.resetQuickAdd = resetQuickAdd;
+window.modificaCampione = modificaCampione;
+window.eliminaCampione = eliminaCampione;
