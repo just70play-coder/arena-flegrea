@@ -107,6 +107,14 @@ function normalizzaMinerale(input) {
  return inputLower.charAt(0).toUpperCase() + inputLower.slice(1);
 }
 
+// Sanitizza località (rimuove backslash e normalizza)
+function sanitizzaLocalita(input) {
+ return input
+  .replace(/[\\]/g, '')  // Rimuove \
+  .replace(/\s+/g, ' ')  // Normalizza spazi
+  .trim();
+}
+
 function getFattoreLocalita(minerale, localita) {
     const mineraleNorm = normalizzaMinerale(minerale);
     const localitaMineraleDB = CONFIG.localitaMinerali[mineraleNorm];
