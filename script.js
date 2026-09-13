@@ -13,7 +13,7 @@ const CONFIG = {
     fattoreCorrezioneEtsy: 0.7,
     
     localitaMinerali: {
-        'diaspro': {
+        'diaspro rosso': {
             'Madagascar': 1.2,
             'Egitto': 1.3,
             'Australia': 1.15,
@@ -42,7 +42,7 @@ const CONFIG = {
 };
 
 const ALIAS_MINERALI = {
- 'diaspro': ['jasper', 'jaspis', 'diaspro rosso', 'red jasper', 'jasper rosso', 'ocean jasper', 'picture jasper', 'fire jasper', 'vivid jasper'],
+ 'diaspro rosso': ['jasper', 'jaspis', 'diaspro rosso', 'red jasper', 'jasper rosso', 'ocean jasper', 'picture jasper', 'fire jasper', 'vivid jasper'],
  'quarzo': ['quartz', 'cristallo di rocca', 'rock crystal', 'clear quartz', 'vivid quartz'],
  'ametista': ['amethyst', 'ametista viola', 'purple amethyst', 'vivid amethyst'],
  'citrino': ['citrine', 'citrino naturale'],
