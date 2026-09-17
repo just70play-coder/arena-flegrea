@@ -231,6 +231,118 @@ function calcolaMedie(campioni) {
     return medie;
 }
 
+// ===========================
+// STATISTICHE AVANZATE
+// ===========================
+
+function calcolaStatisticheAvanzate(campioni) {
+    if (!campioni || campioni.length === 0) {
+        return null;
+    }
+    
+    const prezzi = campioni.map(c => c.prezzo).sort((a, b) => a - b);
+    const prezziGrammo = campioni.map(c => c.prezzogrammo).filter(pg => pg > 0).sort((a, b) => a - b);
+    const pesi = campioni.map(c => c.peso).sort((a, b) => a - b);
+    
+    // Calcola mediana
+    function mediana(arr) {
+        const mid = Math.floor(arr.length / 2);
+        return arr.length % 2 === 0 ? (arr[mid - 1] + arr[mid]) / 2 : arr[mid];
+    }
+    
+    // Calcola deviazione standard
+    function devStandard(arr) {
+        const media = arr.reduce((a, b) => a + b, 0) / arr.length;
+        const varianza = arr.reduce((sum, val) => sum + Math.pow(val - media, 2), 0) / arr.length;
+        return Math.sqrt(varianza);
+    }
+    
+    // Trova campione più costoso e più economico
+    const indicePiuCostoso = campioni.indexOf(campioni.reduce((max, c) => c.prezzo > max.prezzo ? c : max, campioni[0]));
+    const indicePiuEconomico = campioni.indexOf(campioni.reduce((min, c) => c.prezzo < min.prezzo ? c : min, campioni[0]));
+    
+    // Migliore affare (€/g più basso)
+    const campioneMiglioreAffare = campioni.filter(c => c.prezzogrammo > 0)
+        .reduce((min, c) => c.prezzogrammo < min.prezzogrammo ? c : min, campioni.filter(c => c.prezzogrammo > 0)[0]);
+    
+    return {
+        totale: campioni.length,
+        
+        // Prezzi
+        prezzoMin: Math.min(...prezzi),
+        prezzoMax: Math.max(...prezzi),
+        prezzoMedia: prezzi.reduce((a, b) => a + b, 0) / prezzi.length,
+        prezzoMediana: mediana(prezzi),
+        prezzoDevStd: devStandard(prezzi),
+        
+        // Prezzi per grammo
+        prezzoGrammoMin: prezziGrammo.length > 0 ? Math.min(...prezziGrammo) : 0,
+        prezzoGrammoMax: prezziGrammo.length > 0 ? Math.max(...prezziGrammo) : 0,
+        prezzoGrammoMedia: prezziGrammo.length > 0 ? prezziGrammo.reduce((a, b) => a + b, 0) / prezziGrammo.length : 0,
+        
+        // Pesi
+        pesoMin: Math.min(...pesi),
+        pesoMax: Math.max(...pesi),
+        pesoMedia: pesi.reduce((a, b) => a + b, 0) / pesi.length,
+        pesoTotale: pesi.reduce((a, b) => a + b, 0),
+        
+        // Campioni notevoli
+        campionePiuCostoso: campioni[indicePiuCostoso],
+        campionePiuEconomico: campioni[indicePiuEconomico],
+        campioneMiglioreAffare: campioneMiglioreAffare,
+        
+        // Distribuzione mercati
+        distribuzioneMercati: calcolaDistribuzioneMercati(campioni),
+        
+        // Trend temporale
+        trendTemporale: calcolaTrendTemporale(campioni)
+    };
+}
+
+function calcolaDistribuzioneMercati(campioni) {
+    const mercati = {};
+    const totale = campioni.length;
+    
+    campioni.forEach(c => {
+        if (!mercati[c.mercato]) {
+            mercati[c.mercato] = { count: 0, percentuale: 0 };
+        }
+        mercati[c.mercato].count++;
+    });
+    
+    // Calcola percentuali
+    Object.keys(mercati).forEach(m => {
+        mercati[m].percentuale = (mercati[m].count / totale) * 100;
+    });
+    
+    return mercati;
+}
+
+function calcolaTrendTemporale(campioni) {
+    // Ordina per data
+    const campionOrdinati = [...campioni].sort((a, b) => new Date(a.data) - new Date(b.data));
+    
+    if (campionOrdinati.length < 2) {
+        return { trend: 'insufficiente', variazione: 0 };
+    }
+    
+    const primo = campionOrdinati[0];
+    const ultimo = campionOrdinati[campionOrdinati.length - 1];
+    
+    const variazione = ((ultimo.prezzo - primo.prezzo) / primo.prezzo) * 100;
+    
+    let trend = 'stabile';
+    if (variazione > 10) trend = 'crescita';
+    if (variazione < -10) trend = 'calo';
+    
+    return {
+        trend: trend,
+        variazione: variazione,
+        primoCampione: primo,
+        ultimoCampione: ultimo
+    };
+}
+
 function calcolaMediaPonderata(medie, usaPesoGrammo = false) {
     let somma = 0;
     let pesoTotale = 0;
@@ -645,6 +757,9 @@ function mostraDettagliMinerale(chiave) {
     const dati = dbPrezzi[chiave];
     if (!dati) return;
     
+    // Calcola statistiche avanzate
+    const stats = calcolaStatisticheAvanzate(dati.campioni);
+    
     const modal = document.createElement('div');
     modal.className = 'modal';
     modal.onclick = (e) => { if (e.target === modal) modal.remove(); };
@@ -654,50 +769,196 @@ function mostraDettagliMinerale(chiave) {
             <span class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</span>
             <h2>${dati.minerale} - ${dati.localita}</h2>
             
-            <h3>Medie per mercato</h3>
-            ${generaTabellaStorico(dati.medie)}
+            ${generaStatisticheGenerali(stats)}
             
-            <h3>📦 Campioni registrati (${dati.campioni.length})</h3>
-<div class="campioni-lista">
- ${dati.campioni.map((c, idx) => `
-  <div class="campione-card">
-   <div class="campione-header">
-    <span class="campione-data">📅 ${c.data}</span>
-    <span class="badge">${c.mercato.toUpperCase()}</span>
-   </div>
-   
-   <div class="campione-body">
-    <div class="campione-row">
-     <strong>💰 Prezzo:</strong> €${c.prezzo.toFixed(2)}
-    </div>
-    <div class="campione-row">
-     <strong>⚖️ Peso:</strong> ${c.peso}g
-    </div>
-    <div class="campione-row">
-     <strong>📏 €/grammo:</strong> €${c.prezzogrammo.toFixed(2)}/g
-    </div>
-    ${c.dimensioni ? `<div class="campione-row"><strong>📐 Dimensioni:</strong> ${c.dimensioni}</div>` : ''}
-    ${c.note ? `<div class="campione-note">📝 ${c.note}</div>` : ''}
-    ${c.link ? `<div class="campione-row"><a href="${c.link}" target="_blank" class="link-asta">🔗 Vedi asta originale</a></div>` : ''}
-   </div>
-   
-   <div class="campione-actions">
-    <button onclick="modificaCampione('${chiave}', ${idx})" class="btn-edit">
-     ✏️ Modifica
-    </button>
-    <button onclick="eliminaCampione('${chiave}', ${idx})" class="btn-delete">
-     🗑️ Elimina
-    </button>
-   </div>
-  </div>
- `).join('')}
-</div>
+            <h3>📊 Distribuzione per mercato</h3>
+            ${generaDistribuzioneMercati(stats.distribuzioneMercati, dati.medie)}
+            
+            <h3>📈 Trend temporale</h3>
+            ${generaTrendTemporale(stats.trendTemporale)}
+            
+            <h3>🏆 Campioni notevoli</h3>
+            ${generaCampioniNotevoli(stats)}
+            
+            <h3>📦 Tutti i campioni (${dati.campioni.length})</h3>
+            <div class="campioni-lista">
+                ${dati.campioni.map((c, idx) => `
+                    <div class="campione-card">
+                        <div class="campione-header">
+                            <span class="campione-data">📅 ${c.data}</span>
+                            <span class="badge">${c.mercato.toUpperCase()}</span>
+                        </div>
+                        
+                        <div class="campione-body">
+                            <div class="campione-row">
+                                <strong>💰 Prezzo:</strong> €${c.prezzo.toFixed(2)}
+                            </div>
+                            <div class="campione-row">
+                                <strong>⚖️ Peso:</strong> ${c.peso}g
+                            </div>
+                            <div class="campione-row">
+                                <strong>📏 €/grammo:</strong> €${c.prezzogrammo.toFixed(2)}/g
+                            </div>
+                            ${c.dimensioni ? `<div class="campione-row"><strong>📐 Dimensioni:</strong> ${c.dimensioni}</div>` : ''}
+                            ${c.note ? `<div class="campione-note">📝 ${c.note}</div>` : ''}
+                            ${c.link ? `<div class="campione-row"><a href="${c.link}" target="_blank" class="link-asta">🔗 Vedi asta originale</a></div>` : ''}
+                        </div>
+                        
+                        <div class="campione-actions">
+                            <button onclick="modificaCampione('${chiave}', ${idx})" class="btn-edit">
+                                ✏️ Modifica
+                            </button>
+                            <button onclick="eliminaCampione('${chiave}', ${idx})" class="btn-delete">
+                                🗑️ Elimina
+                            </button>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
             
             <button onclick="this.parentElement.parentElement.remove()" class="btn-primary" style="margin-top:20px;">Chiudi</button>
         </div>
     `;
     
     document.body.appendChild(modal);
+}
+
+function generaStatisticheGenerali(stats) {
+    return `
+        <div class="stats-avanzate">
+            <h3>📊 Statistiche Generali</h3>
+            <div class="stats-grid-avanzate">
+                <div class="stat-box">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Prezzo Medio</div>
+                        <div class="stat-value-big">€${stats.prezzoMedia.toFixed(2)}</div>
+                        <div class="stat-range">Min: €${stats.prezzoMin.toFixed(2)} | Max: €${stats.prezzoMax.toFixed(2)}</div>
+                    </div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-icon">📏</div>
+                    <div class="stat-info">
+                        <div class="stat-label">€/grammo Medio</div>
+                        <div class="stat-value-big">${stats.prezzoGrammoMedia > 0 ? '€' + stats.prezzoGrammoMedia.toFixed(2) + '/g' : 'N/D'}</div>
+                        ${stats.prezzoGrammoMedia > 0 ? `<div class="stat-range">Min: €${stats.prezzoGrammoMin.toFixed(2)}/g | Max: €${stats.prezzoGrammoMax.toFixed(2)}/g</div>` : ''}
+                    </div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-icon">⚖️</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Peso Medio</div>
+                        <div class="stat-value-big">${stats.pesoMedia.toFixed(1)}g</div>
+                        <div class="stat-range">Min: ${stats.pesoMin}g | Max: ${stats.pesoMax}g</div>
+                    </div>
+                </div>
+                
+                <div class="stat-box">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <div class="stat-label">Campioni Totali</div>
+                        <div class="stat-value-big">${stats.totale}</div>
+                        <div class="stat-range">Peso totale: ${stats.pesoTotale.toFixed(1)}g</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="stat-dettagli">
+                <p><strong>📊 Mediana prezzi:</strong> €${stats.prezzoMediana.toFixed(2)}</p>
+                <p><strong>📈 Deviazione standard:</strong> €${stats.prezzoDevStd.toFixed(2)} <span class="stat-hint">(variabilità prezzi)</span></p>
+            </div>
+        </div>
+    `;
+}
+
+function generaDistribuzioneMercati(distribuzione, medie) {
+    let html = '<div class="mercati-distribuzione">';
+    
+    const mercatiOrdinati = Object.entries(distribuzione).sort((a, b) => b[1].count - a[1].count);
+    
+    mercatiOrdinati.forEach(([mercato, dati]) => {
+        const mediaMercato = medie[mercato];
+        html += `
+            <div class="mercato-bar">
+                <div class="mercato-label">
+                    <strong>${mercato.toUpperCase()}</strong>
+                    <span>${dati.count} campioni (${dati.percentuale.toFixed(1)}%)</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width: ${dati.percentuale}%"></div>
+                </div>
+                ${mediaMercato ? `
+                    <div class="mercato-stats">
+                        Media: €${mediaMercato.mediaPrezzo.toFixed(2)} | 
+                        €/g: ${mediaMercato.mediaPrezzoGrammo > 0 ? '€' + mediaMercato.mediaPrezzoGrammo.toFixed(2) + '/g' : 'N/D'}
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    });
+    
+    html += '</div>';
+    return html;
+}
+
+function generaTrendTemporale(trend) {
+    if (trend.trend === 'insufficiente') {
+        return '<p class="stat-hint">📊 Dati insufficienti per analisi temporale (minimo 2 campioni)</p>';
+    }
+    
+    const iconaTrend = trend.trend === 'crescita' ? '📈' : trend.trend === 'calo' ? '📉' : '➡️';
+    const classeTrend = trend.trend === 'crescita' ? 'trend-up' : trend.trend === 'calo' ? 'trend-down' : 'trend-stable';
+    
+    return `
+        <div class="trend-box ${classeTrend}">
+            <div class="trend-header">
+                <span class="trend-icon">${iconaTrend}</span>
+                <span class="trend-label">Trend: <strong>${trend.trend.toUpperCase()}</strong></span>
+                <span class="trend-variazione">${trend.variazione > 0 ? '+' : ''}${trend.variazione.toFixed(1)}%</span>
+            </div>
+            <div class="trend-dettagli">
+                <p><strong>Primo campione:</strong> €${trend.primoCampione.prezzo.toFixed(2)} (${trend.primoCampione.data})</p>
+                <p><strong>Ultimo campione:</strong> €${trend.ultimoCampione.prezzo.toFixed(2)} (${trend.ultimoCampione.data})</p>
+            </div>
+        </div>
+    `;
+}
+
+function generaCampioniNotevoli(stats) {
+    return `
+        <div class="campioni-notevoli">
+            <div class="notevole-card">
+                <div class="notevole-icon">💎</div>
+                <div class="notevole-info">
+                    <div class="notevole-label">Più Costoso</div>
+                    <div class="notevole-valore">€${stats.campionePiuCostoso.prezzo.toFixed(2)}</div>
+                    <div class="notevole-dettagli">${stats.campionePiuCostoso.peso}g | ${stats.campionePiuCostoso.mercato} | ${stats.campionePiuCostoso.data}</div>
+                </div>
+            </div>
+            
+            <div class="notevole-card">
+                <div class="notevole-icon">💸</div>
+                <div class="notevole-info">
+                    <div class="notevole-label">Più Economico</div>
+                    <div class="notevole-valore">€${stats.campionePiuEconomico.prezzo.toFixed(2)}</div>
+                    <div class="notevole-dettagli">${stats.campionePiuEconomico.peso}g | ${stats.campionePiuEconomico.mercato} | ${stats.campionePiuEconomico.data}</div>
+                </div>
+            </div>
+            
+            ${stats.campioneMiglioreAffare ? `
+            <div class="notevole-card">
+                <div class="notevole-icon">🏆</div>
+                <div class="notevole-info">
+                    <div class="notevole-label">Migliore Affare (€/g)</div>
+                    <div class="notevole-valore">€${stats.campioneMiglioreAffare.prezzogrammo.toFixed(2)}/g</div>
+                    <div class="notevole-dettagli">€${stats.campioneMiglioreAffare.prezzo.toFixed(2)} | ${stats.campioneMiglioreAffare.peso}g | ${stats.campioneMiglioreAffare.data}</div>
+                </div>
+            </div>
+            ` : ''}
+        </div>
+    `;
 }
 
 // ===========================
