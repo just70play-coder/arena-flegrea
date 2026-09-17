@@ -78,8 +78,68 @@ function salvaDatabase() {
     try {
         localStorage.setItem('arenaFlegreaPrezzi', JSON.stringify(dbPrezzi));
         aggiornaStatistiche();
+        aggiornaDatalist(); // ← AGGIUNGI QUESTA
     } catch (e) {
         alert('Errore salvataggio database');
+    }
+}
+
+function aggiornaDatalist() {
+    // Set per evitare duplicati
+    const minerali = new Set();
+    const localita = new Set();
+    
+    // Estrai minerali e località dal database
+    Object.values(dbPrezzi).forEach(gruppo => {
+        minerali.add(gruppo.minerale);
+        localita.add(gruppo.localita);
+    });
+    
+    // Aggiungi anche gli alias dei minerali
+    Object.keys(ALIAS_MINERALI).forEach(nome => {
+        minerali.add(nome.charAt(0).toUpperCase() + nome.slice(1));
+    });
+    
+    // Converti in array ordinati
+    const listaMinerali = Array.from(minerali).sort();
+    const listaLocalita = Array.from(localita).sort();
+    
+    console.log('📋 Aggiornamento datalist:', listaMinerali.length, 'minerali,', listaLocalita.length, 'località');
+    
+    // Popola i datalist per Quick Add
+    const datalistMineraliQA = document.getElementById('datalist-minerali-qa');
+    const datalistLocalitaQA = document.getElementById('datalist-localita-qa');
+    
+    if (datalistMineraliQA) {
+        datalistMineraliQA.innerHTML = listaMinerali.map(m => `<option value="${m}">`).join('');
+        console.log('✓ datalist-minerali-qa popolato');
+    } else {
+        console.error('❌ datalist-minerali-qa non trovato!');
+    }
+    
+    if (datalistLocalitaQA) {
+        datalistLocalitaQA.innerHTML = listaLocalita.map(l => `<option value="${l}">`).join('');
+        console.log('✓ datalist-localita-qa popolato');
+    } else {
+        console.error('❌ datalist-localita-qa non trovato!');
+    }
+    
+    // Popola i datalist per Valutatore
+    const datalistMineraliVal = document.getElementById('datalist-minerali-val');
+    const datalistLocalitaVal = document.getElementById('datalist-localita-val');
+    
+    if (datalistMineraliVal) {
+        datalistMineraliVal.innerHTML = listaMinerali.map(m => `<option value="${m}">`).join('');
+        console.log('✓ datalist-minerali-val popolato');
+    } else {
+        console.error('❌ datalist-minerali-val non trovato!');
+    }
+    
+    if (datalistLocalitaVal) {
+        datalistLocalitaVal.innerHTML = listaLocalita.map(l => `<option value="${l}">`).join('');
+        console.log('✓ datalist-localita-val popolato');
+    } else {
+        console.error('❌ datalist-localita-val non trovato!');
     }
 }
 
@@ -92,13 +152,28 @@ function normalizzaMinerale(input) {
   .replace(/[\/\\'"]/g, '') // Rimuove caratteri speciali
   .replace(/\s+/g, ' ');    // Normalizza spazi
  
- // Cerca corrispondenza esatta o parziale
+ // Parole da NON capitalizzare (preposizioni, congiunzioni)
+ const paroleBasse = ['con', 'e', 'di', 'da', 'in', 'su', 'per', 'a', 'il', 'la', 'lo', 'le', 'gli', 'dei', 'delle'];
+ 
+ // Se contiene "con", "e", o virgola → capitalizza intelligente
+ if (/\s+con\s+|\s+e\s+|,/.test(inputLower)) {
+  return input.trim().split(' ').map((parola, idx) => {
+   const parolaLower = parola.toLowerCase();
+   // Prima parola sempre maiuscola, altre solo se NON sono preposizioni
+   if (idx === 0 || !paroleBasse.includes(parolaLower)) {
+    return parola.charAt(0).toUpperCase() + parola.slice(1).toLowerCase();
+   }
+   return parolaLower; // Preposizione in minuscolo
+  }).join(' ');
+ }
+ 
+ // Cerca corrispondenza ESATTA (non parziale)
  for (const [standard, aliases] of Object.entries(ALIAS_MINERALI)) {
-  if (inputLower === standard) return standard;
+  if (inputLower === standard) return standard.charAt(0).toUpperCase() + standard.slice(1);
   
   for (const alias of aliases) {
-   if (inputLower === alias || inputLower.includes(alias)) {
-    return standard;
+   if (inputLower === alias) {
+    return standard.charAt(0).toUpperCase() + standard.slice(1);
    }
   }
  }
@@ -281,6 +356,7 @@ function inizializzaQuickAdd() {
         euroGrammoSpan.textContent = '0.00';
         document.getElementById('qa-data').valueAsDate = new Date();
     });
+	aggiornaDatalist();
 }
 
 function resetQuickAdd() {
@@ -351,6 +427,7 @@ function inizializzaValutatore() {
             datiDB: datiDB
         });
     });
+	aggiornaDatalist();
 }
 
 function calcolaValoreStimato(minerale, localita, peso, datiDB) {
@@ -447,17 +524,95 @@ function mostraDatabase() {
         return;
     }
     
+    // Reset filtri
+    document.getElementById('search-db').value = '';
+    document.getElementById('filtro-minerale').value = '';
+    document.getElementById('filtro-localita').value = '';
+    document.getElementById('ordina-db').value = 'alfabetico';
+    
+    // Popola dropdown filtri
+    popolaFiltri();
+    
+    // Mostra tutto
+    filtraDatabase();
+}
+
+function popolaFiltri() {
+    const minerali = new Set();
+    const localita = new Set();
+    
+    Object.values(dbPrezzi).forEach(dati => {
+        minerali.add(dati.minerale);
+        localita.add(dati.localita);
+    });
+    
+    // Popola select minerali
+    const selectMinerali = document.getElementById('filtro-minerale');
+    selectMinerali.innerHTML = '<option value="">🔍 Tutti i minerali</option>';
+    Array.from(minerali).sort().forEach(m => {
+        selectMinerali.innerHTML += `<option value="${m}">${m}</option>`;
+    });
+    
+    // Popola select località
+    const selectLocalita = document.getElementById('filtro-localita');
+    selectLocalita.innerHTML = '<option value="">📍 Tutte le località</option>';
+    Array.from(localita).sort().forEach(l => {
+        selectLocalita.innerHTML += `<option value="${l}">${l}</option>`;
+    });
+}
+
+function filtraDatabase() {
+    const container = document.getElementById('database-list');
+    const searchTerm = document.getElementById('search-db').value.toLowerCase();
+    const filtroMinerale = document.getElementById('filtro-minerale').value;
+    const filtroLocalita = document.getElementById('filtro-localita').value;
+    const ordinamento = document.getElementById('ordina-db').value;
+    
+    // Filtra dati
+    let datiFilterati = Object.entries(dbPrezzi).filter(([chiave, dati]) => {
+        const matchSearch = !searchTerm || 
+            dati.minerale.toLowerCase().includes(searchTerm) || 
+            dati.localita.toLowerCase().includes(searchTerm);
+        
+        const matchMinerale = !filtroMinerale || dati.minerale === filtroMinerale;
+        const matchLocalita = !filtroLocalita || dati.localita === filtroLocalita;
+        
+        return matchSearch && matchMinerale && matchLocalita;
+    });
+    
+    // Ordina
+    datiFilterati.sort(([chiaveA, datiA], [chiaveB, datiB]) => {
+        switch(ordinamento) {
+            case 'alfabetico':
+                return datiA.minerale.localeCompare(datiB.minerale);
+            case 'campioni':
+                return datiB.campioni.length - datiA.campioni.length;
+            case 'prezzo-alto':
+                return calcolaMediaPonderata(datiB.medie, false) - calcolaMediaPonderata(datiA.medie, false);
+            case 'prezzo-basso':
+                return calcolaMediaPonderata(datiA.medie, false) - calcolaMediaPonderata(datiB.medie, false);
+            default:
+                return 0;
+        }
+    });
+    
+    // Mostra risultati
+    if (datiFilterati.length === 0) {
+        container.innerHTML = '<div class="empty-state"><p>Nessun risultato trovato</p></div>';
+        return;
+    }
+    
     let html = '<div class="database-lista">';
     
-    for (const [chiave, dati] of Object.entries(dbPrezzi)) {
+    datiFilterati.forEach(([chiave, dati]) => {
         const mediaGenerale = calcolaMediaPonderata(dati.medie, false);
         const mediaPrezzoGrammo = calcolaMediaPonderata(dati.medie, true);
         
         html += `
             <div class="database-card">
                 <div class="database-header">
-                    <h3>${dati.minerale}</h3>
-                    <span class="badge">${dati.localita}</span>
+                    <h3>${dati.minerale.toUpperCase()}</h3>
+                    <div class="database-localita">${dati.localita}</div>
                 </div>
                 <div class="database-stats">
                     <div class="stat">
@@ -476,11 +631,11 @@ function mostraDatabase() {
                     ` : ''}
                 </div>
                 <button onclick="mostraDettagliMinerale('${chiave}')" class="btn-dettagli">
-                    Vedi Dettagli →
+                    📊 Vedi Dettagli →
                 </button>
             </div>
         `;
-    }
+    });
     
     html += '</div>';
     container.innerHTML = html;
@@ -789,6 +944,10 @@ document.addEventListener('DOMContentLoaded', () => {
     inizializzaQuickAdd();
     inizializzaValutatore();
     aggiornaStatistiche();
+	
+	console.log('🔍 Test: prima di aggiornaDatalist');
+    aggiornaDatalist(); // ← AGGIUNGI QUESTA
+    console.log('✓ Test: dopo aggiornaDatalist');
     
     // Import backup
     document.getElementById('import-backup')?.addEventListener('change', (e) => {
@@ -824,3 +983,5 @@ window.resetQuickAdd = resetQuickAdd;
 window.modificaCampione = modificaCampione;
 window.eliminaCampione = eliminaCampione;
 window.pulisciBackslash = pulisciBackslash;
+window.aggiornaDatalist = aggiornaDatalist;
+window.filtraDatabase = filtraDatabase;

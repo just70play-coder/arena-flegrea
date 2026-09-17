@@ -385,15 +385,19 @@ button,
    =========================== */
 
 .db-controls {
-    display: flex;
+    display: grid;
+    grid-template-columns: 2fr 1fr 1fr 1fr auto auto;
     gap: 12px;
     margin-bottom: 20px;
     flex-wrap: wrap;
 }
 
 .search-input {
-    flex: 1;
     min-width: 200px;
+}
+
+.filtro-select {
+    min-width: 150px;
 }
 
 .database-lista {
@@ -408,6 +412,9 @@ button,
     border-radius: 12px;
     padding: 20px;
     transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
 }
 
 .database-card:hover {
@@ -417,14 +424,29 @@ button,
 
 .database-header {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
+    flex-direction: column;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-color);
+    padding-bottom: 12px;
 }
 
 .database-header h3 {
     margin: 0;
-    font-size: 1.1rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--primary-color);
+}
+
+.database-localita {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+.database-localita::before {
+    content: "📍 ";
 }
 
 .badge {
@@ -434,13 +456,13 @@ button,
     border-radius: 6px;
     font-size: 0.75rem;
     font-weight: 500;
+    align-self: flex-start;
 }
 
 .database-stats {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
     gap: 10px;
-    margin-bottom: 16px;
 }
 
 .stat {
@@ -462,6 +484,27 @@ button,
     font-size: 1rem;
     font-weight: 600;
     color: var(--text-primary);
+}
+
+.btn-dettagli {
+    background: transparent;
+    color: var(--primary-color);
+    border: 1px solid var(--primary-color);
+    padding: 10px 16px;
+    font-size: 0.9rem;
+    width: 100%;
+    margin-top: auto;
+}
+
+.btn-dettagli:hover {
+    background: var(--primary-color);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .db-controls {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ===========================
@@ -809,5 +852,3 @@ button,
         grid-template-columns: 1fr;
     }
 }
-
-.hidden { display: none; }

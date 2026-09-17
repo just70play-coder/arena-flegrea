@@ -86,31 +86,26 @@
                             <div class="form-group">
                                 <label>🔍 Minerale <span class="required">*</span></label>
                                 <input 
-                                    type="text" 
-                                    id="qa-minerale" 
-                                    list="minerali-suggestions"
-                                    placeholder="es. Sanidino, Diaspro..."
-                                    required
-                                >
-                                <datalist id="minerali-suggestions">
-                                    <option value="Sanidino">
-                                    <option value="Leucite">
-                                    <option value="Hauyne">
-                                    <option value="Diaspro">
-                                    <option value="Quarzo">
-                                    <option value="Ametista">
-                                    <option value="Citrino">
-                                </datalist>
+								type="text" 
+								id="qa-minerale" 
+								list="datalist-minerali-qa"
+								placeholder="es. Sanidino, Diaspro..."
+								required
+									>
+									<datalist id="datalist-minerali-qa">
+									</datalist>
                             </div>
 
                             <div class="form-group">
                                 <label>📍 Località <span class="required">*</span></label>
-                                <input 
-                                    type="text" 
-                                    id="qa-localita" 
-                                    placeholder="es. Monte Nuovo, Madagascar..."
-                                    required
-                                >
+								<input 
+									type="text" 
+									id="qa-localita" 
+									list="datalist-localita-qa"
+									placeholder="es. Monte Nuovo, Madagascar..."
+									required
+								>
+								<datalist id="datalist-localita-qa"></datalist>
                             </div>
                         </div>
 
@@ -211,16 +206,26 @@
                     <h2>💾 Database Prezzi</h2>
                     
                     <div class="db-controls">
-                        <input 
-                            type="text" 
-                            id="db-search" 
-                            placeholder="🔍 Cerca minerale..."
-                            class="search-input"
-                        >
-                        <button onclick="esportaDatabase()" class="btn-secondary">
-                            📥 Esporta JSON
-                        </button>
-                    </div>
+						<input type="text" id="search-db" class="search-input" placeholder="🔍 Cerca minerale o località..." oninput="filtraDatabase()">
+						
+						<select id="filtro-minerale" onchange="filtraDatabase()" class="filtro-select">
+							<option value="">🔍 Tutti i minerali</option>
+						</select>
+						
+						<select id="filtro-localita" onchange="filtraDatabase()" class="filtro-select">
+							<option value="">📍 Tutte le località</option>
+						</select>
+						
+						<select id="ordina-db" onchange="filtraDatabase()" class="filtro-select">
+							<option value="alfabetico">A→Z Minerale</option>
+							<option value="campioni">Più campioni</option>
+							<option value="prezzo-alto">Prezzo più alto</option>
+							<option value="prezzo-basso">Prezzo più basso</option>
+						</select>
+						
+						<button onclick="mostraDatabase()" class="btn-secondary">🔄 Reset</button>
+						<button onclick="esportaDatabase()" class="btn-secondary">📥 Esporta JSON</button>
+					</div>
 
                     <div id="database-list"></div>
                 </div>
@@ -237,21 +242,25 @@
                             <div class="form-group">
                                 <label>🔍 Minerale <span class="required">*</span></label>
                                 <input 
-                                    type="text" 
-                                    id="val-minerale" 
-                                    placeholder="es. Diaspro"
-                                    required
-                                >
+									type="text" 
+									id="val-minerale" 
+									list="datalist-minerali-val"
+									placeholder="es. Sanidino, Diaspro..."
+									required
+								>
+								<datalist id="datalist-minerali-val"></datalist>
                             </div>
 
                             <div class="form-group">
                                 <label>📍 Località <span class="required">*</span></label>
-                                <input 
-                                    type="text" 
-                                    id="val-localita" 
-                                    placeholder="es. Madagascar"
-                                    required
-                                >
+                               <input 
+									type="text" 
+									id="val-localita" 
+									list="datalist-localita-val"
+									placeholder="es. Monte Nuovo, Campi Flegrei..."
+									required
+									>
+									<datalist id="datalist-localita-val"></datalist>
                             </div>
                         </div>
 
