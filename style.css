@@ -1458,3 +1458,258 @@ input:disabled {
     cursor: not-allowed;
     background: var(--background-elevated);
 }
+
+
+/* ===========================
+   PHASE 5: SCORING FOTOGRAFICO
+   =========================== */
+.scoring-box {
+    margin: 24px 0;
+    padding: 18px;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: var(--background-elevated);
+}
+
+.scoring-intestazione {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.scoring-intestazione h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: var(--text-primary);
+}
+
+.btn-small {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+}
+
+.scoring-griglia {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+    gap: 16px;
+    margin-top: 16px;
+}
+
+.scoring-criterio {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto auto;
+    align-items: center;
+    gap: 4px 8px;
+    padding: 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--card-bg);
+}
+
+.scoring-criterio label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.scoring-peso {
+    display: inline-block;
+    margin-left: 6px;
+    padding: 1px 6px;
+    border-radius: 6px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: var(--secondary-color);
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.scoring-criterio output {
+    justify-self: end;
+    min-width: 34px;
+    text-align: center;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--primary-hover);
+}
+
+.scoring-criterio input[type="range"] {
+    grid-column: 1 / -1;
+    width: 100%;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+}
+
+.scoring-criterio small {
+    grid-column: 1 / -1;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.3;
+}
+
+.scoring-pannello {
+    margin-top: 16px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border-color);
+}
+
+.scoring-score {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.scoring-score strong {
+    font-size: 1.35rem;
+    color: var(--primary-hover);
+    font-variant-numeric: tabular-nums;
+}
+
+.scoring-barra {
+    margin-top: 8px;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--input-bg);
+    overflow: hidden;
+}
+
+.scoring-barra-riempimento {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+    transition: width 0.15s ease;
+}
+
+.scoring-hint {
+    margin-top: 10px;
+    font-size: 0.78rem;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+.scoring-hint strong {
+    color: var(--warning-color);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Scomposizione della formula nel risultato */
+.scomposizione {
+    margin-top: 16px;
+}
+
+.scomposizione-riga {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 6px 0;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    border-bottom: 1px dashed var(--border-color);
+}
+
+.scomposizione-riga strong {
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+    text-align: right;
+}
+
+.scomposizione-riga.totale {
+    margin-top: 4px;
+    border-bottom: none;
+    font-size: 0.95rem;
+}
+
+.scomposizione-riga.totale strong {
+    color: var(--primary-hover);
+}
+
+
+/* ===========================
+   v0.2.8: SCALA — PAGINAZIONE E LISTE LUNGHE
+   =========================== */
+.paginazione {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 14px;
+    margin-top: 18px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    background: var(--background-elevated);
+}
+
+.btn-pagina {
+    min-width: 38px;
+    padding: 6px 10px;
+    border: 1px solid var(--border-color-light);
+    border-radius: 8px;
+    background: var(--card-bg);
+    color: var(--text-primary);
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.btn-pagina:hover:not(:disabled) {
+    background: var(--card-bg-hover);
+    border-color: var(--primary-color);
+}
+
+.btn-pagina:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
+
+.paginazione-info {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.paginazione-info strong {
+    color: var(--text-primary);
+    font-variant-numeric: tabular-nums;
+}
+
+.paginazione-totale {
+    margin-left: 6px;
+    color: var(--text-muted);
+}
+
+.paginazione-gruppi {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.paginazione-gruppi select {
+    padding: 4px 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--input-bg);
+    color: var(--text-primary);
+    font-size: 0.8rem;
+}
+
+.filter-truncate {
+    padding: 8px 10px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    border-top: 1px dashed var(--border-color);
+}
+
+.form-hint {
+    display: block;
+    margin-top: 4px;
+    font-size: 0.72rem;
+    color: var(--text-muted);
+    line-height: 1.3;
+}

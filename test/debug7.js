@@ -1,0 +1,11 @@
+const { caricaApp } = require('./harness');
+const { app } = caricaApp({ fileDemo: true });
+const votiDefault = { cristallinita: 5, estetica: 5, rarita: 5, dimensioni: 5, integrita: 10, trasparenza: 5 };
+const sc = app.calcolaScore(votiDefault);
+console.log('score default =', sc.score, '| suDieci =', sc.suDieci);
+console.log('fattoreDaIntegrita(10) =', app.fattoreDaIntegrita(10));
+const dati = app.trovaDatiGruppo('Sanidino', 'Monte Nuovo').datiDB;
+console.log('legacy  =', app.calcolaValoreStimato('Sanidino','Monte Nuovo',85,dati).toFixed(4));
+console.log('default =', app.calcolaValoreStimato('Sanidino','Monte Nuovo',85,dati,sc).toFixed(4));
+const s = app.generaScomposizione('Sanidino','Monte Nuovo',85,dati,sc);
+console.log('scomposizione:', JSON.stringify({base:+s.base.toFixed(4), loc:s.fattoreLocalita, score:s.score, suDieci:s.suDieci, int:s.fattoreIntegrita, valore:+s.valore.toFixed(4)}));

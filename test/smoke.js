@@ -1,0 +1,17 @@
+const fs = require('fs');
+const { JSDOM } = require('jsdom');
+const html = fs.readFileSync('/home/user/arena-flegrea/index.html','utf8');
+const script = fs.readFileSync('/home/user/arena-flegrea/script.js','utf8');
+const dom = new JSDOM(html, { runScripts:'outside-only', url:'http://localhost/', virtualConsole: new (require('jsdom').VirtualConsole)().on('jsdomError', e => console.log('JSDOM ERROR:', e.message)) });
+const w = dom.window;
+w.addEventListener('error', e => console.log('WINDOW ERROR:', e.message));
+w.localStorage.setItem('arenaFlegreaPrezzi', fs.readFileSync('/home/user/arena-flegrea/dati-demo.json','utf8'));
+let errori = 0;
+const logOriginale = w.console.error;
+w.console.error = (...a) => { errori++; logOriginale(...a); };
+w.eval(script + `\nwindow.__g = () => ({ gruppi: Object.keys(dbPrezzi).length, canoniche: Object.keys(LOCALITA_CANONICHE).length, indice: Object.keys(INDICE_LOCALITA).length });`);
+w.document.dispatchEvent(new w.Event('DOMContentLoaded', { bubbles: true }));
+console.log('stato:', JSON.stringify(w.__g()));
+console.log('dati locali:', w.__app ? 'ok' : 'n/d');
+console.log('console.error durante init:', errori);
+console.log('esito: ' + (errori === 0 ? 'NESSUN ERRORE' : 'ERRORI PRESENTI'));

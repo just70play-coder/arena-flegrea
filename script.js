@@ -1,7 +1,14 @@
 // ===========================
-// ARENA FLEGREA v0.2.5.1
+// ARENA FLEGREA v0.2.8
 // Phase 4: Filtri Excel-like + v0.2.5: Provenienza Sconosciuta (0.7x)
 // v0.2.5.1: fix lookup fattori località specifici per minerale
+// v0.2.6: LOCALITÀ CANONICHE — alias, corrispondenza case-insensitive e
+//         fattori per giacimento tipico (es. hardystonite da Parker Shaft 1.6x)
+// v0.2.7: PHASE 5 — scoring fotografico: 6 criteri ponderati (25/20/20/15/10/10),
+//         fattore integrità derivato dal voto, formula Valore = Base × Località ×
+//         (Score/10) × Integrità, scomposizione trasparente nel risultato
+// v0.2.8: SCALA — paginazione di griglia e modal, liste dei filtri con tetto,
+//         migrazione canonicalizzante dei gruppi, minerali secondari delle associazioni
 // (Database Prezzi + Modal dettagli)
 // ===========================
 
@@ -23,34 +30,130 @@ const CONFIG = {
     localitaSconosciuta: 'Sconosciuta',
     fattoreLocalitaSconosciuta: 0.7,
     
-    localitaMinerali: {
-        'diaspro rosso': {
-            'Madagascar': 1.2,
-            'Egitto': 1.3,
-            'Australia': 1.15,
-            'Brasile': 1.0
-        },
-        'sanidino': {
-            'Monte Nuovo': 1.4,
-            'Solfatara': 1.5,
-            'Pisciarelli': 1.6,
-            'Vesuvio': 1.2
-        },
-        'quarzo': {
-            'Brasile': 1.15,
-            'Madagascar': 1.1,
-            'Alpi': 1.25
-        }
+    // v0.2.6: le località specifiche per minerale vivono in LOCALITA_CANONICHE (sotto),
+    // che aggiunge alias, corrispondenza case-insensitive e fattori per minerale
+    
+    // v0.2.8: struttura per database con centinaia di campioni
+    gruppoPerPage: 12,        // gruppi (minerale + località) per pagina nel Database Prezzi
+    campioniPerPagina: 20,    // campioni per pagina nel modal dei dettagli
+    sogliaPopoverFiltri: 150, // oltre questa soglia le liste dei filtri mostrano solo le prime voci
+    
+    // Fallback per una località NON presente in LOCALITA_CANONICHE: fattore neutro 1.0
+    // (scelta v0.2.6: nessuna penalità implicita; solo "Sconosciuta" vale 0.7)
+    fattoreLocalitaDefault: 1.0,
+    
+    // Fallback generico per località: usato quando LOCALITA_CANONICHE non ha un
+    // fattore specifico per quel minerale. Le voci 'Sconosciuta' e 'altra località'
+    // sono volutamente assenti: la prima vale fattoreLocalitaSconosciuta (0.7),
+    // la seconda fattoreLocalitaDefault (1.0).
+    // ===========================
+    // PHASE 5: SCORING FOTOGRAFICO (pesi fissi dalla specifica di Fabio)
+    // ===========================
+    scoringCriteri: {
+        cristallinita: { peso: 25, etichetta: 'Cristallinità',
+            descrizione: 'Sviluppo e definizione dei cristalli' },
+        estetica: { peso: 20, etichetta: 'Estetica',
+            descrizione: 'Bilanciamento e appeal complessivo del pezzo' },
+        rarita: { peso: 20, etichetta: 'Rarità',
+            descrizione: 'Frequenza della specie e di questa forma' },
+        dimensioni: { peso: 15, etichetta: 'Dimensioni',
+            descrizione: 'Grandezza rispetto allo standard della specie' },
+        integrita: { peso: 10, etichetta: 'Integrità',
+            descrizione: 'Assenza di rotture, riparazioni e scheggiature' },
+        trasparenza: { peso: 10, etichetta: 'Trasparenza',
+            descrizione: 'Grado di trasmissione della luce' }
     },
+    // Voto di default: 5 per tutti i criteri, 10 per Integrità
+    // (10 = integrità perfetta: a default lo Score vale 5.5/10 come nella specifica)
+    scoringDefault: 5,
+    scoringDefaultIntegrita: 10,
+    // Il fattore integrità DERIVA dal voto del criterio (decisione Fabio: opzione C)
+    fattoreIntegritaMin: 0.60,
+    fattoreIntegritaMax: 1.00,
+    // Comportamento v0.2.5.1 per le chiamate senza score (retrocompatibilità)
+    fattoreQualitaLegacy: 0.5,
+    fattoreIntegritaLegacy: 0.95,
     
     fattoriLocalita: {
         'Monte Nuovo': 1.4,
         'Solfatara': 1.5,
         'Madagascar': 1.1,
-        'Brasile': 1.0,
-        'altra località': 0.85
+        'Brasile': 1.0
     }
 };
+
+// ===========================
+// v0.2.6: LOCALITÀ CANONICHE
+// Giacimenti tipici riconosciuti: ogni località ha i suoi alias e il fattore
+// specifico per minerale. È la regola fondamentale del progetto: lo stesso
+// minerale vale di più se viene dal giacimento di riferimento.
+//   minerali: fattore > 1 = giacimento tipico, < 1 = provenienza ordinaria
+//   alias: scritture accettate (senza accenti, minuscole, anche parziali)
+// ===========================
+
+const LOCALITA_CANONICHE = {
+    'Parker Shaft (Franklin, New Jersey)': {
+        alias: ['parker shaft', 'franklin mine', 'franklin', 'franklin mining district',
+                'new jersey', 'sussex county', 'franklinite mine'],
+        minerali: {
+            hardystonite: 1.6, clinohedrite: 1.6, willemite: 1.5,
+            franklinite: 1.4, datolite: 1.3, calcite: 1.15
+        }
+    },
+    'Monte Nuovo': {
+        alias: ['monte nuovo', 'montenuovo', 'quarantola', 'monte nuovo (pozzuoli)',
+                'campi flegrei monte nuovo'],
+        minerali: { sanidino: 1.4 }
+    },
+    'Solfatara': {
+        alias: ['solfatara', 'solfatara di pozzuoli', 'la solfatara'],
+        minerali: { sanidino: 1.5 }
+    },
+    'Pisciarelli': {
+        alias: ['pisciarelli', 'pisciarelli di agnano'],
+        minerali: { sanidino: 1.6 }
+    },
+    'Vesuvio': {
+        alias: ['vesuvio', 'somma vesuvio', 'monte somma', 'vesuvius'],
+        minerali: { sanidino: 1.2 }
+    },
+    'Madagascar': {
+        alias: ['madagascar'],
+        minerali: { 'diaspro rosso': 1.2, quarzo: 1.1 }
+    },
+    'Brasile': {
+        alias: ['brasile', 'brazil'],
+        minerali: { quarzo: 1.15, 'diaspro rosso': 1.0 }
+    },
+    'Alpi': {
+        alias: ['alpi', 'alps', 'alpi italiane'],
+        minerali: { quarzo: 1.25 }
+    },
+    'Egitto': {
+        alias: ['egitto', 'egypt'],
+        minerali: { 'diaspro rosso': 1.3 }
+    },
+    'Australia': {
+        alias: ['australia'],
+        minerali: { 'diaspro rosso': 1.15 }
+    },
+    'Sconosciuta': {
+        alias: ['sconosciuta', 'ignota', 'unknown', 'provenienza sconosciuta'],
+        minerali: {}
+    }
+};
+
+// Indice di risoluzione: alias (minuscoli) -> nome canonico, ordinati dal più lungo
+// al più corto perché la corrispondenza esatta venga provata prima di quella parziale
+const INDICE_LOCALITA = (() => {
+    const indice = {};
+    for (const [nome, dati] of Object.entries(LOCALITA_CANONICHE)) {
+        for (const alias of [nome, ...dati.alias]) {
+            indice[alias.toLowerCase().trim()] = nome;
+        }
+    }
+    return indice;
+})();
 
 const ALIAS_MINERALI = {
  'diaspro rosso': ['jasper red', 'jaspis', 'red jasper', 'jasper rosso', 'ocean jasper', 'picture jasper', 'fire jasper', 'vivid jasper'],
@@ -83,6 +186,49 @@ function caricaDatabase() {
             dbPrezzi = {};
         }
     }
+    // v0.2.8: allinea i dati esistenti alle forme canoniche (minerale e località)
+    canonicalizzaDatabase();
+}
+
+// v0.2.8 MIGRAZIONE: riscrive i gruppi con minerale e località canonici e accorpa
+// i duplicati che ne derivano. Non distruttiva: nessun campione viene perso e i
+// campioni accorpati mantengono l'ordine (prima quelli del gruppo canonico).
+function canonicalizzaDatabase() {
+    const migrato = {};
+    let gruppiRinominati = 0;
+    let gruppiAccorpati = 0;
+    
+    for (const gruppo of Object.values(dbPrezzi)) {
+        const minerale = normalizzaMinerale(gruppo.minerale);
+        const localita = normalizzaLocalita(gruppo.localita);
+        const chiave = generaChiave(minerale, localita);
+        
+        if (!migrato[chiave]) {
+            migrato[chiave] = {
+                minerale: minerale,
+                localita: localita,
+                campioni: gruppo.campioni.slice(),
+                medie: {}
+            };
+        } else {
+            migrato[chiave].campioni.push(...gruppo.campioni);
+            gruppiAccorpati++;
+        }
+        
+        if (minerale !== gruppo.minerale || localita !== gruppo.localita) gruppiRinominati++;
+    }
+    
+    if (gruppiRinominati === 0 && gruppiAccorpati === 0) return false;
+    
+    for (const gruppo of Object.values(migrato)) {
+        gruppo.medie = calcolaMedie(gruppo.campioni);
+    }
+    
+    dbPrezzi = migrato;
+    salvaDatabase();
+    console.log('✓ Canonicalizzazione: ' + gruppiRinominati + ' gruppi rinominati, ' +
+                gruppiAccorpati + ' accorpati');
+    return true;
 }
 
 function salvaDatabase() {
@@ -110,6 +256,10 @@ function aggiornaDatalist() {
     Object.keys(ALIAS_MINERALI).forEach(nome => {
         minerali.add(nome.charAt(0).toUpperCase() + nome.slice(1));
     });
+    
+    // v0.2.6: aggiungi le località canoniche (così l'utente seleziona sempre la stessa
+    // scrittura e non frammenta i gruppi con varianti)
+    Object.keys(LOCALITA_CANONICHE).forEach(nome => localita.add(nome));
     
     // Converti in array ordinati
     const listaMinerali = Array.from(minerali).sort();
@@ -205,29 +355,156 @@ function sanitizzaLocalita(input) {
 // (evita gruppi duplicati: "sconosciuta", "SCONOSCIUTA", " Sconosciuta " → "Sconosciuta")
 function normalizzaLocalita(input) {
     const pulita = sanitizzaLocalita(input);
-    if (pulita.toLowerCase() === CONFIG.localitaSconosciuta.toLowerCase()) {
-        return CONFIG.localitaSconosciuta;
+    // v0.2.6: risolve la scrittura alla località canonica (alias + case-insensitive).
+    // Se non c'è corrispondenza la località resta come digitata: niente dati persi.
+    return localitaCanonica(pulita).nome || pulita;
+}
+
+// v0.2.8: legge il campo "minerali secondari" (separati da virgola) in un array normalizzato
+function parseMineraliSecondari(testo) {
+    return String(testo || '')
+        .split(',')
+        .map(parte => normalizzaMinerale(parte.trim()))
+        .filter(Boolean);
+}
+
+// Estrae il minerale DOMINANTE da un'associazione multiminerale
+// ("Hardystonite, Clinohedrite e Willemite" -> "Hardystonite")
+function estraiMineraleDominante(input) {
+    const primo = String(input || '').split(/,|\be\b|\+|\//i)[0].trim();
+    return primo || String(input || '').trim();
+}
+
+// Risolve una località alla forma canonica: corrispondenza esatta sugli alias,
+// poi parziale (l'alias compare come parola all'interno della stringa digitata).
+// Restituisce { nome, dati } oppure { nome: null, dati: null } se non censita.
+function localitaCanonica(input) {
+    const pulita = sanitizzaLocalita(String(input == null ? '' : input)).toLowerCase();
+    if (!pulita) return { nome: null, dati: null };
+
+    if (INDICE_LOCALITA[pulita]) {
+        const nome = INDICE_LOCALITA[pulita];
+        return { nome: nome, dati: LOCALITA_CANONICHE[nome] };
     }
-    return pulita;
+
+    const parole = pulita.split(/[^a-z0-9àèéìòù]+/).filter(Boolean);
+    for (const alias of Object.keys(INDICE_LOCALITA).sort((a, b) => b.length - a.length)) {
+        const tokenAlias = alias.split(' ');
+        if (tokenAlias.length > 1 && pulita.includes(alias)) {
+            const nome = INDICE_LOCALITA[alias];
+            return { nome: nome, dati: LOCALITA_CANONICHE[nome] };
+        }
+        if (tokenAlias.length === 1 && alias.length > 3 && parole.includes(alias)) {
+            const nome = INDICE_LOCALITA[alias];
+            return { nome: nome, dati: LOCALITA_CANONICHE[nome] };
+        }
+    }
+
+    return { nome: null, dati: null };
+}
+
+// ===========================
+// PHASE 5: SCORING FOTOGRAFICO
+// ===========================
+
+// Punteggio ponderato 1-10 sui 6 criteri (pesi dalla specifica: 25/20/20/15/10/10)
+function calcolaScore(voti) {
+    let somma = 0;
+    let pesoTotale = 0;
+    const votiNormalizzati = {};
+    
+    for (const [chiave, criterio] of Object.entries(CONFIG.scoringCriteri)) {
+        const voto = Number(voti ? voti[chiave] : NaN);
+        const votoSicuro = isNaN(voto) ? CONFIG.scoringDefault : Math.min(10, Math.max(1, voto));
+        votiNormalizzati[chiave] = votoSicuro;
+        somma += votoSicuro * criterio.peso;
+        pesoTotale += criterio.peso;
+    }
+    
+    // I voti normalizzati viaggiano con lo score: chi calcola il valore ha sempre
+    // a disposizione il voto di integrità da cui deriva il fattore correttivo
+    return {
+        voti: votiNormalizzati,
+        score: pesoTotale > 0 ? somma / pesoTotale : 0,
+        suDieci: pesoTotale > 0 ? somma / pesoTotale / 10 : 0
+    };
+}
+
+// Il fattore integrità 0.60-1.00 DERIVA dal voto del criterio Integrità (1 → 0.60, 10 → 1.00)
+function fattoreDaIntegrita(voto) {
+    const v = Math.min(10, Math.max(1, Number(voto) || CONFIG.scoringDefaultIntegrita));
+    return CONFIG.fattoreIntegritaMin + (v - 1) * (CONFIG.fattoreIntegritaMax - CONFIG.fattoreIntegritaMin) / 9;
+}
+
+// Legge i 6 cursori del Valutatore
+function leggiVotiScoring() {
+    const voti = {};
+    for (const chiave of Object.keys(CONFIG.scoringCriteri)) {
+        const input = document.getElementById('score-' + chiave);
+        voti[chiave] = input ? Number(input.value) : CONFIG.scoringDefault;
+    }
+    return voti;
+}
+
+// Aggiorna il pannello live "Score X.X / 10" sotto i cursori
+function aggiornaPannelloScoring() {
+    const voti = leggiVotiScoring();
+    const { score } = calcolaScore(voti);
+    const fattore = fattoreDaIntegrita(voti.integrita);
+    
+    const valore = document.getElementById('score-valore');
+    if (valore) valore.textContent = score.toFixed(1);
+    const fattoreEl = document.getElementById('score-fattore-integrita');
+    if (fattoreEl) fattoreEl.textContent = fattore.toFixed(2);
+    
+    const percentuale = document.getElementById('score-barra-riempimento');
+    if (percentuale) percentuale.style.width = (score * 10).toFixed(1) + '%';
+    
+    return { voti: voti, score: score, fattoreIntegrita: fattore };
+}
+
+// Rimette i cursori ai valori di default
+function resetScoring() {
+    for (const [chiave, criterio] of Object.entries(CONFIG.scoringCriteri)) {
+        const input = document.getElementById('score-' + chiave);
+        if (input) input.value = chiave === 'integrita' ? CONFIG.scoringDefaultIntegrita : criterio.peso ? CONFIG.scoringDefault : 5;
+        const output = document.getElementById('score-valore-' + chiave);
+        if (output) output.textContent = input ? input.value : CONFIG.scoringDefault;
+    }
+    aggiornaPannelloScoring();
 }
 
 function getFattoreLocalita(minerale, localita) {
     // v0.2.5: provenienza sconosciuta → coefficiente fisso 0.7x
-    if (localita && String(localita).trim().toLowerCase() === CONFIG.localitaSconosciuta.toLowerCase()) {
+    const localitaTesto = String(localita == null ? '' : localita).trim().toLowerCase();
+    if (localitaTesto === CONFIG.localitaSconosciuta.toLowerCase()) {
         return CONFIG.fattoreLocalitaSconosciuta;
     }
     
-    const mineraleNorm = normalizzaMinerale(minerale);
-    // v0.2.5.1 FIX: le chiavi di CONFIG.localitaMinerali sono minuscole ('sanidino', 'diaspro rosso')
-    // mentre mineraleNorm è capitalizzato ('Sanidino') → senza .toLowerCase() i fattori
-    // specifici per minerale non venivano MAI applicati
-    const localitaMineraleDB = CONFIG.localitaMinerali[mineraleNorm.toLowerCase()];
+    // v0.2.6: il fattore si cerca sulla LOCALITÀ CANONICA, non sulla stringa digitata
+    const canonica = localitaCanonica(localita);
+    const nomeCanonica = canonica.nome;
     
-    if (localitaMineraleDB && localitaMineraleDB[localita]) {
-        return localitaMineraleDB[localita];
+    // Sconosciuta scritta in una variante non prevista dal controllo sopra
+    if (nomeCanonica === CONFIG.localitaSconosciuta) {
+        return CONFIG.fattoreLocalitaSconosciuta;
     }
     
-    return CONFIG.fattoriLocalita[localita] || CONFIG.fattoriLocalita['altra località'];
+    // Associazioni multiminerali: il fattore segue il minerale dominante
+    const mineraleNorm = normalizzaMinerale(estraiMineraleDominante(minerale)).toLowerCase();
+    
+    // 1) fattore specifico minerale + località (giacimento tipico)
+    if (canonica.dati && canonica.dati.minerali[mineraleNorm] !== undefined) {
+        return canonica.dati.minerali[mineraleNorm];
+    }
+    
+    // 2) fallback generico per quella località
+    if (nomeCanonica && CONFIG.fattoriLocalita[nomeCanonica] !== undefined) {
+        return CONFIG.fattoriLocalita[nomeCanonica];
+    }
+    
+    // 3) località non censita → fattore neutro
+    return CONFIG.fattoreLocalitaDefault;
 }
 
 function generaChiave(minerale, localita) {
@@ -484,6 +761,7 @@ function inizializzaQuickAdd() {
             prezzo: prezzo,
             peso: peso,
             prezzogrammo: prezzogrammo,
+            mineraliSecondari: parseMineraliSecondari(document.getElementById('qa-minerali-secondari')?.value),
             dimensioni: document.getElementById('qa-dimensioni').value.trim(),
             mercato: mercato,
             data: document.getElementById('qa-data').value,
@@ -631,6 +909,19 @@ function inizializzaValutatore() {
     pesoInput.addEventListener('input', aggiornaEuroGrammo);
     prezzoInput.addEventListener('input', aggiornaEuroGrammo);
     
+    // PHASE 5: score ponderato live + pulsante di ripristino
+    for (const chiave of Object.keys(CONFIG.scoringCriteri)) {
+        const input = document.getElementById('score-' + chiave);
+        const output = document.getElementById('score-valore-' + chiave);
+        if (!input) continue;
+        input.addEventListener('input', () => {
+            if (output) output.textContent = input.value;
+            aggiornaPannelloScoring();
+        });
+    }
+    document.getElementById('score-reset')?.addEventListener('click', resetScoring);
+    aggiornaPannelloScoring();
+    
     form.addEventListener('submit', (e) => {
         e.preventDefault();
         
@@ -661,7 +952,11 @@ function inizializzaValutatore() {
             return;
         }
         
-        const valoreStimato = calcolaValoreStimato(mineraleNorm, lookup.localitaFattore, peso, lookup.datiDB);
+        // PHASE 5: lo score ponderato dei 6 criteri entra nella formula
+        const voti = leggiVotiScoring();
+        const score = calcolaScore(voti);
+        const scomposizione = generaScomposizione(mineraleNorm, lookup.localitaFattore, peso, lookup.datiDB, score);
+        const valoreStimato = calcolaValoreStimato(mineraleNorm, lookup.localitaFattore, peso, lookup.datiDB, score);
         const percentuale = (prezzo / valoreStimato) * 100;
         const raccomandazione = generaRaccomandazione(percentuale);
         
@@ -674,13 +969,17 @@ function inizializzaValutatore() {
             valoreStimato: valoreStimato,
             percentuale: percentuale,
             raccomandazione: raccomandazione,
-            datiDB: lookup.datiDB
+            datiDB: lookup.datiDB,
+            scomposizione: scomposizione
         });
     });
 	aggiornaDatalist();
 }
 
-function calcolaValoreStimato(minerale, localita, peso, datiDB) {
+// PHASE 5: Valore = MediaMercati × (Score/10) × Località × Integrità
+// Senza il parametro score (chiamate legacy) restituisce il valore v0.2.5.1:
+// base × località × 0.5 × 0.95
+function calcolaValoreStimato(minerale, localita, peso, datiDB, score) {
     const medie = datiDB.medie;
     
     let mediaPonderata;
@@ -694,11 +993,50 @@ function calcolaValoreStimato(minerale, localita, peso, datiDB) {
     }
     
     const fattoreLocalita = getFattoreLocalita(minerale, localita);
-    const fattoreQualita = 0.5; // default 5/10
-    const fattoreIntegrita = 0.95;
     
-    return mediaPonderata * fattoreLocalita * fattoreQualita * fattoreIntegrita;
+    if (!score) {
+        const fattoreLegacy = CONFIG.fattoreQualitaLegacy * CONFIG.fattoreIntegritaLegacy;
+        return mediaPonderata * fattoreLocalita * fattoreLegacy;
+    }
+    
+    const votoIntegrita = score.voti && score.voti.integrita !== undefined
+        ? score.voti.integrita
+        : CONFIG.scoringDefaultIntegrita;
+    const fattoreIntegrita = score.fattoreIntegrita !== undefined
+        ? score.fattoreIntegrita
+        : fattoreDaIntegrita(votoIntegrita);
+    const valore = mediaPonderata * fattoreLocalita * score.suDieci * fattoreIntegrita;
+    
+    return valore;
 }
+
+// Scomposizione trasparente della formula (mostrata nel risultato della valutazione)
+function generaScomposizione(minerale, localita, peso, datiDB, score) {
+    const medie = datiDB.medie;
+    const hasPrezzoGrammo = Object.values(medie).some(m => m.mediaPrezzoGrammo > 0);
+    const mediaUnitaria = calcolaMediaPonderata(medie, true);
+    const base = hasPrezzoGrammo ? mediaUnitaria * peso : calcolaMediaPonderata(medie, false);
+    const fattoreLocalita = getFattoreLocalita(minerale, localita);
+    const votoIntegrita = score.voti ? score.voti.integrita : CONFIG.scoringDefaultIntegrita;
+    const fattoreIntegrita = score.fattoreIntegrita !== undefined
+        ? score.fattoreIntegrita
+        : fattoreDaIntegrita(votoIntegrita);
+    
+    return {
+        base: base,
+        peso: peso,
+        perGrammo: hasPrezzoGrammo,
+        mediaUnitaria: mediaUnitaria,
+        fattoreLocalita: fattoreLocalita,
+        score: score.score,
+        suDieci: score.suDieci,
+        fattoreIntegrita: fattoreIntegrita,
+        votoIntegrita: votoIntegrita,
+        valore: base * fattoreLocalita * score.suDieci * fattoreIntegrita
+    };
+}
+
+
 
 function generaRaccomandazione(percentuale) {
     if (percentuale <= 60) return { testo: 'ACQUISTO ECCELLENTE', classe: 'eccellente', emoji: '🌟' };
@@ -730,6 +1068,8 @@ function mostraRisultatiValutazione(r) {
                 </div>
             </div>
             
+            ${r.scomposizione ? generaBloccoScomposizione(r.scomposizione) : ''}
+            
             <div class="dettagli-valutazione">
                 <h4>Dettagli</h4>
                 <p><strong>Minerale:</strong> ${r.minerale}</p>
@@ -739,6 +1079,39 @@ function mostraRisultatiValutazione(r) {
                 
                 <h4>Database (${r.datiDB.campioni.length} campioni)</h4>
                 ${generaTabellaStorico(r.datiDB.medie)}
+            </div>
+        </div>
+    `;
+}
+
+// PHASE 5: mostra ogni passaggio della formula, così il valore stimato è verificabile
+function generaBloccoScomposizione(sc) {
+    const baseTesto = sc.perGrammo
+        ? `€${sc.mediaUnitaria.toFixed(4)}/g × ${sc.peso} g = €${sc.base.toFixed(2)}`
+        : `media ponderata dei mercati = €${sc.base.toFixed(2)}`;
+    
+    return `
+        <div class="dettagli-valutazione scomposizione">
+            <h4>Come è calcolato il valore</h4>
+            <div class="scomposizione-riga">
+                <span>Base di mercato</span>
+                <strong>${baseTesto}</strong>
+            </div>
+            <div class="scomposizione-riga">
+                <span>Fattore località</span>
+                <strong>× ${sc.fattoreLocalita.toFixed(2)}</strong>
+            </div>
+            <div class="scomposizione-riga">
+                <span>Score qualità (${sc.score.toFixed(1)}/10)</span>
+                <strong>× ${sc.suDieci.toFixed(3)}</strong>
+            </div>
+            <div class="scomposizione-riga">
+                <span>Fattore integrità (voto ${sc.votoIntegrita}/10)</span>
+                <strong>× ${sc.fattoreIntegrita.toFixed(3)}</strong>
+            </div>
+            <div class="scomposizione-riga totale">
+                <span>Valore stimato</span>
+                <strong>€${sc.valore.toFixed(2)}</strong>
             </div>
         </div>
     `;
@@ -838,19 +1211,45 @@ function ricostruisciListaCheckbox(nome, valori) {
         Array.from(lista.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value)
     );
     
-    // 2. Ricostruisci
-    if (valori.length === 0) {
-        lista.innerHTML = '<span class="filter-empty">Nessun dato</span>';
-    } else {
-        lista.innerHTML = valori.map(v => {
-            const vSafe = escapeHtml(v);
-            const checked = selezionati.has(v) ? ' checked' : '';
-            return `<label class="filter-checkbox"><input type="checkbox" value="${vSafe}"${checked} onchange="applicaFiltri()"><span>${vSafe}</span></label>`;
-        }).join('');
-    }
+    // 2. Ricostruisci (v0.2.8: con un tetto al numero di voci renderizzate)
+    disegnaListaCheckbox(nome, valori, selezionati, '');
     
     // 3. Sincronizza "Seleziona tutto"
     aggiornaSelectAll(nome);
+}
+
+// v0.2.8: disegna la lista dei checkbox di un popover.
+// Le voci già spuntate vengono sempre renderizzate per prime, così una selezione
+// non si perde mai anche quando la lista supera la soglia e viene accorciata.
+function disegnaListaCheckbox(nome, valori, selezionati, termineRicerca) {
+    const lista = document.getElementById('pl-' + nome);
+    if (!lista) return;
+    
+    const t = String(termineRicerca || '').toLowerCase().trim();
+    let visibili = valori.filter(v => !t || String(v).toLowerCase().includes(t));
+    
+    if (visibili.length === 0) {
+        lista.innerHTML = '<span class="filter-empty">Nessun dato</span>';
+        return;
+    }
+    
+    const soglia = CONFIG.sogliaPopoverFiltri;
+    let nascoste = 0;
+    if (visibili.length > soglia) {
+        const totaleCoinvolte = visibili.length;
+        const spuntate = visibili.filter(v => selezionati.has(v));
+        const restanti = visibili.filter(v => !selezionati.has(v));
+        visibili = spuntate.concat(restanti).slice(0, soglia);
+        nascoste = totaleCoinvolte - visibili.length;
+    }
+    
+    lista.innerHTML = visibili.map(v => {
+        const vSafe = escapeHtml(v);
+        const checked = selezionati.has(v) ? ' checked' : '';
+        return `<label class="filter-checkbox"><input type="checkbox" value="${vSafe}"${checked} onchange="applicaFiltri()"><span>${vSafe}</span></label>`;
+    }).join('') + (nascoste > 0
+        ? `<div class="filter-truncate">+ altre ${nascoste} voci — usa la ricerca per affinare</div>`
+        : '');
 }
 
 // Apre/chiude un popover (chiude gli altri, stile Excel)
@@ -885,11 +1284,18 @@ function toggleTutti(nome, checked) {
 }
 
 // Ricerca live dentro un popover
+// v0.2.8: la ricerca rigenera la lista (necessario quando le voci sono troppe per
+// essere renderizzate tutte) e preserva le selezioni già attive
 function cercaNelPopover(nome, term) {
-    const t = term.toLowerCase().trim();
-    document.querySelectorAll('#pl-' + nome + ' .filter-checkbox').forEach(lbl => {
-        lbl.style.display = lbl.textContent.toLowerCase().includes(t) ? '' : 'none';
+    const valori = new Set();
+    Object.values(dbPrezzi).forEach(dati => {
+        if (nome === 'minerali') valori.add(dati.minerale);
+        if (nome === 'localita') valori.add(dati.localita);
     });
+    const selezionati = new Set(
+        Array.from(document.querySelectorAll('#pl-' + nome + ' input[type="checkbox"]:checked')).map(cb => cb.value)
+    );
+    disegnaListaCheckbox(nome, Array.from(valori).sort(), selezionati, term);
 }
 
 // Sincronizza la checkbox "Seleziona tutto" (checked / indeterminate)
@@ -1038,8 +1444,14 @@ function aggiornaContatoreRisultati(visibili, totali) {
     if (rt) rt.textContent = totali;
 }
 
-function filtraDatabase() {
-    const container = document.getElementById('database-list');
+// v0.2.8: stato della paginazione del Database Prezzi
+let paginaDatabase = 1;
+let ultimaRicercaDatabase = [];
+let paginaModal = 1;
+let campioniModal = [];
+let chiaveModal = '';
+
+function filtraDatabase(azzeraPagina = true) {
     const searchTerm = document.getElementById('search-db').value.toLowerCase();
     const ordinamento = document.getElementById('ordina-db').value;
     
@@ -1049,9 +1461,12 @@ function filtraDatabase() {
     // PHASE 4: ricerca testuale + filtri gruppo + filtri campione
     let datiFilterati = Object.entries(dbPrezzi)
         .filter(([chiave, dati]) => {
+            // v0.2.8: la ricerca trova anche i minerali secondari delle associazioni
             const matchSearch = !searchTerm || 
                 dati.minerale.toLowerCase().includes(searchTerm) || 
-                dati.localita.toLowerCase().includes(searchTerm);
+                dati.localita.toLowerCase().includes(searchTerm) ||
+                dati.campioni.some(c => (c.mineraliSecondari || [])
+                    .some(m => String(m).toLowerCase().includes(searchTerm)));
             return matchSearch && gruppoSuperaFiltri(dati);
         })
         .map(([chiave, dati]) => {
@@ -1089,15 +1504,36 @@ function filtraDatabase() {
         }
     });
     
+    // v0.2.8: la griglia mostra una pagina alla volta (centinaia di gruppi restano fluidi)
+    ultimaRicercaDatabase = datiFilterati;
+    const perPagina = CONFIG.gruppoPerPage;
+    const totalePagine = Math.max(1, Math.ceil(datiFilterati.length / perPagina));
+    if (azzeraPagina) paginaDatabase = 1;
+    if (paginaDatabase > totalePagine) paginaDatabase = totalePagine;
+    if (paginaDatabase < 1) paginaDatabase = 1;
+    
+    disegnaPaginaDatabase();
+}
+
+// Disegna la pagina corrente dei gruppi + la barra di paginazione
+function disegnaPaginaDatabase() {
+    const container = document.getElementById('database-list');
+    const datiFilterati = ultimaRicercaDatabase;
+    
     // Mostra risultati
     if (datiFilterati.length === 0) {
         container.innerHTML = '<div class="empty-state"><p>Nessun risultato trovato</p></div>';
         return;
     }
     
+    const perPagina = CONFIG.gruppoPerPage;
+    const inizio = (paginaDatabase - 1) * perPagina;
+    const slice = datiFilterati.slice(inizio, inizio + perPagina);
+    const totalePagine = Math.max(1, Math.ceil(datiFilterati.length / perPagina));
+    
     let html = '<div class="database-lista">';
     
-    datiFilterati.forEach(entry => {
+    slice.forEach(entry => {
         const { chiave, dati, campioniVisibili, mediaGenerale, mediaPrezzoGrammo } = entry;
         const isFiltrato = campioniVisibili.length < dati.campioni.length;
         
@@ -1131,7 +1567,46 @@ function filtraDatabase() {
     });
     
     html += '</div>';
+    html += generaBarraPaginazione('db', paginaDatabase, totalePagine, datiFilterati.length, 'gruppi');
     container.innerHTML = html;
+}
+
+// Barra di paginazione condivisa da griglia database e modal dei dettagli
+function generaBarraPaginazione(prefisso, pagina, totalePagine, totaleVoci, etichetta) {
+    if (totalePagine <= 1) return '';
+    
+    return `
+        <div class="paginazione" id="${prefisso}-paginazione">
+            <button type="button" class="btn-pagina" ${pagina <= 1 ? 'disabled' : ''}
+                onclick="vaiAPagina('${prefisso}', ${pagina - 1})">←</button>
+            <span class="paginazione-info">
+                Pagina <strong>${pagina}</strong> di <strong>${totalePagine}</strong>
+                <span class="paginazione-totale">(${totaleVoci} ${etichetta})</span>
+            </span>
+            <button type="button" class="btn-pagina" ${pagina >= totalePagine ? 'disabled' : ''}
+                onclick="vaiAPagina('${prefisso}', ${pagina + 1})">→</button>
+        </div>
+    `;
+}
+
+function vaiAPagina(prefisso, pagina) {
+    if (prefisso === 'db') {
+        paginaDatabase = pagina;
+        disegnaPaginaDatabase();
+    } else if (prefisso === 'modal') {
+        paginaModal = pagina;
+        disegnaListaCampioni();
+    }
+}
+
+// v0.2.8: cambia il numero di gruppi per pagina
+function cambiaGruppiPerPage(valore) {
+    const v = parseInt(valore, 10);
+    if (!isNaN(v) && v > 0) {
+        CONFIG.gruppoPerPage = v;
+        paginaDatabase = 1;
+        disegnaPaginaDatabase();
+    }
 }
 
 function mostraDettagliMinerale(chiave) {
@@ -1175,46 +1650,77 @@ function mostraDettagliMinerale(chiave) {
             ` : ''}
             
             <h3>📦 ${isFiltrato ? `Campioni (${campioniVisibili.length} di ${dati.campioni.length})` : `Tutti i campioni (${dati.campioni.length})`}</h3>
-            <div class="campioni-lista">
-                ${campioniIndicizzati.map(({ campione: c, idx }) => `
-                    <div class="campione-card">
-                        <div class="campione-header">
-                            <span class="campione-data">📅 ${c.data}</span>
-                            <span class="badge">${c.mercato.toUpperCase()}</span>
-                        </div>
-                        
-                        <div class="campione-body">
-                            <div class="campione-row">
-                                <strong>💰 Prezzo:</strong> €${c.prezzo.toFixed(2)}
-                            </div>
-                            <div class="campione-row">
-                                <strong>⚖️ Peso:</strong> ${c.peso}g
-                            </div>
-                            <div class="campione-row">
-                                <strong>📏 €/grammo:</strong> €${c.prezzogrammo.toFixed(2)}/g
-                            </div>
-                            ${c.dimensioni ? `<div class="campione-row"><strong>📐 Dimensioni:</strong> ${c.dimensioni}</div>` : ''}
-                            ${c.note ? `<div class="campione-note">📝 ${c.note}</div>` : ''}
-                            ${c.link ? `<div class="campione-row"><a href="${c.link}" target="_blank" class="link-asta">🔗 Vedi asta originale</a></div>` : ''}
-                        </div>
-                        
-                        <div class="campione-actions">
-                            <button onclick="modificaCampione('${chiave}', ${idx})" class="btn-edit">
-                                ✏️ Modifica
-                            </button>
-                            <button onclick="eliminaCampione('${chiave}', ${idx})" class="btn-delete">
-                                🗑️ Elimina
-                            </button>
-                        </div>
-                    </div>
-                `).join('')}
-            </div>
+            <div class="campioni-lista" id="campioni-lista"></div>
+            <div id="campioni-paginazione"></div>
             
             <button onclick="this.parentElement.parentElement.remove()" class="btn-primary" style="margin-top:20px;">Chiudi</button>
         </div>
     `;
     
     document.body.appendChild(modal);
+    
+    // v0.2.8: la lista dei campioni viene paginata a parte (indici originali preservati)
+    paginaModal = 1;
+    campioniModal = campioniIndicizzati;
+    chiaveModal = chiave;
+    disegnaListaCampioni();
+}
+
+// Disegna la pagina corrente dei campioni nel modal, mantenendo l'INDICE ORIGINALE
+// nei pulsanti Modifica/Elimina anche quando la lista è paginata o filtrata
+function disegnaListaCampioni() {
+    const lista = document.getElementById('campioni-lista');
+    const barra = document.getElementById('campioni-paginazione');
+    if (!lista) return;
+    
+    const perPagina = CONFIG.campioniPerPagina;
+    const totalePagine = Math.max(1, Math.ceil(campioniModal.length / perPagina));
+    if (paginaModal > totalePagine) paginaModal = totalePagine;
+    if (paginaModal < 1) paginaModal = 1;
+    
+    const inizio = (paginaModal - 1) * perPagina;
+    const slice = campioniModal.slice(inizio, inizio + perPagina);
+    
+    lista.innerHTML = slice.map(({ campione: c, idx }) => generaCardCampione(chiaveModal, c, idx)).join('');
+    if (barra) {
+        barra.innerHTML = generaBarraPaginazione('modal', paginaModal, totalePagine, campioniModal.length, 'campioni');
+    }
+}
+
+function generaCardCampione(chiave, c, idx) {
+    return `
+        <div class="campione-card">
+            <div class="campione-header">
+                <span class="campione-data">📅 ${c.data}</span>
+                <span class="badge">${c.mercato.toUpperCase()}</span>
+            </div>
+            
+            <div class="campione-body">
+                <div class="campione-row">
+                    <strong>💰 Prezzo:</strong> €${c.prezzo.toFixed(2)}
+                </div>
+                <div class="campione-row">
+                    <strong>⚖️ Peso:</strong> ${c.peso}g
+                </div>
+                <div class="campione-row">
+                    <strong>📏 €/grammo:</strong> €${c.prezzogrammo.toFixed(2)}/g
+                </div>
+                ${c.mineraliSecondari && c.mineraliSecondari.length ? `<div class="campione-row"><strong>🔗 Associazione:</strong> ${escapeHtml(c.mineraliSecondari.join(', '))}</div>` : ''}
+                ${c.dimensioni ? `<div class="campione-row"><strong>📐 Dimensioni:</strong> ${c.dimensioni}</div>` : ''}
+                ${c.note ? `<div class="campione-note">📝 ${c.note}</div>` : ''}
+                ${c.link ? `<div class="campione-row"><a href="${c.link}" target="_blank" class="link-asta">🔗 Vedi asta originale</a></div>` : ''}
+            </div>
+            
+            <div class="campione-actions">
+                <button onclick="modificaCampione('${chiave}', ${idx})" class="btn-edit">
+                    ✏️ Modifica
+                </button>
+                <button onclick="eliminaCampione('${chiave}', ${idx})" class="btn-delete">
+                    🗑️ Elimina
+                </button>
+            </div>
+        </div>
+    `;
 }
 
 function generaStatisticheGenerali(stats) {
@@ -1379,6 +1885,9 @@ function modificaCampione(chiave, idx) {
  const nuoveNote = prompt('📝 Note:', campione.note || '');
  if (nuoveNote === null) return;
  
+ const nuoviSecondari = prompt('🔗 Minerali secondari (separati da virgola):', (campione.mineraliSecondari || []).join(', '));
+ if (nuoviSecondari === null) return;
+ 
  // Validazione valori numerici
  const prezzoNum = parseFloat(nuovoPrezzo);
  const pesoNum = parseFloat(nuovoPeso);
@@ -1403,6 +1912,7 @@ function modificaCampione(chiave, idx) {
  campione.peso = pesoNum;
  campione.prezzogrammo = prezzoNum / pesoNum;
  campione.note = nuoveNote;
+ campione.mineraliSecondari = parseMineraliSecondari(nuoviSecondari);
  
  // Controlla se minerale o località sono cambiati rispetto al gruppo attuale
  if (nuovaChiave !== chiave) {
@@ -1617,6 +2127,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 const backup = JSON.parse(ev.target.result);
                 if (confirm('Sovrascrivere database attuale?')) {
                     dbPrezzi = backup;
+                    canonicalizzaDatabase(); // v0.2.8: allinea anche i backup importati
                     salvaDatabase();
                     mostraDatabase();
                     alert('✓ Backup ripristinato!');
@@ -1654,4 +2165,16 @@ window.impostaPeriodo = impostaPeriodo;
 
 // V0.2.5: provenienza sconosciuta
 window.toggleLocalitaSconosciuta = toggleLocalitaSconosciuta;
+
+// v0.2.8: paginazione e migrazione
+window.disegnaPaginaDatabase = disegnaPaginaDatabase;
+window.disegnaListaCampioni = disegnaListaCampioni;
+window.vaiAPagina = vaiAPagina;
+window.cambiaGruppiPerPage = cambiaGruppiPerPage;
+window.canonicalizzaDatabase = canonicalizzaDatabase;
+
+// PHASE 5: scoring fotografico
+window.leggiVotiScoring = leggiVotiScoring;
+window.aggiornaPannelloScoring = aggiornaPannelloScoring;
+window.resetScoring = resetScoring;
 window.getFattoreLocalita = getFattoreLocalita;

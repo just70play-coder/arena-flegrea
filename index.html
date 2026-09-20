@@ -185,6 +185,16 @@
                         </div>
 
                         <div class="form-group">
+                            <label>🔗 Minerali secondari (opzionale)</label>
+                            <input 
+                                type="text" 
+                                id="qa-minerali-secondari" 
+                                placeholder="es. Clinohedrite, Willemite"
+                            >
+                            <small class="form-hint">Per le associazioni: il gruppo resta sul minerale principale, questi restano ricercabili</small>
+                        </div>
+
+                        <div class="form-group">
                             <label>📝 Note (conservazione, qualità...)</label>
                             <textarea 
                                 id="qa-note" 
@@ -211,9 +221,9 @@
                     <h2>💾 Database Prezzi</h2>
                     
                     <div class="db-controls">
-						<input type="text" id="search-db" class="search-input" placeholder="🔍 Cerca minerale o località..." oninput="filtraDatabase()">
+						<input type="text" id="search-db" class="search-input" placeholder="🔍 Cerca minerale o località..." oninput="filtraDatabase(true)">
 						
-						<select id="ordina-db" onchange="filtraDatabase()" class="filtro-select">
+						<select id="ordina-db" onchange="filtraDatabase(true)" class="filtro-select">
 							<option value="alfabetico">A→Z Minerale</option>
 							<option value="campioni">Più campioni</option>
 							<option value="prezzo-alto">Prezzo più alto</option>
@@ -402,6 +412,85 @@
                             <strong>€<span id="val-eurogrammo">0.00</span>/g</strong>
                         </div>
 
+                        						<!-- PHASE 5: SCORING FOTOGRAFICO (6 criteri ponderati) -->
+						<div class="scoring-box">
+							<div class="scoring-intestazione">
+								<h3>📸 Scoring fotografico</h3>
+								<button type="button" id="score-reset" class="btn-secondary btn-small">Ripristina</button>
+							</div>
+							<p class="subtitle">Vota ogni criterio da 1 a 10: il punteggio è ponderato (25 / 20 / 20 / 15 / 10 / 10)</p>
+
+							<div class="scoring-griglia">
+								<div class="scoring-criterio">
+									<label for="score-cristallinita">
+										Cristallinità <span class="scoring-peso">25%</span>
+									</label>
+									<input type="range" id="score-cristallinita" min="1" max="10" step="1" value="5">
+									<output id="score-valore-cristallinita">5</output>
+									<small>Sviluppo e definizione dei cristalli</small>
+								</div>
+
+								<div class="scoring-criterio">
+									<label for="score-estetica">
+										Estetica <span class="scoring-peso">20%</span>
+									</label>
+									<input type="range" id="score-estetica" min="1" max="10" step="1" value="5">
+									<output id="score-valore-estetica">5</output>
+									<small>Bilanciamento e appeal del pezzo</small>
+								</div>
+
+								<div class="scoring-criterio">
+									<label for="score-rarita">
+										Rarità <span class="scoring-peso">20%</span>
+									</label>
+									<input type="range" id="score-rarita" min="1" max="10" step="1" value="5">
+									<output id="score-valore-rarita">5</output>
+									<small>Frequenza della specie e di questa forma</small>
+								</div>
+
+								<div class="scoring-criterio">
+									<label for="score-dimensioni">
+										Dimensioni <span class="scoring-peso">15%</span>
+									</label>
+									<input type="range" id="score-dimensioni" min="1" max="10" step="1" value="5">
+									<output id="score-valore-dimensioni">5</output>
+									<small>Grandezza rispetto allo standard</small>
+								</div>
+
+								<div class="scoring-criterio">
+									<label for="score-integrita">
+										Integrità <span class="scoring-peso">10%</span>
+									</label>
+									<input type="range" id="score-integrita" min="1" max="10" step="1" value="10">
+									<output id="score-valore-integrita">10</output>
+									<small>10 = perfetta · 1 → fattore 0.60</small>
+								</div>
+
+								<div class="scoring-criterio">
+									<label for="score-trasparenza">
+										Trasparenza <span class="scoring-peso">10%</span>
+									</label>
+									<input type="range" id="score-trasparenza" min="1" max="10" step="1" value="5">
+									<output id="score-valore-trasparenza">5</output>
+									<small>Trasmissione della luce</small>
+								</div>
+							</div>
+
+							<div class="scoring-pannello">
+								<div class="scoring-score">
+									<span>Score ponderato</span>
+									<strong><span id="score-valore">5.5</span> / 10</strong>
+								</div>
+								<div class="scoring-barra">
+									<div class="scoring-barra-riempimento" id="score-barra-riempimento" style="width:55%"></div>
+								</div>
+								<p class="scoring-hint">
+									Integrità genera anche il fattore <strong id="score-fattore-integrita">1.00</strong> (range 0.60–1.00):
+									un danno pesa due volte, come da specifica.
+								</p>
+							</div>
+						</div>
+
                         <button type="submit" class="btn-primary btn-large">
                             🚀 VALUTA AUTOMATICAMENTE
                         </button>
@@ -444,7 +533,7 @@
                     </div>
 
                     <h3>ℹ️ Info Sistema</h3>
-                    <p><strong>Versione:</strong> 0.2.5.1 - Provenienza Sconosciuta (0.7x) + fix fattori per minerale</p>
+                    <p><strong>Versione:</strong> 0.2.8 - Scala: paginazione, liste filtri con tetto, migrazione canonica, minerali secondari</p>
                     <p><strong>Storage usato:</strong> <span id="storage-size">0 KB</span></p>
                 </div>
             </section>
