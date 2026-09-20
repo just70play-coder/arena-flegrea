@@ -1,0 +1,448 @@
+{
+  "sanidino_monte_nuovo": {
+    "minerale": "Sanidino",
+    "localita": "Monte Nuovo",
+    "campioni": [
+      {
+        "prezzo": 48,
+        "peso": 110,
+        "prezzogrammo": 0.4364,
+        "dimensioni": "",
+        "mercato": "catawiki",
+        "data": "2026-09-05",
+        "link": "",
+        "note": "Cristalli prismatici trasparenti"
+      },
+      {
+        "prezzo": 35,
+        "peso": 95,
+        "prezzogrammo": 0.3684,
+        "dimensioni": "",
+        "mercato": "ebay",
+        "data": "2026-08-12",
+        "link": "",
+        "note": ""
+      },
+      {
+        "prezzo": 52,
+        "peso": 120,
+        "prezzogrammo": 0.4333,
+        "dimensioni": "45x30mm",
+        "mercato": "catawiki",
+        "data": "2026-06-20",
+        "link": "",
+        "note": ""
+      },
+      {
+        "prezzo": 29,
+        "peso": 85,
+        "prezzogrammo": 0.3412,
+        "dimensioni": "",
+        "mercato": "etsy",
+        "data": "2026-03-15",
+        "link": "",
+        "note": ""
+      },
+      {
+        "prezzo": 120,
+        "peso": 250,
+        "prezzogrammo": 0.48,
+        "dimensioni": "",
+        "mercato": "heritage",
+        "data": "2025-11-08",
+        "link": "",
+        "note": "Gruppo storico, ottima integrità"
+      },
+      {
+        "prezzo": 40,
+        "peso": 100,
+        "prezzogrammo": 0.4,
+        "dimensioni": "",
+        "mercato": "dealer",
+        "data": "2025-07-22",
+        "link": "",
+        "note": ""
+      }
+    ],
+    "medie": {
+      "catawiki": {
+        "mediaPrezzo": 50,
+        "mediaPeso": 115,
+        "mediaPrezzoGrammo": 0.43485,
+        "min": 48,
+        "max": 52,
+        "n": 2
+      },
+      "ebay": {
+        "mediaPrezzo": 35,
+        "mediaPeso": 95,
+        "mediaPrezzoGrammo": 0.3684,
+        "min": 35,
+        "max": 35,
+        "n": 1
+      },
+      "etsy": {
+        "mediaPrezzo": 29,
+        "mediaPeso": 85,
+        "mediaPrezzoGrammo": 0.3412,
+        "min": 29,
+        "max": 29,
+        "n": 1
+      },
+      "heritage": {
+        "mediaPrezzo": 120,
+        "mediaPeso": 250,
+        "mediaPrezzoGrammo": 0.48,
+        "min": 120,
+        "max": 120,
+        "n": 1
+      },
+      "dealer": {
+        "mediaPrezzo": 40,
+        "mediaPeso": 100,
+        "mediaPrezzoGrammo": 0.4,
+        "min": 40,
+        "max": 40,
+        "n": 1
+      }
+    }
+  },
+  "leucite_solfatara": {
+    "minerale": "Leucite",
+    "localita": "Solfatara",
+    "campioni": [
+      {
+        "prezzo": 65,
+        "peso": 140,
+        "prezzogrammo": 0.4643,
+        "dimensioni": "",
+        "mercato": "catawiki",
+        "data": "2026-09-10",
+        "link": "",
+        "note": "Cristalli trapezoidali"
+      },
+      {
+        "prezzo": 48,
+        "peso": 130,
+        "prezzogrammo": 0.3692,
+        "dimensioni": "",
+        "mercato": "ebay",
+        "data": "2026-07-30",
+        "link": "",
+        "note": ""
+      },
+      {
+        "prezzo": 39,
+        "peso": 110,
+        "prezzogrammo": 0.3545,
+        "dimensioni": "",
+        "mercato": "etsy",
+        "data": "2026-02-14",
+        "link": "",
+        "note": ""
+      },
+      {
+        "prezzo": 58,
+        "peso": 135,
+        "prezzogrammo": 0.4296,
+        "dimensioni": "",
+        "mercato": "catawiki",
+        "data": "2025-12-05",
+        "link": "",
+        "note": ""
+      }
+    ],
+    "medie": {
+      "catawiki": {
+        "mediaPrezzo": 61.5,
+        "mediaPeso": 137.5,
+        "mediaPrezzoGrammo": 0.44694999999999996,
+        "min": 58,
+        "max": 65,
+        "n": 2
+      },
+      "ebay": {
+        "mediaPrezzo": 48,
+        "mediaPeso": 130,
+        "mediaPrezzoGrammo": 0.3692,
+        "min": 48,
+        "max": 48,
+        "n": 1
+      },
+      "etsy": {
+        "mediaPrezzo": 39,
+        "mediaPeso": 110,
+        "mediaPrezzoGrammo": 0.3545,
+        "min": 39,
+        "max": 39,
+        "n": 1
+      }
+    }
+  },
+  "hauyne_pisciarelli": {
+    "minerale": "Hauyne",
+    "localita": "Pisciarelli",
+    "campioni": [
+      {
+        "prezzo": 95,
+        "peso": 60,
+        "prezzogrammo": 1.5833,
+        "dimensioni": "",
+        "mercato": "dealer",
+        "data": "2026-08-28",
+        "link": "",
+        "note": "Blu intenso, raro"
+      },
+      {
+        "prezzo": 110,
+        "peso": 75,
+        "prezzogrammo": 1.4667,
+        "dimensioni": "",
+        "mercato": "catawiki",
+        "data": "2026-05-16",
+        "link": "",
+        "note": ""
+      },
+      {
+        "prezzo": 75,
+        "peso": 55,
+        "prezzogrammo": 1.3636,
+        "dimensioni": "",
+        "mercato": "ebay",
+        "data": "2025-10-20",
+        "link": "",
+        "note": ""
+      }
+    ],
+    "medie": {
+      "catawiki": {
+        "mediaPrezzo": 110,
+        "mediaPeso": 75,
+        "mediaPrezzoGrammo": 1.4667,
+        "min": 110,
+        "max": 110,
+        "n": 1
+      },
+      "ebay": {
+        "mediaPrezzo": 75,
+        "mediaPeso": 55,
+        "mediaPrezzoGrammo": 1.3636,
+        "min": 75,
+        "max": 75,
+        "n": 1
+      },
+      "dealer": {
+        "mediaPrezzo": 95,
+        "mediaPeso": 60,
+        "mediaPrezzoGrammo": 1.5833,
+        "min": 95,
+        "max": 95,
+        "n": 1
+      }
+    }
+  },
+  "diaspro_rosso_madagascar": {
+    "minerale": "Diaspro Rosso",
+    "localita": "Madagascar",
+    "campioni": [
+      {
+        "prezzo": 22,
+        "peso": 180,
+        "prezzogrammo": 0.1222,
+        "dimensioni": "",
+        "mercato": "ebay",
+        "data": "2026-09-01",
+        "link": "",
+        "note": ""
+      },
+      {
+        "prezzo": 18,
+        "peso": 150,
+        "prezzogrammo": 0.12,
+        "dimensioni": "",
+        "mercato": "etsy",
+        "data": "2026-06-11",
+        "link": "",
+        "note": ""
+      },
+      {
+        "prezzo": 26,
+        "peso": 200,
+        "prezzogrammo": 0.13,
+        "dimensioni": "60x40mm",
+        "mercato": "catawiki",
+        "data": "2026-01-25",
+        "link": "",
+        "note": ""
+      },
+      {
+        "prezzo": 20,
+        "peso": 170,
+        "prezzogrammo": 0.1176,
+        "dimensioni": "",
+        "mercato": "dealer",
+        "data": "2025-09-14",
+        "link": "",
+        "note": ""
+      }
+    ],
+    "medie": {
+      "catawiki": {
+        "mediaPrezzo": 26,
+        "mediaPeso": 200,
+        "mediaPrezzoGrammo": 0.13,
+        "min": 26,
+        "max": 26,
+        "n": 1
+      },
+      "ebay": {
+        "mediaPrezzo": 22,
+        "mediaPeso": 180,
+        "mediaPrezzoGrammo": 0.1222,
+        "min": 22,
+        "max": 22,
+        "n": 1
+      },
+      "etsy": {
+        "mediaPrezzo": 18,
+        "mediaPeso": 150,
+        "mediaPrezzoGrammo": 0.12,
+        "min": 18,
+        "max": 18,
+        "n": 1
+      },
+      "dealer": {
+        "mediaPrezzo": 20,
+        "mediaPeso": 170,
+        "mediaPrezzoGrammo": 0.1176,
+        "min": 20,
+        "max": 20,
+        "n": 1
+      }
+    }
+  },
+  "quarzo_brasile": {
+    "minerale": "Quarzo",
+    "localita": "Brasile",
+    "campioni": [
+      {
+        "prezzo": 85,
+        "peso": 450,
+        "prezzogrammo": 0.1889,
+        "dimensioni": "",
+        "mercato": "catawiki",
+        "data": "2026-08-05",
+        "link": "",
+        "note": ""
+      },
+      {
+        "prezzo": 210,
+        "peso": 900,
+        "prezzogrammo": 0.2333,
+        "dimensioni": "",
+        "mercato": "heritage",
+        "data": "2026-04-18",
+        "link": "",
+        "note": "Cristallo di rocca, trasparenza eccezionale"
+      },
+      {
+        "prezzo": 60,
+        "peso": 400,
+        "prezzogrammo": 0.15,
+        "dimensioni": "",
+        "mercato": "ebay",
+        "data": "2025-08-30",
+        "link": "",
+        "note": ""
+      }
+    ],
+    "medie": {
+      "catawiki": {
+        "mediaPrezzo": 85,
+        "mediaPeso": 450,
+        "mediaPrezzoGrammo": 0.1889,
+        "min": 85,
+        "max": 85,
+        "n": 1
+      },
+      "ebay": {
+        "mediaPrezzo": 60,
+        "mediaPeso": 400,
+        "mediaPrezzoGrammo": 0.15,
+        "min": 60,
+        "max": 60,
+        "n": 1
+      },
+      "heritage": {
+        "mediaPrezzo": 210,
+        "mediaPeso": 900,
+        "mediaPrezzoGrammo": 0.2333,
+        "min": 210,
+        "max": 210,
+        "n": 1
+      }
+    }
+  },
+  "ametista_sconosciuta": {
+    "minerale": "Ametista",
+    "localita": "Sconosciuta",
+    "campioni": [
+      {
+        "prezzo": 32,
+        "peso": 220,
+        "prezzogrammo": 0.1455,
+        "dimensioni": "",
+        "mercato": "ebay",
+        "data": "2026-08-22",
+        "link": "",
+        "note": "Provenienza non dichiarata dal venditore"
+      },
+      {
+        "prezzo": 45,
+        "peso": 280,
+        "prezzogrammo": 0.1607,
+        "dimensioni": "",
+        "mercato": "catawiki",
+        "data": "2026-05-30",
+        "link": "",
+        "note": ""
+      },
+      {
+        "prezzo": 28,
+        "peso": 200,
+        "prezzogrammo": 0.14,
+        "dimensioni": "",
+        "mercato": "etsy",
+        "data": "2025-12-18",
+        "link": "",
+        "note": ""
+      }
+    ],
+    "medie": {
+      "catawiki": {
+        "mediaPrezzo": 45,
+        "mediaPeso": 280,
+        "mediaPrezzoGrammo": 0.1607,
+        "min": 45,
+        "max": 45,
+        "n": 1
+      },
+      "ebay": {
+        "mediaPrezzo": 32,
+        "mediaPeso": 220,
+        "mediaPrezzoGrammo": 0.1455,
+        "min": 32,
+        "max": 32,
+        "n": 1
+      },
+      "etsy": {
+        "mediaPrezzo": 28,
+        "mediaPeso": 200,
+        "mediaPrezzoGrammo": 0.14,
+        "min": 28,
+        "max": 28,
+        "n": 1
+      }
+    }
+  }
+}

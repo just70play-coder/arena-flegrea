@@ -386,9 +386,9 @@ button,
 
 .db-controls {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr auto auto;
+    grid-template-columns: 2fr 1fr auto auto;
     gap: 12px;
-    margin-bottom: 20px;
+    margin-bottom: 12px;
     flex-wrap: wrap;
 }
 
@@ -1100,4 +1100,361 @@ button,
     .database-lista {
         grid-template-columns: 1fr;
     }
+}
+/* ===========================
+   PHASE 4: FILTRI EXCEL-LIKE
+   =========================== */
+
+.hidden {
+    display: none !important;
+}
+
+/* Toolbar con i dropdown filtri */
+.filter-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 12px;
+    background: var(--background-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+}
+
+.filter-dropdown {
+    position: relative;
+}
+
+/* Pulsante dropdown (stile Excel) */
+.filter-drop-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 14px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 8px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: border-color 0.2s, background 0.2s;
+    white-space: nowrap;
+}
+
+.filter-drop-btn:hover {
+    border-color: var(--primary-color);
+}
+
+/* Stato attivo: filtro applicato (evidenziato come Excel) */
+.filter-drop-btn.attivo {
+    border-color: var(--primary-color);
+    background: rgba(99, 102, 241, 0.15);
+}
+
+.drop-arrow {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+/* Mini-badge con numero di valori selezionati sul pulsante */
+.filter-count {
+    background: var(--primary-color);
+    color: #fff;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 1px 6px;
+    border-radius: 10px;
+    min-width: 16px;
+    text-align: center;
+}
+
+/* Popover con checkbox/campi */
+.filter-popover {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 100;
+    min-width: 250px;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color-light);
+    border-radius: 10px;
+    box-shadow: var(--shadow-lg);
+    padding: 12px;
+}
+
+.popover-header {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.select-all-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.select-all-label input[type="checkbox"] {
+    accent-color: var(--primary-color);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+}
+
+.popover-search {
+    width: 100%;
+    padding: 6px 10px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.85rem;
+}
+
+.popover-search:focus {
+    outline: none;
+    border-color: var(--input-focus);
+}
+
+.popover-list {
+    max-height: 260px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.popover-list::-webkit-scrollbar {
+    width: 8px;
+}
+
+.popover-list::-webkit-scrollbar-track {
+    background: var(--background);
+    border-radius: 4px;
+}
+
+.popover-list::-webkit-scrollbar-thumb {
+    background: var(--border-color-light);
+    border-radius: 4px;
+}
+
+.popover-list::-webkit-scrollbar-thumb:hover {
+    background: var(--primary-color);
+}
+
+/* Riga checkbox dentro il popover */
+.filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.88rem;
+    transition: background 0.15s;
+}
+
+.filter-checkbox:hover {
+    background: var(--card-bg-hover);
+}
+
+.filter-checkbox input[type="checkbox"] {
+    accent-color: var(--primary-color);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.filter-checkbox span {
+    color: var(--text-primary);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.filter-empty {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    font-style: italic;
+    padding: 8px;
+}
+
+/* Range (date / prezzo / peso) dentro il popover */
+.popover-range {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.popover-range label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.popover-range input {
+    padding: 8px 10px;
+    background: var(--input-bg);
+    border: 1px solid var(--input-border);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.88rem;
+    width: 100%;
+}
+
+.popover-range input:focus {
+    outline: none;
+    border-color: var(--input-focus);
+}
+
+/* Scorciatoie periodo (ultimi 30g, 90g, anno) */
+.popover-shortcuts {
+    display: flex;
+    gap: 6px;
+    margin-top: 10px;
+    flex-wrap: wrap;
+}
+
+.popover-shortcuts button {
+    padding: 5px 10px;
+    background: var(--background-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-secondary);
+    font-size: 0.78rem;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.popover-shortcuts button:hover {
+    border-color: var(--primary-color);
+    color: var(--text-primary);
+}
+
+/* Badge "X filtri attivi" */
+.filter-badge {
+    background: var(--primary-color);
+    color: #fff;
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    margin-left: auto;
+}
+
+/* Pulsante "Rimuovi tutti i filtri" */
+.btn-clear-filters {
+    background: rgba(239, 68, 68, 0.1);
+    border: 1px solid var(--danger-color);
+    color: var(--danger-color);
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+
+.btn-clear-filters:hover {
+    background: var(--danger-color);
+    color: #fff;
+}
+
+/* Contatore "Mostrando X di Y campioni" */
+.results-counter {
+    margin-bottom: 16px;
+    padding: 10px 14px;
+    background: var(--background-elevated);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    color: var(--text-secondary);
+    font-size: 0.88rem;
+}
+
+.results-counter span {
+    color: var(--primary-hover);
+    font-weight: 700;
+}
+
+/* Mobile: popover a larghezza piena */
+@media (max-width: 768px) {
+    .filter-popover {
+        position: fixed;
+        top: auto;
+        left: 12px;
+        right: 12px;
+        min-width: 0;
+    }
+}
+
+/* PHASE 4: sottotesto "su X" nella stat Campioni delle card */
+.stat-sub {
+    display: block;
+    font-size: 0.72rem;
+    font-weight: 400;
+    color: var(--text-muted);
+}
+
+/* PHASE 4: avviso "vista filtrata" nel modal dettagli */
+.modal-filter-notice {
+    margin: 10px 0 16px;
+    padding: 10px 14px;
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid var(--primary-color);
+    border-radius: 8px;
+    color: var(--secondary-color);
+    font-size: 0.85rem;
+}
+
+/* ===========================
+   V0.2.5: PROVENIENZA SCONOSCIUTA
+   =========================== */
+
+.checkbox-sconosciuta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+    transition: color 0.15s;
+}
+
+.checkbox-sconosciuta:hover {
+    color: var(--text-primary);
+}
+
+.checkbox-sconosciuta input[type="checkbox"] {
+    accent-color: var(--warning-color);
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+
+.sconosciuta-hint {
+    color: var(--warning-color);
+    font-weight: 700;
+    font-size: 0.8rem;
+}
+
+/* Campo località disabilitato (checkbox sconosciuta attiva) */
+input:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+    background: var(--background-elevated);
 }

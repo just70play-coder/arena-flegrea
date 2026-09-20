@@ -106,6 +106,11 @@
 									required
 								>
 								<datalist id="datalist-localita-qa"></datalist>
+								<!-- v0.2.5: provenienza sconosciuta -->
+								<label class="checkbox-sconosciuta" title="Salva il campione con località 'Sconosciuta'">
+									<input type="checkbox" id="qa-localita-sconosciuta" onchange="toggleLocalitaSconosciuta('qa')">
+									❓ Provenienza sconosciuta
+								</label>
                             </div>
                         </div>
 
@@ -208,14 +213,6 @@
                     <div class="db-controls">
 						<input type="text" id="search-db" class="search-input" placeholder="🔍 Cerca minerale o località..." oninput="filtraDatabase()">
 						
-						<select id="filtro-minerale" onchange="filtraDatabase()" class="filtro-select">
-							<option value="">🔍 Tutti i minerali</option>
-						</select>
-						
-						<select id="filtro-localita" onchange="filtraDatabase()" class="filtro-select">
-							<option value="">📍 Tutte le località</option>
-						</select>
-						
 						<select id="ordina-db" onchange="filtraDatabase()" class="filtro-select">
 							<option value="alfabetico">A→Z Minerale</option>
 							<option value="campioni">Più campioni</option>
@@ -225,6 +222,113 @@
 						
 						<button onclick="mostraDatabase()" class="btn-secondary">🔄 Reset</button>
 						<button onclick="esportaDatabase()" class="btn-secondary">📥 Esporta JSON</button>
+					</div>
+
+					<!-- ===========================
+					     PHASE 4: FILTRI EXCEL-LIKE
+					     =========================== -->
+					<div class="filter-toolbar">
+
+						<!-- Dropdown Minerali -->
+						<div class="filter-dropdown">
+							<button type="button" class="filter-drop-btn" id="fb-minerali" onclick="toggleFilterDropdown('minerali')">
+								💎 Minerali <span class="filter-count hidden" id="fc-minerali">0</span> <span class="drop-arrow">▾</span>
+							</button>
+							<div class="filter-popover hidden" id="fp-minerali">
+								<div class="popover-header">
+									<label class="select-all-label"><input type="checkbox" id="select-all-minerali" onchange="toggleTutti('minerali', this.checked)"> Seleziona tutto</label>
+									<input type="text" class="popover-search" placeholder="Cerca minerale..." oninput="cercaNelPopover('minerali', this.value)">
+								</div>
+								<div class="popover-list" id="pl-minerali">
+									<span class="filter-empty">Nessun dato</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Dropdown Località -->
+						<div class="filter-dropdown">
+							<button type="button" class="filter-drop-btn" id="fb-localita" onclick="toggleFilterDropdown('localita')">
+								📍 Località <span class="filter-count hidden" id="fc-localita">0</span> <span class="drop-arrow">▾</span>
+							</button>
+							<div class="filter-popover hidden" id="fp-localita">
+								<div class="popover-header">
+									<label class="select-all-label"><input type="checkbox" id="select-all-localita" onchange="toggleTutti('localita', this.checked)"> Seleziona tutto</label>
+									<input type="text" class="popover-search" placeholder="Cerca località..." oninput="cercaNelPopover('localita', this.value)">
+								</div>
+								<div class="popover-list" id="pl-localita">
+									<span class="filter-empty">Nessun dato</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- Dropdown Mercati -->
+						<div class="filter-dropdown">
+							<button type="button" class="filter-drop-btn" id="fb-mercati" onclick="toggleFilterDropdown('mercati')">
+								🏪 Mercati <span class="filter-count hidden" id="fc-mercati">0</span> <span class="drop-arrow">▾</span>
+							</button>
+							<div class="filter-popover hidden" id="fp-mercati">
+								<div class="popover-list" id="pl-mercati">
+									<label class="filter-checkbox"><input type="checkbox" value="catawiki" onchange="applicaFiltri()"><span>Catawiki</span></label>
+									<label class="filter-checkbox"><input type="checkbox" value="ebay" onchange="applicaFiltri()"><span>eBay</span></label>
+									<label class="filter-checkbox"><input type="checkbox" value="etsy" onchange="applicaFiltri()"><span>Etsy</span></label>
+									<label class="filter-checkbox"><input type="checkbox" value="heritage" onchange="applicaFiltri()"><span>Heritage</span></label>
+									<label class="filter-checkbox"><input type="checkbox" value="dealer" onchange="applicaFiltri()"><span>Dealer</span></label>
+								</div>
+							</div>
+						</div>
+
+						<!-- Dropdown Date -->
+						<div class="filter-dropdown">
+							<button type="button" class="filter-drop-btn" id="fb-date" onclick="toggleFilterDropdown('date')">
+								📅 Date <span class="filter-count hidden" id="fc-date">0</span> <span class="drop-arrow">▾</span>
+							</button>
+							<div class="filter-popover hidden" id="fp-date">
+								<div class="popover-range">
+									<label>Da <input type="date" id="filter-data-da" onchange="applicaFiltri()"></label>
+									<label>A <input type="date" id="filter-data-a" onchange="applicaFiltri()"></label>
+								</div>
+								<div class="popover-shortcuts">
+									<button type="button" onclick="impostaPeriodo(30)">Ultimi 30g</button>
+									<button type="button" onclick="impostaPeriodo(90)">Ultimi 90g</button>
+									<button type="button" onclick="impostaPeriodo(365)">Ultimo anno</button>
+								</div>
+							</div>
+						</div>
+
+						<!-- Dropdown Prezzo -->
+						<div class="filter-dropdown">
+							<button type="button" class="filter-drop-btn" id="fb-prezzo" onclick="toggleFilterDropdown('prezzo')">
+								💰 Prezzo <span class="filter-count hidden" id="fc-prezzo">0</span> <span class="drop-arrow">▾</span>
+							</button>
+							<div class="filter-popover hidden" id="fp-prezzo">
+								<div class="popover-range">
+									<label>Min (€) <input type="number" id="filter-prezzo-min" min="0" step="0.01" placeholder="0.00" onchange="applicaFiltri()"></label>
+									<label>Max (€) <input type="number" id="filter-prezzo-max" min="0" step="0.01" placeholder="∞" onchange="applicaFiltri()"></label>
+								</div>
+							</div>
+						</div>
+
+						<!-- Dropdown Peso -->
+						<div class="filter-dropdown">
+							<button type="button" class="filter-drop-btn" id="fb-peso" onclick="toggleFilterDropdown('peso')">
+								⚖️ Peso <span class="filter-count hidden" id="fc-peso">0</span> <span class="drop-arrow">▾</span>
+							</button>
+							<div class="filter-popover hidden" id="fp-peso">
+								<div class="popover-range">
+									<label>Min (g) <input type="number" id="filter-peso-min" min="0" step="0.01" placeholder="0.00" onchange="applicaFiltri()"></label>
+									<label>Max (g) <input type="number" id="filter-peso-max" min="0" step="0.01" placeholder="∞" onchange="applicaFiltri()"></label>
+								</div>
+							</div>
+						</div>
+
+						<!-- Badge filtri attivi + Rimuovi tutti -->
+						<span id="filter-badge" class="filter-badge hidden">0 filtri attivi</span>
+						<button id="btn-clear-filters" class="btn-clear-filters hidden" onclick="rimuoviTuttiFiltri()">✕ Rimuovi tutti i filtri</button>
+					</div>
+
+					<!-- PHASE 4: Contatore risultati -->
+					<div class="results-counter" id="results-counter">
+						Mostrando <span id="results-count">0</span> di <span id="results-total">0</span> campioni
 					</div>
 
                     <div id="database-list"></div>
@@ -261,6 +365,11 @@
 									required
 									>
 									<datalist id="datalist-localita-val"></datalist>
+									<!-- v0.2.5: provenienza sconosciuta (coefficiente 0.7x) -->
+									<label class="checkbox-sconosciuta" title="Valuta con coefficiente località 0.7x">
+										<input type="checkbox" id="val-localita-sconosciuta" onchange="toggleLocalitaSconosciuta('val')">
+										❓ Provenienza sconosciuta <span class="sconosciuta-hint">(0.7x)</span>
+									</label>
                             </div>
                         </div>
 
@@ -335,7 +444,7 @@
                     </div>
 
                     <h3>ℹ️ Info Sistema</h3>
-                    <p><strong>Versione:</strong> 2.0 Weight-Aware</p>
+                    <p><strong>Versione:</strong> 0.2.5.1 - Provenienza Sconosciuta (0.7x) + fix fattori per minerale</p>
                     <p><strong>Storage usato:</strong> <span id="storage-size">0 KB</span></p>
                 </div>
             </section>

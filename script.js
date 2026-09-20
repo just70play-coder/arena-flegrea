@@ -1,4 +1,11 @@
 // ===========================
+// ARENA FLEGREA v0.2.5.1
+// Phase 4: Filtri Excel-like + v0.2.5: Provenienza Sconosciuta (0.7x)
+// v0.2.5.1: fix lookup fattori località specifici per minerale
+// (Database Prezzi + Modal dettagli)
+// ===========================
+
+// ===========================
 // CONFIGURAZIONE
 // ===========================
 
@@ -11,6 +18,10 @@ const CONFIG = {
         dealer: 0.05
     },
     fattoreCorrezioneEtsy: 0.7,
+    
+    // v0.2.5: località sconosciuta (coefficiente 0.7x = minimo del range Phase 5: 0.7-1.5)
+    localitaSconosciuta: 'Sconosciuta',
+    fattoreLocalitaSconosciuta: 0.7,
     
     localitaMinerali: {
         'diaspro rosso': {
@@ -190,9 +201,27 @@ function sanitizzaLocalita(input) {
   .trim();
 }
 
+// v0.2.5: normalizza località — varianti di "sconosciuta" → località canonica
+// (evita gruppi duplicati: "sconosciuta", "SCONOSCIUTA", " Sconosciuta " → "Sconosciuta")
+function normalizzaLocalita(input) {
+    const pulita = sanitizzaLocalita(input);
+    if (pulita.toLowerCase() === CONFIG.localitaSconosciuta.toLowerCase()) {
+        return CONFIG.localitaSconosciuta;
+    }
+    return pulita;
+}
+
 function getFattoreLocalita(minerale, localita) {
+    // v0.2.5: provenienza sconosciuta → coefficiente fisso 0.7x
+    if (localita && String(localita).trim().toLowerCase() === CONFIG.localitaSconosciuta.toLowerCase()) {
+        return CONFIG.fattoreLocalitaSconosciuta;
+    }
+    
     const mineraleNorm = normalizzaMinerale(minerale);
-    const localitaMineraleDB = CONFIG.localitaMinerali[mineraleNorm];
+    // v0.2.5.1 FIX: le chiavi di CONFIG.localitaMinerali sono minuscole ('sanidino', 'diaspro rosso')
+    // mentre mineraleNorm è capitalizzato ('Sanidino') → senza .toLowerCase() i fattori
+    // specifici per minerale non venivano MAI applicati
+    const localitaMineraleDB = CONFIG.localitaMinerali[mineraleNorm.toLowerCase()];
     
     if (localitaMineraleDB && localitaMineraleDB[localita]) {
         return localitaMineraleDB[localita];
@@ -424,13 +453,17 @@ function inizializzaQuickAdd() {
         e.preventDefault();
         
         const minerale = normalizzaMinerale(document.getElementById('qa-minerale').value);
-        const localita = sanitizzaLocalita(document.getElementById('qa-localita').value);
+        // v0.2.5: checkbox "provenienza sconosciuta" → località canonica
+        const provenienzaSconosciuta = document.getElementById('qa-localita-sconosciuta').checked;
+        const localita = provenienzaSconosciuta
+            ? CONFIG.localitaSconosciuta
+            : normalizzaLocalita(document.getElementById('qa-localita').value);
         const peso = parseFloat(pesoInput.value);
         const prezzo = parseFloat(prezzoInput.value);
         const mercato = document.getElementById('qa-mercato').value;
         
         if (!minerale || !localita || peso <= 0 || prezzo <= 0) {
-            alert('Compila tutti i campi obbligatori!');
+            alert('Compila tutti i campi obbligatori!\n\n(oppure spunta "Provenienza sconosciuta" se non conosci la località)');
             return;
         }
         
@@ -467,6 +500,7 @@ function inizializzaQuickAdd() {
         form.reset();
         euroGrammoSpan.textContent = '0.00';
         document.getElementById('qa-data').valueAsDate = new Date();
+        resetStatoSconosciuta('qa'); // v0.2.5: riattiva il campo località
     });
 	aggiornaDatalist();
 }
@@ -475,6 +509,102 @@ function resetQuickAdd() {
     document.getElementById('form-quick-add').reset();
     document.getElementById('qa-eurogrammo').textContent = '0.00';
     document.getElementById('qa-data').valueAsDate = new Date();
+    resetStatoSconosciuta('qa'); // v0.2.5
+}
+
+// ===========================
+// V0.2.5: PROVENIENZA SCONOSCIUTA
+// ===========================
+
+// Checkbox "Provenienza sconosciuta": disattiva/riattiva il campo località
+// (prefisso: 'qa' per Quick Add, 'val' per Valutatore)
+function toggleLocalitaSconosciuta(prefisso) {
+    const checkbox = document.getElementById(prefisso + '-localita-sconosciuta');
+    const input = document.getElementById(prefisso + '-localita');
+    if (!checkbox || !input) return;
+    
+    if (checkbox.checked) {
+        input.value = '';
+        input.disabled = true;
+        input.removeAttribute('required');
+    } else {
+        input.disabled = false;
+        input.setAttribute('required', '');
+    }
+    
+    // Nascondi/mostra l'asterisco obbligatorio
+    const gruppo = input.closest('.form-group');
+    const stella = gruppo ? gruppo.querySelector('label > .required') : null;
+    if (stella) stella.style.visibility = checkbox.checked ? 'hidden' : '';
+}
+
+// Ripristina lo stato del campo dopo un reset del form
+// (form.reset() riporta i valori ma NON riabilita gli input disabilitati via JS)
+function resetStatoSconosciuta(prefisso) {
+    const checkbox = document.getElementById(prefisso + '-localita-sconosciuta');
+    const input = document.getElementById(prefisso + '-localita');
+    if (checkbox) checkbox.checked = false;
+    if (input) {
+        input.disabled = false;
+        input.setAttribute('required', '');
+    }
+    const gruppo = input ? input.closest('.form-group') : null;
+    const stella = gruppo ? gruppo.querySelector('label > .required') : null;
+    if (stella) stella.style.visibility = '';
+}
+
+// Lookup dati per valutazione con località nota (comportamento classico)
+function trovaDatiGruppo(mineraleNorm, localita) {
+    const chiave = generaChiave(mineraleNorm, localita);
+    const datiDB = dbPrezzi[chiave];
+    if (!datiDB || Object.keys(datiDB.medie).length === 0) return null;
+    return { datiDB: datiDB, localitaFattore: localita, etichetta: localita };
+}
+
+// v0.2.5: lookup con provenienza sconosciuta — strategia IBRIDA:
+// 1) se esiste il gruppo minerale+"Sconosciuta" → usa quello
+// 2) altrimenti aggrega i campioni di TUTTE le località di quel minerale
+// Il fattore località è sempre 0.7x (minimo del range Phase 5)
+function trovaDatiLocalitaSconosciuta(mineraleNorm) {
+    // 1) Gruppo dedicato "Sconosciuta"
+    const chiaveSconosciuta = generaChiave(mineraleNorm, CONFIG.localitaSconosciuta);
+    const gruppoSconosciuto = dbPrezzi[chiaveSconosciuta];
+    if (gruppoSconosciuto && gruppoSconosciuto.campioni.length > 0) {
+        return {
+            datiDB: {
+                minerale: mineraleNorm,
+                localita: CONFIG.localitaSconosciuta,
+                campioni: gruppoSconosciuto.campioni,
+                medie: calcolaMedie(gruppoSconosciuto.campioni)
+            },
+            localitaFattore: CONFIG.localitaSconosciuta,
+            etichetta: CONFIG.localitaSconosciuta + ' (0.7x)',
+            aggregato: false
+        };
+    }
+    
+    // 2) Fallback: aggrega tutte le località del minerale
+    const campioniAggregati = [];
+    let gruppiUsati = 0;
+    Object.values(dbPrezzi).forEach(gruppo => {
+        if (gruppo.minerale === mineraleNorm && gruppo.campioni.length > 0) {
+            campioniAggregati.push(...gruppo.campioni);
+            gruppiUsati++;
+        }
+    });
+    if (campioniAggregati.length === 0) return null;
+    
+    return {
+        datiDB: {
+            minerale: mineraleNorm,
+            localita: CONFIG.localitaSconosciuta,
+            campioni: campioniAggregati,
+            medie: calcolaMedie(campioniAggregati)
+        },
+        localitaFattore: CONFIG.localitaSconosciuta,
+        etichetta: CONFIG.localitaSconosciuta + ' — tutte le località (' + gruppiUsati + (gruppiUsati === 1 ? ' zona' : ' zone') + ') (0.7x)',
+        aggregato: true
+    };
 }
 
 // ===========================
@@ -505,38 +635,46 @@ function inizializzaValutatore() {
         e.preventDefault();
         
         const minerale = document.getElementById('val-minerale').value.trim();
-        const localita = document.getElementById('val-localita').value.trim();
+        // v0.2.5: provenienza sconosciuta via checkbox (o digitando "sconosciuta")
+        const provenienzaSconosciuta = document.getElementById('val-localita-sconosciuta').checked;
+        const localitaInput = normalizzaLocalita(document.getElementById('val-localita').value);
         const peso = parseFloat(pesoInput.value);
         const prezzo = parseFloat(prezzoInput.value);
         
-        if (!minerale || !localita || peso <= 0 || prezzo <= 0) {
-            alert('Compila tutti i campi!');
+        if (!minerale || peso <= 0 || prezzo <= 0 || (!provenienzaSconosciuta && !localitaInput)) {
+            alert('Compila tutti i campi!\n\n(oppure spunta "Provenienza sconosciuta" se non conosci la località)');
             return;
         }
         
         const mineraleNorm = normalizzaMinerale(minerale);
-        const chiave = generaChiave(mineraleNorm, localita);
-        const datiDB = dbPrezzi[chiave];
+        const usaSconosciuta = provenienzaSconosciuta || localitaInput === CONFIG.localitaSconosciuta;
         
-        if (!datiDB || Object.keys(datiDB.medie).length === 0) {
-            alert(`⚠ Nessun dato per ${mineraleNorm} - ${localita}\n\nAggiungi prima dei prezzi nel Quick Add!`);
+        // v0.2.5: lookup dati — sconosciuta usa strategia ibrida, altrimenti gruppo esatto
+        const lookup = usaSconosciuta
+            ? trovaDatiLocalitaSconosciuta(mineraleNorm)
+            : trovaDatiGruppo(mineraleNorm, localitaInput);
+        
+        if (!lookup) {
+            alert(usaSconosciuta
+                ? `⚠ Nessun dato per ${mineraleNorm}\n\n(né con località "${CONFIG.localitaSconosciuta}" né in altre località)\n\nAggiungi prima dei prezzi nel Quick Add!`
+                : `⚠ Nessun dato per ${mineraleNorm} - ${localitaInput}\n\nAggiungi prima dei prezzi nel Quick Add!`);
             return;
         }
         
-        const valoreStimato = calcolaValoreStimato(mineraleNorm, localita, peso, datiDB);
+        const valoreStimato = calcolaValoreStimato(mineraleNorm, lookup.localitaFattore, peso, lookup.datiDB);
         const percentuale = (prezzo / valoreStimato) * 100;
         const raccomandazione = generaRaccomandazione(percentuale);
         
         mostraRisultatiValutazione({
             minerale: mineraleNorm,
-            localita: localita,
+            localita: lookup.etichetta,
             peso: peso,
             prezzo: prezzo,
             prezzogrammo: prezzo / peso,
             valoreStimato: valoreStimato,
             percentuale: percentuale,
             raccomandazione: raccomandazione,
-            datiDB: datiDB
+            datiDB: lookup.datiDB
         });
     });
 	aggiornaDatalist();
@@ -633,13 +771,12 @@ function mostraDatabase() {
     
     if (Object.keys(dbPrezzi).length === 0) {
         container.innerHTML = '<div class="empty-state"><p>Database vuoto. Aggiungi prezzi con Quick Add!</p></div>';
+        aggiornaContatoreRisultati(0, 0);
         return;
     }
     
-    // Reset filtri
+    // Reset ricerca e ordinamento (i filtri avanzati restano attivi)
     document.getElementById('search-db').value = '';
-    document.getElementById('filtro-minerale').value = '';
-    document.getElementById('filtro-localita').value = '';
     document.getElementById('ordina-db').value = 'alfabetico';
     
     // Popola dropdown filtri
@@ -649,6 +786,34 @@ function mostraDatabase() {
     filtraDatabase();
 }
 
+// ===========================
+// PHASE 4: FILTRI EXCEL-LIKE
+// ===========================
+
+// Stato centrale dei filtri (unica fonte di verità)
+let filtriAttivi = {
+    minerali: [],     // valori spuntati nel dropdown Minerali
+    localita: [],     // valori spuntati nel dropdown Località
+    mercati: [],      // valori spuntati nel dropdown Mercati (lowercase)
+    dataDa: null,     // Date | null
+    dataA: null,      // Date | null
+    prezzoMin: null,  // number | null
+    prezzoMax: null,
+    pesoMin: null,
+    pesoMax: null
+};
+
+// Escape HTML per valori dinamici (anti-bug v0.2.5: niente markup rotto)
+function escapeHtml(str) {
+    return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+// Popola le liste checkbox di Minerali e Località dal database
 function popolaFiltri() {
     const minerali = new Set();
     const localita = new Set();
@@ -658,51 +823,267 @@ function popolaFiltri() {
         localita.add(dati.localita);
     });
     
-    // Popola select minerali
-    const selectMinerali = document.getElementById('filtro-minerale');
-    selectMinerali.innerHTML = '<option value="">🔍 Tutti i minerali</option>';
-    Array.from(minerali).sort().forEach(m => {
-        selectMinerali.innerHTML += `<option value="${m}">${m}</option>`;
+    ricostruisciListaCheckbox('minerali', Array.from(minerali).sort());
+    ricostruisciListaCheckbox('localita', Array.from(localita).sort());
+}
+
+// Ricostruisce una lista checkbox PRESERVANDO le selezioni attive
+// (anti-bug v0.2.5: le spunte non spariscono quando si aggiungono campioni)
+function ricostruisciListaCheckbox(nome, valori) {
+    const lista = document.getElementById('pl-' + nome);
+    if (!lista) return;
+    
+    // 1. Salva cosa era spuntato PRIMA di ricostruire
+    const selezionati = new Set(
+        Array.from(lista.querySelectorAll('input[type="checkbox"]:checked')).map(cb => cb.value)
+    );
+    
+    // 2. Ricostruisci
+    if (valori.length === 0) {
+        lista.innerHTML = '<span class="filter-empty">Nessun dato</span>';
+    } else {
+        lista.innerHTML = valori.map(v => {
+            const vSafe = escapeHtml(v);
+            const checked = selezionati.has(v) ? ' checked' : '';
+            return `<label class="filter-checkbox"><input type="checkbox" value="${vSafe}"${checked} onchange="applicaFiltri()"><span>${vSafe}</span></label>`;
+        }).join('');
+    }
+    
+    // 3. Sincronizza "Seleziona tutto"
+    aggiornaSelectAll(nome);
+}
+
+// Apre/chiude un popover (chiude gli altri, stile Excel)
+function toggleFilterDropdown(nome) {
+    const popover = document.getElementById('fp-' + nome);
+    if (!popover) return;
+    const eraAperto = !popover.classList.contains('hidden');
+    chiudiTuttiDropdown();
+    if (!eraAperto) popover.classList.remove('hidden');
+}
+
+function chiudiTuttiDropdown() {
+    document.querySelectorAll('.filter-popover').forEach(p => p.classList.add('hidden'));
+}
+
+// Click fuori da un dropdown → chiudi tutti i popover
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('.filter-dropdown')) chiudiTuttiDropdown();
+});
+
+// "Seleziona tutto" dentro un popover (rispetta la ricerca interna: solo righe visibili)
+function toggleTutti(nome, checked) {
+    const lista = document.getElementById('pl-' + nome);
+    if (!lista) return;
+    lista.querySelectorAll('.filter-checkbox').forEach(lbl => {
+        if (lbl.style.display !== 'none') {
+            const cb = lbl.querySelector('input[type="checkbox"]');
+            if (cb) cb.checked = checked;
+        }
+    });
+    applicaFiltri();
+}
+
+// Ricerca live dentro un popover
+function cercaNelPopover(nome, term) {
+    const t = term.toLowerCase().trim();
+    document.querySelectorAll('#pl-' + nome + ' .filter-checkbox').forEach(lbl => {
+        lbl.style.display = lbl.textContent.toLowerCase().includes(t) ? '' : 'none';
+    });
+}
+
+// Sincronizza la checkbox "Seleziona tutto" (checked / indeterminate)
+function aggiornaSelectAll(nome) {
+    const sa = document.getElementById('select-all-' + nome);
+    const lista = document.getElementById('pl-' + nome);
+    if (!sa || !lista) return;
+    const cbs = Array.from(lista.querySelectorAll('input[type="checkbox"]'));
+    const checkedCount = cbs.filter(cb => cb.checked).length;
+    sa.checked = cbs.length > 0 && checkedCount === cbs.length;
+    sa.indeterminate = checkedCount > 0 && checkedCount < cbs.length;
+}
+
+// Legge lo stato della UI → filtriAttivi (ID dedicati per gruppo: niente selettori fragili)
+function aggiornaStatoFiltri() {
+    filtriAttivi.minerali = Array.from(document.querySelectorAll('#pl-minerali input[type="checkbox"]:checked')).map(cb => cb.value);
+    filtriAttivi.localita = Array.from(document.querySelectorAll('#pl-localita input[type="checkbox"]:checked')).map(cb => cb.value);
+    filtriAttivi.mercati = Array.from(document.querySelectorAll('#pl-mercati input[type="checkbox"]:checked')).map(cb => cb.value);
+    
+    const da = document.getElementById('filter-data-da').value;
+    const a = document.getElementById('filter-data-a').value;
+    filtriAttivi.dataDa = da ? new Date(da) : null;
+    filtriAttivi.dataA = a ? new Date(a) : null;
+    
+    const pmin = parseFloat(document.getElementById('filter-prezzo-min').value);
+    const pmax = parseFloat(document.getElementById('filter-prezzo-max').value);
+    filtriAttivi.prezzoMin = isNaN(pmin) ? null : pmin;
+    filtriAttivi.prezzoMax = isNaN(pmax) ? null : pmax;
+    
+    const wmin = parseFloat(document.getElementById('filter-peso-min').value);
+    const wmax = parseFloat(document.getElementById('filter-peso-max').value);
+    filtriAttivi.pesoMin = isNaN(wmin) ? null : wmin;
+    filtriAttivi.pesoMax = isNaN(wmax) ? null : wmax;
+}
+
+// Test a livello GRUPPO (minerale + località)
+function gruppoSuperaFiltri(dati) {
+    if (filtriAttivi.minerali.length > 0 && !filtriAttivi.minerali.includes(dati.minerale)) return false;
+    if (filtriAttivi.localita.length > 0 && !filtriAttivi.localita.includes(dati.localita)) return false;
+    return true;
+}
+
+// Test a livello CAMPIONE (mercato, data, prezzo, peso + gruppo)
+function campioneSuperaFiltri(campione, dati) {
+    if (dati && !gruppoSuperaFiltri(dati)) return false;
+    
+    if (filtriAttivi.mercati.length > 0) {
+        const mercato = String(campione.mercato || '').toLowerCase();
+        if (!filtriAttivi.mercati.includes(mercato)) return false;
+    }
+    
+    if (filtriAttivi.dataDa || filtriAttivi.dataA) {
+        const d = new Date(campione.data);
+        if (isNaN(d.getTime())) return false;
+        if (filtriAttivi.dataDa && d < filtriAttivi.dataDa) return false;
+        if (filtriAttivi.dataA && d > filtriAttivi.dataA) return false;
+    }
+    
+    if (filtriAttivi.prezzoMin !== null && campione.prezzo < filtriAttivi.prezzoMin) return false;
+    if (filtriAttivi.prezzoMax !== null && campione.prezzo > filtriAttivi.prezzoMax) return false;
+    if (filtriAttivi.pesoMin !== null && campione.peso < filtriAttivi.pesoMin) return false;
+    if (filtriAttivi.pesoMax !== null && campione.peso > filtriAttivi.pesoMax) return false;
+    
+    return true;
+}
+
+// Ingresso unico: cambia un filtro → aggiorna stato, UI e griglia
+function applicaFiltri() {
+    aggiornaStatoFiltri();
+    aggiornaSelectAll('minerali');
+    aggiornaSelectAll('localita');
+    aggiornaUIFiltri();
+    filtraDatabase();
+}
+
+// Aggiorna badge, pulsanti attivi e contatori per gruppo
+function aggiornaUIFiltri() {
+    const gruppi = [
+        ['minerali', filtriAttivi.minerali.length],
+        ['localita', filtriAttivi.localita.length],
+        ['mercati', filtriAttivi.mercati.length],
+        ['date', (filtriAttivi.dataDa ? 1 : 0) + (filtriAttivi.dataA ? 1 : 0)],
+        ['prezzo', (filtriAttivi.prezzoMin !== null ? 1 : 0) + (filtriAttivi.prezzoMax !== null ? 1 : 0)],
+        ['peso', (filtriAttivi.pesoMin !== null ? 1 : 0) + (filtriAttivi.pesoMax !== null ? 1 : 0)]
+    ];
+    
+    let totaleGruppi = 0;
+    gruppi.forEach(([nome, count]) => {
+        const btn = document.getElementById('fb-' + nome);
+        const fc = document.getElementById('fc-' + nome);
+        if (!btn || !fc) return;
+        if (count > 0) {
+            btn.classList.add('attivo');
+            fc.textContent = count;
+            fc.classList.remove('hidden');
+            totaleGruppi++;
+        } else {
+            btn.classList.remove('attivo');
+            fc.classList.add('hidden');
+        }
     });
     
-    // Popola select località
-    const selectLocalita = document.getElementById('filtro-localita');
-    selectLocalita.innerHTML = '<option value="">📍 Tutte le località</option>';
-    Array.from(localita).sort().forEach(l => {
-        selectLocalita.innerHTML += `<option value="${l}">${l}</option>`;
+    const badge = document.getElementById('filter-badge');
+    const btnClear = document.getElementById('btn-clear-filters');
+    if (badge && btnClear) {
+        if (totaleGruppi > 0) {
+            badge.textContent = totaleGruppi === 1 ? '1 filtro attivo' : `${totaleGruppi} filtri attivi`;
+            badge.classList.remove('hidden');
+            btnClear.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+            btnClear.classList.add('hidden');
+        }
+    }
+}
+
+// Azzera tutti i filtri (checkbox + range)
+function rimuoviTuttiFiltri() {
+    document.querySelectorAll('#pl-minerali input[type="checkbox"], #pl-localita input[type="checkbox"], #pl-mercati input[type="checkbox"]').forEach(cb => {
+        cb.checked = false;
     });
+    document.getElementById('filter-data-da').value = '';
+    document.getElementById('filter-data-a').value = '';
+    document.getElementById('filter-prezzo-min').value = '';
+    document.getElementById('filter-prezzo-max').value = '';
+    document.getElementById('filter-peso-min').value = '';
+    document.getElementById('filter-peso-max').value = '';
+    applicaFiltri();
+}
+
+// Scorciatoie periodo: ultimi N giorni
+function impostaPeriodo(giorni) {
+    const oggi = new Date();
+    const da = new Date();
+    da.setDate(oggi.getDate() - giorni);
+    document.getElementById('filter-data-da').value = da.toISOString().split('T')[0];
+    document.getElementById('filter-data-a').value = oggi.toISOString().split('T')[0];
+    applicaFiltri();
+}
+
+// Contatore "Mostrando X di Y campioni"
+function aggiornaContatoreRisultati(visibili, totali) {
+    const rc = document.getElementById('results-count');
+    const rt = document.getElementById('results-total');
+    if (rc) rc.textContent = visibili;
+    if (rt) rt.textContent = totali;
 }
 
 function filtraDatabase() {
     const container = document.getElementById('database-list');
     const searchTerm = document.getElementById('search-db').value.toLowerCase();
-    const filtroMinerale = document.getElementById('filtro-minerale').value;
-    const filtroLocalita = document.getElementById('filtro-localita').value;
     const ordinamento = document.getElementById('ordina-db').value;
     
-    // Filtra dati
-    let datiFilterati = Object.entries(dbPrezzi).filter(([chiave, dati]) => {
-        const matchSearch = !searchTerm || 
-            dati.minerale.toLowerCase().includes(searchTerm) || 
-            dati.localita.toLowerCase().includes(searchTerm);
-        
-        const matchMinerale = !filtroMinerale || dati.minerale === filtroMinerale;
-        const matchLocalita = !filtroLocalita || dati.localita === filtroLocalita;
-        
-        return matchSearch && matchMinerale && matchLocalita;
-    });
+    // Totale campioni nel database (per il contatore)
+    const totaleCampioni = Object.values(dbPrezzi).reduce((sum, dati) => sum + dati.campioni.length, 0);
     
-    // Ordina
-    datiFilterati.sort(([chiaveA, datiA], [chiaveB, datiB]) => {
+    // PHASE 4: ricerca testuale + filtri gruppo + filtri campione
+    let datiFilterati = Object.entries(dbPrezzi)
+        .filter(([chiave, dati]) => {
+            const matchSearch = !searchTerm || 
+                dati.minerale.toLowerCase().includes(searchTerm) || 
+                dati.localita.toLowerCase().includes(searchTerm);
+            return matchSearch && gruppoSuperaFiltri(dati);
+        })
+        .map(([chiave, dati]) => {
+            const campioniVisibili = dati.campioni.filter(c => campioneSuperaFiltri(c, dati));
+            // Medie ricalcolate SOLO sui campioni visibili (stile Excel)
+            const medieVisibili = calcolaMedie(campioniVisibili);
+            return {
+                chiave,
+                dati,
+                campioniVisibili,
+                medieVisibili,
+                mediaGenerale: calcolaMediaPonderata(medieVisibili, false),
+                mediaPrezzoGrammo: calcolaMediaPonderata(medieVisibili, true)
+            };
+        })
+        .filter(entry => entry.campioniVisibili.length > 0);
+    
+    // Aggiorna contatore risultati
+    const campioniVisibiliTot = datiFilterati.reduce((sum, e) => sum + e.campioniVisibili.length, 0);
+    aggiornaContatoreRisultati(campioniVisibiliTot, totaleCampioni);
+    
+    // Ordina (sui valori VISUALIZZATI)
+    datiFilterati.sort((a, b) => {
         switch(ordinamento) {
             case 'alfabetico':
-                return datiA.minerale.localeCompare(datiB.minerale);
+                return a.dati.minerale.localeCompare(b.dati.minerale);
             case 'campioni':
-                return datiB.campioni.length - datiA.campioni.length;
+                return b.campioniVisibili.length - a.campioniVisibili.length;
             case 'prezzo-alto':
-                return calcolaMediaPonderata(datiB.medie, false) - calcolaMediaPonderata(datiA.medie, false);
+                return b.mediaGenerale - a.mediaGenerale;
             case 'prezzo-basso':
-                return calcolaMediaPonderata(datiA.medie, false) - calcolaMediaPonderata(datiB.medie, false);
+                return a.mediaGenerale - b.mediaGenerale;
             default:
                 return 0;
         }
@@ -716,20 +1097,20 @@ function filtraDatabase() {
     
     let html = '<div class="database-lista">';
     
-    datiFilterati.forEach(([chiave, dati]) => {
-        const mediaGenerale = calcolaMediaPonderata(dati.medie, false);
-        const mediaPrezzoGrammo = calcolaMediaPonderata(dati.medie, true);
+    datiFilterati.forEach(entry => {
+        const { chiave, dati, campioniVisibili, mediaGenerale, mediaPrezzoGrammo } = entry;
+        const isFiltrato = campioniVisibili.length < dati.campioni.length;
         
         html += `
             <div class="database-card">
                 <div class="database-header">
-                    <h3>${dati.minerale.toUpperCase()}</h3>
-                    <div class="database-localita">${dati.localita}</div>
+                    <h3>${escapeHtml(dati.minerale.toUpperCase())}</h3>
+                    <div class="database-localita">${escapeHtml(dati.localita)}</div>
                 </div>
                 <div class="database-stats">
                     <div class="stat">
                         <div class="stat-label">Campioni</div>
-                        <div class="stat-value">${dati.campioni.length}</div>
+                        <div class="stat-value">${campioniVisibili.length}${isFiltrato ? `<span class="stat-sub">su ${dati.campioni.length}</span>` : ''}</div>
                     </div>
                     <div class="stat">
                         <div class="stat-label">€ Medio</div>
@@ -757,8 +1138,17 @@ function mostraDettagliMinerale(chiave) {
     const dati = dbPrezzi[chiave];
     if (!dati) return;
     
-    // Calcola statistiche avanzate
-    const stats = calcolaStatisticheAvanzate(dati.campioni);
+    // PHASE 4: filtra i campioni mantenendo l'INDICE ORIGINALE per modifica/elimina
+    // (anti-bug v0.2.5: i pulsanti devono puntare a dati.campioni[idx], non alla lista filtrata)
+    const campioniIndicizzati = dati.campioni
+        .map((campione, idx) => ({ campione, idx }))
+        .filter(entry => campioneSuperaFiltri(entry.campione, dati));
+    const campioniVisibili = campioniIndicizzati.map(entry => entry.campione);
+    const isFiltrato = campioniVisibili.length < dati.campioni.length;
+    
+    // Calcola statistiche avanzate sui campioni VISIBILI (stile Excel)
+    const stats = calcolaStatisticheAvanzate(campioniVisibili);
+    const medieVisibili = calcolaMedie(campioniVisibili);
     
     const modal = document.createElement('div');
     modal.className = 'modal';
@@ -769,20 +1159,24 @@ function mostraDettagliMinerale(chiave) {
             <span class="modal-close" onclick="this.parentElement.parentElement.remove()">&times;</span>
             <h2>${dati.minerale} - ${dati.localita}</h2>
             
-            ${generaStatisticheGenerali(stats)}
+            ${isFiltrato ? `<div class="modal-filter-notice">🔍 Vista filtrata: ${campioniVisibili.length} di ${dati.campioni.length} campioni — statistiche ricalcolate sui campioni visibili</div>` : ''}
             
+            ${stats ? generaStatisticheGenerali(stats) : '<p class="stat-hint">Nessun campione corrisponde ai filtri attivi.</p>'}
+            
+            ${stats ? `
             <h3>📊 Distribuzione per mercato</h3>
-            ${generaDistribuzioneMercati(stats.distribuzioneMercati, dati.medie)}
+            ${generaDistribuzioneMercati(stats.distribuzioneMercati, medieVisibili)}
             
             <h3>📈 Trend temporale</h3>
             ${generaTrendTemporale(stats.trendTemporale)}
             
             <h3>🏆 Campioni notevoli</h3>
             ${generaCampioniNotevoli(stats)}
+            ` : ''}
             
-            <h3>📦 Tutti i campioni (${dati.campioni.length})</h3>
+            <h3>📦 ${isFiltrato ? `Campioni (${campioniVisibili.length} di ${dati.campioni.length})` : `Tutti i campioni (${dati.campioni.length})`}</h3>
             <div class="campioni-lista">
-                ${dati.campioni.map((c, idx) => `
+                ${campioniIndicizzati.map(({ campione: c, idx }) => `
                     <div class="campione-card">
                         <div class="campione-header">
                             <span class="campione-data">📅 ${c.data}</span>
@@ -1001,7 +1395,7 @@ function modificaCampione(chiave, idx) {
  
  // Normalizza minerale e località
  const nuovoMinerale = normalizzaMinerale(nuovoMineraleRaw);
- const nuovaLocalita = sanitizzaLocalita(nuovaLocalitaRaw);
+ const nuovaLocalita = normalizzaLocalita(nuovaLocalitaRaw); // v0.2.5: canonizza "sconosciuta"
  const nuovaChiave = generaChiave(nuovoMinerale, nuovaLocalita);
  
  // Aggiorna i dati specifici del campione
@@ -1083,7 +1477,8 @@ function eliminaCampione(chiave, idx) {
   delete dbPrezzi[chiave];
   salvaDatabase();
   alert('🗑️ Ultimo campione eliminato.\n\nMinerale rimosso dal database.');
-  document.querySelector('.modal').remove();
+  const modalUltimo = document.querySelector('.modal');
+  if (modalUltimo) modalUltimo.remove();
   mostraDatabase();
   return;
  }
@@ -1095,7 +1490,8 @@ function eliminaCampione(chiave, idx) {
  alert('✅ Campione eliminato!');
  
  // Ricarica modal
- document.querySelector('.modal').remove();
+ const modalCorrente = document.querySelector('.modal');
+ if (modalCorrente) modalCorrente.remove();
  mostraDettagliMinerale(chiave);
 }
 
@@ -1246,3 +1642,16 @@ window.eliminaCampione = eliminaCampione;
 window.pulisciBackslash = pulisciBackslash;
 window.aggiornaDatalist = aggiornaDatalist;
 window.filtraDatabase = filtraDatabase;
+
+// PHASE 4: filtri Excel-like
+window.mostraDatabase = mostraDatabase;
+window.toggleFilterDropdown = toggleFilterDropdown;
+window.toggleTutti = toggleTutti;
+window.cercaNelPopover = cercaNelPopover;
+window.applicaFiltri = applicaFiltri;
+window.rimuoviTuttiFiltri = rimuoviTuttiFiltri;
+window.impostaPeriodo = impostaPeriodo;
+
+// V0.2.5: provenienza sconosciuta
+window.toggleLocalitaSconosciuta = toggleLocalitaSconosciuta;
+window.getFattoreLocalita = getFattoreLocalita;
