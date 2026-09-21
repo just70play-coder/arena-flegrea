@@ -1,34 +1,34 @@
 /* ===========================
    ARENA FLEGREA - STYLE.CSS
-   Tema Arena.ai
+   Tema Vesuviano–Partenopeo (cyberpunk azzurro)
    =========================== */
 
 :root {
-    --primary-color: #6366f1;
-    --primary-hover: #8183f4;
-    --secondary-color: #a5b4fc;
+    --primary-color: #38bdf8;
+    --primary-hover: #7dd3fc;
+    --secondary-color: #bae6fd;
     --success-color: #10b981;
     --warning-color: #f59e0b;
     --danger-color: #ef4444;
     
-    --background: #0f0f0f;
-    --background-elevated: #1a1a1a;
-    --card-bg: #171717;
-    --card-bg-hover: #1f1f1f;
+    --background: #060b16;
+    --background-elevated: #0c1526;
+    --card-bg: #0f1a2e;
+    --card-bg-hover: #142239;
     
-    --text-primary: #f5f5f5;
-    --text-secondary: #a3a3a3;
-    --text-muted: #737373;
+    --text-primary: #f2f8ff;
+    --text-secondary: #9fb6d9;
+    --text-muted: #5e7397;
     
-    --border-color: #262626;
-    --border-color-light: #333333;
+    --border-color: #1c2e4d;
+    --border-color-light: #2b4066;
     
-    --shadow: 0 1px 3px rgba(0,0,0,0.5);
-    --shadow-lg: 0 8px 24px rgba(0,0,0,0.6);
+    --shadow: 0 1px 3px rgba(2,6,16,0.5);
+    --shadow-lg: 0 8px 24px rgba(1,4,12,0.65);
     
-    --input-bg: #0a0a0a;
-    --input-border: #262626;
-    --input-focus: #6366f1;
+    --input-bg: #040912;
+    --input-border: #1c2e4d;
+    --input-focus: #38bdf8;
 }
 
 * {
@@ -69,14 +69,14 @@ header h1 {
 }
 
 header h1 .volcano-icon {
- -webkit-text-fill-color: #ff6b35;
+ -webkit-text-fill-color: #7dd3fc;
  background: none;
- filter: drop-shadow(0 0 8px rgba(255, 107, 53, 0.5));
+ filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
  margin-right: 8px;
 }
 
 header h1 .gradient-text {
- background: linear-gradient(135deg, #6366f1 0%, #a5b4fc 100%);
+ background: linear-gradient(135deg, #7dd3fc 0%, #eaf7ff 100%);
  -webkit-background-clip: text;
  -webkit-text-fill-color: transparent;
  background-clip: text;
@@ -272,7 +272,7 @@ select:focus,
 textarea:focus {
     outline: none;
     border-color: var(--input-focus);
-    box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.1);
 }
 
 input::placeholder,
@@ -559,8 +559,8 @@ button,
 .raccomandazione-buono { border-left-color: #22c55e; }
 .raccomandazione-buono h3 { color: #22c55e; }
 
-.raccomandazione-corretto { border-left-color: #6366f1; }
-.raccomandazione-corretto h3 { color: #6366f1; }
+.raccomandazione-corretto { border-left-color: var(--primary-color); }
+.raccomandazione-corretto h3 { color: var(--primary-color); }
 
 .raccomandazione-sopravvalutato { border-left-color: #f59e0b; }
 .raccomandazione-sopravvalutato h3 { color: #f59e0b; }
@@ -1149,7 +1149,7 @@ button,
 /* Stato attivo: filtro applicato (evidenziato come Excel) */
 .filter-drop-btn.attivo {
     border-color: var(--primary-color);
-    background: rgba(99, 102, 241, 0.15);
+    background: rgba(56, 189, 248, 0.15);
 }
 
 .drop-arrow {
@@ -1411,7 +1411,7 @@ button,
 .modal-filter-notice {
     margin: 10px 0 16px;
     padding: 10px 14px;
-    background: rgba(99, 102, 241, 0.12);
+    background: rgba(56, 189, 248, 0.12);
     border: 1px solid var(--primary-color);
     border-radius: 8px;
     color: var(--secondary-color);
@@ -1522,7 +1522,7 @@ input:disabled {
     font-size: 0.7rem;
     font-weight: 600;
     color: var(--secondary-color);
-    background: rgba(99, 102, 241, 0.15);
+    background: rgba(56, 189, 248, 0.15);
 }
 
 .scoring-criterio output {
@@ -1712,4 +1712,367 @@ input:disabled {
     font-size: 0.72rem;
     color: var(--text-muted);
     line-height: 1.3;
+}
+
+/* ===========================
+   RESTYLING v0.2.9 — VESUVIANO–PARTENOPEO
+   Notte sul golfo: fondo blu profondo, accenti azzurro/bianco,
+   glow cyberpunk sugli elementi interattivi (intensità intermedia).
+   Solo sovrapposizioni a valle: le sezioni sopra non vengono toccate.
+   =========================== */
+
+/* --- Fondo: notte sul golfo, bagliore azzurro in alto --- */
+body {
+    background:
+        radial-gradient(1100px 480px at 50% -120px, rgba(56, 189, 248, 0.10), transparent 70%),
+        radial-gradient(900px 420px at 88% 112%, rgba(14, 116, 233, 0.08), transparent 70%),
+        var(--background);
+    background-attachment: fixed;
+}
+
+::selection {
+    background: rgba(56, 189, 248, 0.35);
+    color: #f2f8ff;
+}
+
+/* --- Scrollbar azzurra sottile --- */
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-track { background: var(--background); }
+::-webkit-scrollbar-thumb { background: #1f3a5f; border-radius: 5px; }
+::-webkit-scrollbar-thumb:hover {
+    background: #2b548a;
+    box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+}
+
+/* --- Header: linea luminosa orizzontale, titolo che brilla --- */
+header { position: relative; }
+
+header::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: min(620px, 85%);
+    height: 2px;
+    background: linear-gradient(90deg, transparent, #38bdf8, #ffffff, #38bdf8, transparent);
+    box-shadow: 0 0 14px rgba(56, 189, 248, 0.7);
+}
+
+header h1 {
+    text-shadow: 0 0 26px rgba(56, 189, 248, 0.35);
+}
+
+/* --- Navigazione: schedina attiva a gradiente con glow --- */
+.nav-btn:hover {
+    color: var(--secondary-color);
+}
+
+.nav-btn.active {
+    background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+    color: #04101f;
+    font-weight: 600;
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.45);
+}
+
+/* --- Pulsanti: primario azzurro luminoso, glow al passaggio --- */
+.btn-primary {
+    background: linear-gradient(135deg, #38bdf8 0%, #0284c7 100%);
+    color: #04101f;
+    font-weight: 600;
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.22);
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%);
+    box-shadow: 0 0 20px rgba(56, 189, 248, 0.55);
+}
+
+.btn-secondary:hover {
+    border-color: var(--primary-color);
+    color: var(--secondary-color);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.2);
+}
+
+.btn-danger:hover {
+    box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
+}
+
+/* --- Input: anello di focus luminoso --- */
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: var(--input-focus);
+    box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.15), 0 0 14px rgba(56, 189, 248, 0.2);
+}
+
+/* --- Card: bordo blu notte, bagliore leggero al passaggio --- */
+.card:hover,
+.campione-card:hover {
+    border-color: var(--border-color-light);
+    box-shadow: 0 0 16px rgba(56, 189, 248, 0.10);
+}
+
+.stat-card {
+    background: linear-gradient(180deg, rgba(56, 189, 248, 0.07), transparent 45%), var(--background-elevated);
+}
+
+.stat-number {
+    text-shadow: 0 0 18px rgba(56, 189, 248, 0.4);
+}
+
+/* --- Modal: ombra profonda con riflesso azzurro --- */
+.modal-content {
+    box-shadow: 0 12px 40px rgba(1, 6, 18, 0.8), 0 0 24px rgba(56, 189, 248, 0.08);
+}
+
+/* --- Scoring: barra a gradiente azzurro-bianco, punteggio che brilla --- */
+.scoring-barra-riempimento {
+    background: linear-gradient(90deg, #0284c7, #38bdf8, #bae6fd);
+    box-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+}
+
+.scoring-score strong {
+    text-shadow: 0 0 14px rgba(56, 189, 248, 0.5);
+}
+
+/* --- Stelle cadenti: canvas fisso dietro a tutto il contenuto --- */
+#cielo-flegrea {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1; /* sopra il fondo notturno, sotto ogni contenuto */
+    pointer-events: none; /* mai in mezzo ai clic */
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #cielo-flegrea { display: none; }
+}
+
+/* --- Header 'o Vesuvio: niente più grigio, la notte passa dietro --- */
+header {
+    background: linear-gradient(180deg, rgba(10, 20, 40, 0.6) 0%, rgba(10, 20, 40, 0.15) 70%, rgba(10, 20, 40, 0) 100%);
+}
+
+header .container {
+    position: relative;
+    z-index: 1;
+}
+
+.vesuvio-svg {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 130px;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.95;
+}
+
+.vesuvio-svg .cratere {
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.8));
+}
+
+/* Titolo: respiro di luce lento lungo il gradiente */
+header h1 .gradient-text {
+    background-image: linear-gradient(90deg, #7dd3fc 0%, #eaf7ff 50%, #7dd3fc 100%);
+    background-size: 200% 100%;
+    animation: titolo-respiro 7s ease-in-out infinite;
+}
+
+@keyframes titolo-respiro {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+/* Vulcano: bagliore che pulsa come un braciere azzurro */
+header h1 .volcano-icon {
+    animation: vulcano-respiro 4.5s ease-in-out infinite;
+}
+
+@keyframes vulcano-respiro {
+    0%, 100% { filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6)); }
+    50% { filter: drop-shadow(0 0 18px rgba(125, 211, 252, 0.95)); }
+}
+
+/* Fumatore del cratere: soffio lento verso sinistra, come le stelle */
+.fumo circle {
+    opacity: 0;
+    animation: fumo-sale 8s ease-in-out infinite;
+}
+
+.fumo-2 { animation-delay: 4s; }
+
+@keyframes fumo-sale {
+    0% { transform: translate(0, 0) scale(0.6); opacity: 0; }
+    30% { opacity: 0.75; }
+    100% { transform: translate(-30px, -52px) scale(1.8); opacity: 0; }
+}
+
+/* Linea luminosa sotto l'header: respiro discreto */
+header::after {
+    animation: linea-respiro 6s ease-in-out infinite;
+}
+
+@keyframes linea-respiro {
+    0%, 100% { opacity: 0.7; }
+    50% { opacity: 1; }
+}
+
+/* Movimento ridotto: tutto fermo, resta solo un lieve fumo statico */
+@media (prefers-reduced-motion: reduce) {
+    header h1 .gradient-text,
+    header h1 .volcano-icon,
+    .fumo circle,
+    header::after {
+        animation: none;
+    }
+    .fumo circle { opacity: 0.35; }
+}
+
+/* --- 'o golfo: Vesuvio piu basso, mare con luci e vele --- */
+header {
+    overflow: hidden; /* le decorazioni restano dentro la testa di pagina */
+    padding-bottom: 5.5rem; /* arena in piu sotto il sottotitolo: la M resta bassa ma respira */
+}
+
+.vesuvio-svg {
+    height: 150px; /* la M sta tutta nella fascia bassa, sotto il sottotitolo */
+}
+
+/* Vele: sdraiano piano sull'acqua (il <g> esterno porta la posizione, questo solo il dondolio) */
+.vela {
+    transform-box: fill-box;
+    transform-origin: 50% 100%;
+    animation: vela-sdraia 7s ease-in-out infinite alternate;
+    filter: drop-shadow(0 0 3px rgba(125, 211, 252, 0.45));
+}
+
+.vela-2 { animation-duration: 9s; animation-delay: 1.4s; }
+.vela-3 { animation-duration: 5.6s; animation-delay: 0.7s; }
+
+@keyframes vela-sdraia {
+    from { transform: rotate(-1.8deg) translateY(0.4px); }
+    to { transform: rotate(1.8deg) translateY(-1.6px); }
+}
+
+/* Luci delle coste: scintillano piano, in due gruppi sfasati */
+.luce {
+    animation: luce-scintilla 4.5s ease-in-out infinite alternate;
+}
+
+.luce-b { animation-duration: 6.5s; animation-delay: 2.2s; }
+
+@keyframes luce-scintilla {
+    from { opacity: 0.35; }
+    to { opacity: 0.95; }
+}
+
+/* Movimento ridotto: niente dondolio, niente scintillio */
+@media (prefers-reduced-motion: reduce) {
+    .vela,
+    .luce {
+        animation: none;
+    }
+    .vela { transform: none; }
+    .luce { opacity: 0.7; }
+}
+
+/* --- v0.2.9 stupiscimi: 'a luna ca sorge, 'a scia sul mare, nuvole basse --- */
+.luna {
+    /* parte da dietro il fianco del Vesuvio (offset -70,+167) e sale al suo posto;
+       base = posizione finale: con movimento ridotto resta gia' a metà */
+    animation: luna-sorge 16s cubic-bezier(0.25, 0.6, 0.35, 1) 0.8s both;
+}
+
+@keyframes luna-sorge {
+    from { transform: translate(-70px, 167px); }
+    to { transform: translate(0, 0); }
+}
+
+.alone-luna {
+    animation: alone-respira 9s ease-in-out infinite alternate;
+}
+
+@keyframes alone-respira {
+    from { opacity: 0.75; }
+    to { opacity: 1; }
+}
+
+.scia-luna {
+    opacity: 0;
+    animation: scia-appare 10s ease-out 7s forwards;
+}
+
+@keyframes scia-appare {
+    to { opacity: 0.55; }
+}
+
+.nuvola-1 { animation: nuvola-va-e-vieni 46s ease-in-out infinite alternate; }
+.nuvola-2 { animation: nuvola-va-e-vieni 62s ease-in-out infinite alternate-reverse; }
+
+@keyframes nuvola-va-e-vieni {
+    from { transform: translateX(-16px); }
+    to { transform: translateX(18px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .luna, .alone-luna, .scia-luna, .nuvola-1, .nuvola-2 {
+        animation: none;
+    }
+    .scia-luna { opacity: 0.55; }
+}
+
+/* --- v0.2.9f: dimensioni fisse — 'a montagna nun se stringe c'a fenesta!
+   Due layer: il mare (acqua, luci, vele) resta elastico a tutta larghezza,
+   la montagna cu luna e nuvole e' un SVG FISSO 510x220 centrato sul fondo:
+   stessa forma a ogni dimensione della finestra. Le regole piu' su
+   (.vesuvio-svg larghezza 100% / height 130-150px) vengono qui sostituite. --- */
+.mare-svg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 150px;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.95;
+}
+
+.vesuvio-svg {
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 510px;
+    height: 220px;
+    max-width: none;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* --- v0.2.9g: 'a carna a sotto e 'e maccaruni 'acoppo — SMONTATO!
+   Gerarchia giusta d''a scena: cielo > montagna > MARE DAVANTI.
+   1) 'a montagna scenne fino 'a base (niente crepe 'nt''o miezo);
+   2) 'o layer d''o mare sta DAVANTI â montagna ('a riva, 'e luci d''a
+      citta' 'nt''o piede d''o Vesuvio e 'a scia so' sopra, comme 'a foto);
+   3) titulo, nav e linea luminosa restano ancora cchiu' 'ncoppa. --- */
+.mare-svg {
+    z-index: 1; /* davanti â montagna: 'a riva sta 'ncopp' 'e piere d''o monte */
+}
+
+.vesuvio-svg {
+    z-index: 0; /* 'a montagna nasc 'e rret 'all'acqua */
+}
+
+header .container {
+    z-index: 2; /* titulo e nav sempe 'ncoppa 'a tutt''a scena */
+}
+
+header::after {
+    z-index: 3; /* linea luminosa cchiù netta 'e tutto */
 }

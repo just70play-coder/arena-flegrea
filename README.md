@@ -50,3 +50,4 @@ La suite di test (jsdom) vive in `test/`:
 | v0.2.6 | località canoniche e giacimenti tipici |
 | v0.2.7 | Phase 5: scoring fotografico (6 criteri ponderati) |
 | v0.2.8 | scala: paginazione, tetto liste filtri, migrazione canonica, minerali secondari |
+| v0.2.9 | restyling: palette Vesuviano-Partenopeo (dark azzurro + glow cyberpunk) + stelle cadenti con scoppietti, Vesuvio e Monte Somma (profilo a M a dimensioni fisse), luci del golfo, vele e luna che sorge |
