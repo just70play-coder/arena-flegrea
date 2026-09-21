@@ -2180,7 +2180,7 @@ window.resetScoring = resetScoring;
 window.getFattoreLocalita = getFattoreLocalita;
 
 /* ===========================
-   v0.2.9 STELLE CADENTI E ASTEROIDI (particelle con glow sul fondo)
+   v0.2.9 PULVISCOLO STELLARE (particelle calme con glow sul fondo)
    Canvas decorativo #cielo-flegrea, fisso dietro a tutto il contenuto.
    Due famiglie di particelle, entrambe con caduta obliqua verso sinistra:
    - asteroidi: detriti piccoli e lenti che pulsano, sempre presenti;
@@ -2192,19 +2192,11 @@ window.getFattoreLocalita = getFattoreLocalita;
 
 const STELLE_CONFIG = {
     idCanvas: 'cielo-flegrea',
-    areaPerAsteroide: 38000,        // px² di viewport per ogni asteroide di fondo
-    minAsteroidi: 14,
-    maxAsteroidi: 55,
-    intervalloStella: [550, 2400],  // ms tra una stella cadente e la successiva
-    probabilitaGrossa: 0.18,        // quota di stelle "grosse" (asteroidi luminosi)
-    probabilitaScoppietto: 0.3,     // quota di stelle che esplodono in scintille alla fine
-    scintillePerScoppietto: 8,      // quante scintille per ogni scoppietto
-    velocitaStella: [320, 680],     // px/s lungo la traiettoria
-    lunghezzaStella: [55, 150],     // px della scia
-    lunghezzaStellaGrossa: [150, 230],
-    angoloStella: [14, 38],         // gradi dalla verticale (caduta obliqua)
+    areaPerAsteroide: 78000,        // px² di viewport per ogni asteroide (calma: pochi)
+    minAsteroidi: 6,
+    maxAsteroidi: 24,
     angoloAsteroide: [8, 30],       // idem: i detriti di fondo cadono più dritti
-    velocitaAsteroide: [26, 85],    // px/s
+    velocitaAsteroide: [10, 34],    // px/s (deriva quieta)
     raggioAsteroide: [0.7, 2.4]     // px
 };
 
@@ -2227,9 +2219,6 @@ function avviaStelleCadenti() {
         let larghezza = 0;
         let altezza = 0;
         let asteroidi = [];
-        let stelle = [];
-        let scintille = [];
-        let prossimaStella = 0;
         let ultimoTempo = 0;
 
         function numeroAsteroidi() {
@@ -2257,25 +2246,6 @@ function avviaStelleCadenti() {
             }
         }
 
-        function creaStella(adesso) {
-            const grossa = Math.random() < STELLE_CONFIG.probabilitaGrossa;
-            const angolo = casualo(STELLE_CONFIG.angoloStella[0], STELLE_CONFIG.angoloStella[1]) * GRADI;
-            const velocita = casualo(STELLE_CONFIG.velocitaStella[0], STELLE_CONFIG.velocitaStella[1])
-                * (grossa ? 1.25 : 1);
-            return {
-                x: casualo(larghezza * 0.1, larghezza * 1.2),
-                y: casualo(-60, altezza * 0.3),
-                dirx: -Math.sin(angolo),
-                diry: Math.cos(angolo),
-                velocita: velocita,
-                lunghezza: grossa
-                    ? casualo(STELLE_CONFIG.lunghezzaStellaGrossa[0], STELLE_CONFIG.lunghezzaStellaGrossa[1])
-                    : casualo(STELLE_CONFIG.lunghezzaStella[0], STELLE_CONFIG.lunghezzaStella[1]),
-                spessore: grossa ? casualo(2.0, 2.8) : casualo(1.0, 1.9),
-                nata: adesso,
-                vita: casualo(1700, 3600)
-            };
-        }
 
         function ridimensionaCielo() {
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
@@ -2299,35 +2269,6 @@ function avviaStelleCadenti() {
                 a.x += -Math.sin(a.angolo) * a.velocita * dt;
                 a.y += Math.cos(a.angolo) * a.velocita * dt;
                 if (a.y > altezza + 30 || a.x < -30) rinasciAsteroide(a, false);
-            }
-            if (adesso >= prossimaStella) {
-                stelle.push(creaStella(adesso));
-                prossimaStella = adesso
-                    + casualo(STELLE_CONFIG.intervalloStella[0], STELLE_CONFIG.intervalloStella[1]);
-            }
-            // quando una stella cadente "muore" puo' esplodere in un pizzico di scintille
-            for (let i = stelle.length - 1; i >= 0; i--) {
-                const stella = stelle[i];
-                if (adesso - stella.nata >= stella.vita && Math.random() < STELLE_CONFIG.probabilitaScoppietto) {
-                    for (let k = 0; k < STELLE_CONFIG.scintillePerScoppietto; k++) {
-                        const angoloScintilla = casualo(0, Math.PI * 2);
-                        const velocitaScintilla = casualo(20, 90);
-                        scintille.push({
-                            x: stella.x, y: stella.y,
-                            vx: Math.cos(angoloScintilla) * velocitaScintilla,
-                            vy: Math.sin(angoloScintilla) * velocitaScintilla - 20,
-                            nata: adesso, vita: casualo(450, 850),
-                            r: casualo(0.7, 1.5)
-                        });
-                    }
-                }
-            }
-            stelle = stelle.filter(s => adesso - s.nata < s.vita);
-            scintille = scintille.filter(sc => adesso - sc.nata < sc.vita);
-            for (const sc of scintille) {
-                sc.x += sc.vx * dt;
-                sc.y += sc.vy * dt;
-                sc.vy += 70 * dt; // leggera gravita'
             }
         }
 
@@ -2353,42 +2294,6 @@ function avviaStelleCadenti() {
                 }
             }
 
-            // Stelle cadenti: scia a gradiente con testa bianca brillante
-            for (const stella of stelle) {
-                const eta = adesso - stella.nata;
-                const alpha = Math.min(1, eta / 160) * Math.min(1, (stella.vita - eta) / 320);
-                const codaX = stella.x - stella.dirx * stella.lunghezza;
-                const codaY = stella.y - stella.diry * stella.lunghezza;
-                const gradiente = ctx.createLinearGradient(stella.x, stella.y, codaX, codaY);
-                gradiente.addColorStop(0, 'rgba(255, 255, 255, ' + (0.95 * alpha).toFixed(3) + ')');
-                gradiente.addColorStop(0.3, 'rgba(125, 211, 252, ' + (0.55 * alpha).toFixed(3) + ')');
-                gradiente.addColorStop(1, 'rgba(56, 189, 248, 0)');
-                ctx.strokeStyle = gradiente;
-                ctx.lineWidth = stella.spessore;
-                ctx.lineCap = 'round';
-                ctx.shadowColor = 'rgba(56, 189, 248, 0.85)';
-                ctx.shadowBlur = 14;
-                ctx.beginPath();
-                ctx.moveTo(stella.x, stella.y);
-                ctx.lineTo(codaX, codaY);
-                ctx.stroke();
-                ctx.beginPath(); // testa luminosa
-                ctx.arc(stella.x, stella.y, stella.spessore * 1.5, 0, Math.PI * 2);
-                ctx.shadowBlur = 18;
-                ctx.fillStyle = 'rgba(255, 255, 255, ' + (0.9 * alpha).toFixed(3) + ')';
-                ctx.fill();
-            }
-            // scintille dei scoppietti: puntini di luce che svaniscono
-            for (const sc of scintille) {
-                const etaScintilla = adesso - sc.nata;
-                const alphaScintilla = Math.max(0, 1 - etaScintilla / sc.vita);
-                ctx.beginPath();
-                ctx.arc(sc.x, sc.y, sc.r, 0, Math.PI * 2);
-                ctx.shadowBlur = 8;
-                ctx.fillStyle = 'rgba(234, 247, 255, ' + alphaScintilla.toFixed(3) + ')';
-                ctx.fill();
-            }
-            ctx.shadowBlur = 0;
         }
 
         function cicloStelle(adesso) {
@@ -2403,12 +2308,9 @@ function avviaStelleCadenti() {
 
         ridimensionaCielo();
         if (window.console && console.log) {
-            console.log('🌠 Cielo Flegrea attivo: ' + asteroidi.length + ' asteroidi di fondo, stelle cadenti ogni ' + STELLE_CONFIG.intervalloStella[0] + '-' + STELLE_CONFIG.intervalloStella[1] + ' ms');
+            console.log('🌠 Cielo Flegrea attivo: ' + asteroidi.length + ' granelli in deriva quieta');
         }
         window.addEventListener('resize', ridimensionaCielo);
-        prossimaStella = window.performance
-            ? performance.now() + casualo(300, 900)
-            : 0;
         window.requestAnimationFrame(cicloStelle);
     } catch (errore) {
         // Solo estetica: se qualcosa va storto, l'app continua senza particelle.
