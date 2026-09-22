@@ -1,7 +1,7 @@
 {
   "name": "arena-flegrea-test",
   "private": true,
-  "version": "0.2.8",
+  "version": "0.2.10",
   "description": "Suite di test jsdom per Arena Flegrea",
   "scripts": {
     "test": "node run-tests.js",

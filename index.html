@@ -20,12 +20,12 @@
         <svg class="mare-svg" viewBox="0 0 1200 240" preserveAspectRatio="xMidYMax slice" aria-hidden="true" focusable="false">
             <defs>
                 <linearGradient id="mare-flegreo" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stop-color="#38bdf8" stop-opacity="0.14"/>
-                    <stop offset="1" stop-color="#38bdf8" stop-opacity="0.03"/>
+                    <stop id="stop-mare-a" offset="0" stop-color="#38bdf8" stop-opacity="0.14"/>
+                    <stop id="stop-mare-b" offset="1" stop-color="#38bdf8" stop-opacity="0.03"/>
                 </linearGradient>
                 <linearGradient id="terra-costiera" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stop-color="#16305a"/>
-                    <stop offset="1" stop-color="#0a1630"/>
+                    <stop id="stop-terra-a" offset="0" stop-color="#16305a"/>
+                    <stop id="stop-terra-b" offset="1" stop-color="#0a1630"/>
                 </linearGradient>
                 <linearGradient id="riflesso-svanisce" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
                     <stop offset="0" stop-color="#7dd3fc" stop-opacity="0.16"/>
@@ -40,9 +40,9 @@
             <path fill="url(#terra-costiera)" d="M-60,213 C100,210 260,214 420,211 C560,208 700,214 840,211 C980,208 1120,213 1260,210 L1260,240 L-60,240 Z"/>
             <!-- mare e orizzonte -->
             <rect x="0" y="218" width="1200" height="22" fill="url(#mare-flegreo)"/>
-            <line x1="-60" y1="218" x2="1260" y2="218" stroke="#38bdf8" stroke-opacity="0.28" stroke-width="1"/>
+            <line id="linea-orizzonte" x1="-60" y1="218" x2="1260" y2="218" stroke="#38bdf8" stroke-opacity="0.28" stroke-width="1"/>
             <!-- luci delle costiere sul golfo (aloni, puntini che scintillano, riflessi) -->
-            <g>
+            <g id="luci-costiera">
                 <circle cx="185" cy="215" r="5" fill="url(#alone-flegreo)" opacity="0.8"/>
                 <circle cx="540" cy="214" r="4" fill="url(#alone-flegreo)" opacity="0.7"/>
                 <circle cx="860" cy="215" r="5" fill="url(#alone-flegreo)" opacity="0.8"/>
@@ -63,13 +63,13 @@
                 <circle class="luce" cx="1030" cy="215" r="1.4" fill="#7dd3fc"/>
                 <circle class="luce-fiassa" cx="1110" cy="213" r="1" fill="#eaf7ff" opacity="0.4"/>
                 <circle class="luce luce-b" cx="1170" cy="215" r="1.3" fill="#7dd3fc"/>
-                <path class="riflesso" d="M-60,228.2 C20,227 80,228.2 140,227.6 C200,227 260,226.4 320,227.2 C380,228 440,226.6 500,227.8 C560,229 620,231.2 680,230 C740,228.8 800,228 860,227 C920,226 980,228.6 1040,230.6 C1100,232.6 1160,231.6 1220,230.6 C1240,230.3 1255,230.1 1265,230" fill="none" stroke="url(#riflesso-svanisce)" stroke-width="1.4" stroke-linecap="round"/>
+                <path class="riflesso" d="M868,222.6 C861,223.9 855,224.5 848,224.9 C795,226.1 745,226.9 698,227.5 C664,227.9 634,228.9 612,230.5 C601,231.4 595,233 597,234.7 C599,236.4 605,236.7 610,235.6 C612.5,235 613,233.6 611,232.6" fill="none" stroke="url(#riflesso-svanisce)" stroke-width="1.5" stroke-linecap="round"/>
                 <path class="riflesso" d="M-60,232.4 C30,231 120,232.8 210,231.8 C300,230.8 390,233.2 480,232.2 C570,231.2 660,233.6 750,232.4 C840,231.2 930,233.8 1020,232.8 C1110,231.8 1190,233.6 1265,232.6" fill="none" stroke="url(#riflesso-svanisce)" opacity="0.75" stroke-width="1.1" stroke-linecap="round"/>
             <circle class="glint glint-1" r="1.6" fill="#eaf7ff" transform="translate(-100,-100)"/>
             <circle class="glint glint-2" r="1.2" fill="#eaf7ff" transform="translate(-100,-100)"/>
             </g>
             <!-- vele stilizzate che sdraiano sul golfo -->
-            <g transform="translate(255,216)">
+            <g transform="translate(1080,216.8) scale(0.66)">
                 <g class="vela vela-1">
                     <path d="M-12,0 C-6,4 6,4 12,0 Z" fill="#38bdf8" fill-opacity="0.7"/>
                     <path d="M-1,-17 L-1,-1.5 L-10,-1.5 Z" fill="#eaf7ff" fill-opacity="0.92"/>
@@ -91,11 +91,11 @@
                 </g>
             </g>
         </svg>
-        <svg class="vesuvio-svg" viewBox="370 20 510 220" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
+        <svg class="vesuvio-svg" viewBox="325 20 640 220" preserveAspectRatio="xMidYMax meet" aria-hidden="true" focusable="false">
             <defs>
                 <linearGradient id="vesuvio-notte" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stop-color="#16305a"/>
-                    <stop offset="1" stop-color="#0a1630"/>
+                    <stop id="stop-vesuvio-a" offset="0" stop-color="#16305a"/>
+                    <stop id="stop-vesuvio-b" offset="1" stop-color="#0a1630"/>
                 </linearGradient>
                 <radialGradient id="alone-flegreo" cx="0.5" cy="0.5" r="0.5">
                     <stop offset="0" stop-color="#7dd3fc" stop-opacity="0.4"/>
@@ -111,6 +111,16 @@
                     <stop offset="0.8" stop-color="#eaf7ff"/>
                     <stop offset="1" stop-color="#cfeaff"/>
                 </radialGradient>
+                <radialGradient id="sole-alone" cx="0.5" cy="0.5" r="0.5">
+                    <stop offset="0" stop-color="#ffe08a" stop-opacity="0.55"/>
+                    <stop offset="0.5" stop-color="#ffc247" stop-opacity="0.20"/>
+                    <stop offset="1" stop-color="#ffc247" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="sole-corpo" cx="0.4" cy="0.35" r="0.8">
+                    <stop offset="0" stop-color="#fff7d6"/>
+                    <stop offset="0.75" stop-color="#ffdf6b"/>
+                    <stop offset="1" stop-color="#ffc247"/>
+                </radialGradient>
                 <linearGradient id="scia-luna" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="0" stop-color="#eaf7ff" stop-opacity="0.5"/>
                     <stop offset="1" stop-color="#eaf7ff" stop-opacity="0"/>
@@ -120,8 +130,13 @@
                     <stop offset="1" stop-color="#cfeaff" stop-opacity="0"/>
                 </radialGradient>
             </defs>
+            <!-- v0.2.10: sole e luna sullo stesso percorso ellittico (ciclo notte-giorno, vedi script.js) -->
+            <g class="corpo-sole" id="corpo-sole" opacity="0">
+                <circle class="alone-sole" cx="0" cy="0" r="42" fill="url(#sole-alone)"/>
+                <circle cx="0" cy="0" r="14" fill="url(#sole-corpo)"/>
+            </g>
             <!-- 'a luna: sorge da dietro 'o fianco d''o cono, sotto 'o sottotitolo, e lascia 'a scia -->
-            <g class="luna">
+            <g class="luna" id="corpo-luna">
                 <circle class="alone-luna" cx="676" cy="148" r="46" fill="url(#luna-alone)"/>
                 <circle cx="676" cy="148" r="13" fill="url(#luna-corpo)"/>
                 <circle cx="672" cy="144" r="2.6" fill="#cfeaff" opacity="0.55"/>
@@ -143,9 +158,9 @@
                 <ellipse cx="740" cy="176" rx="46" ry="6" fill="url(#nuvola-flegrea)"/>
                 <ellipse cx="785" cy="170" rx="28" ry="4.5" fill="url(#nuvola-flegrea)"/>
             </g>
-            <!-- Vesuvio + Monte Somma: M compatta, coordinate assolute (regione x370-880, y20-240) -->
-            <path fill="url(#vesuvio-notte)" d="M380,240 C416,207 448,194 472,182 C480,178 486,174 490,170 C494,167.5 498,169 502,171 C506,173 512,176 520,179 C526,181 532,181 538,179 C546,176 556,172 568,169 C576,167 584,166 592,166 C600,166 608,167 616,169 C632,174 652,182 674,190 C704,200 748,210 792,216 C804,217 814,217.5 820,218 L820,240 Z"/>
-            <path class="cratere" fill="none" stroke="#38bdf8" stroke-opacity="0.55" stroke-width="2" stroke-linecap="round" d="M568,170 C580,166.8 588,166.2 596,166.2 C606,166.2 614,167.2 624,170"/>
+            <!-- Vesuvio + Monte Somma: M compatta, coordinate assolute (regione allargata x325-965, y20-240: spazio extra per sole/luna con alone) -->
+            <path fill="url(#vesuvio-notte)" d="M380,240 C414,206 446,191 470,177 C479,172 486,166.5 492,162 C497,158.5 503,159.5 509,162.5 C516,166 524,171 534,175.5 C544,171.5 556,165.5 570,160.5 C580,157 588,155.5 596,155.5 C603,155.5 608,157 612,158.5 C620,160.5 630,163.5 642,167.5 C656,173 672,179.5 686,185.5 C708,194 748,204.5 792,213 C804,215.5 814,217 820,218 L820,240 Z"/>
+            <path class="cratere" fill="none" stroke="#38bdf8" stroke-opacity="0.55" stroke-width="2" stroke-linecap="round" d="M578,159.5 C586,156.8 592,156 598,156 C605,156 611,157.2 618,159.5"/>
             <!-- lucine sulle falde (casette sul Vesuvio di notte) -->
             <circle class="luce-fiassa" cx="438" cy="206" r="0.9" fill="#7dd3fc" opacity="0.4"/>
             <circle class="luce-fiassa" cx="688" cy="203" r="0.8" fill="#eaf7ff" opacity="0.35"/>
@@ -676,7 +691,7 @@
                     </div>
 
                     <h3>ℹ️ Info Sistema</h3>
-                    <p><strong>Versione:</strong> 0.2.9 - Restyling Vesuviano-Partenopeo: dark azzurro, glow cyberpunk, cielo calmo, Vesuvio e Monte Somma (profilo a M, dimensioni fisse), luci del golfo, vele e luna che sorge</p>
+                    <p><strong>Versione:</strong> 0.2.10 - Ciclo notte e giorno: sole e luna sulla stessa traiettoria (20 s per corpo, 5 s di pausa di notte piena), solo i colori di cielo, Vesuvio e mare</p>
                     <p><strong>Storage usato:</strong> <span id="storage-size">0 KB</span></p>
                 </div>
             </section>

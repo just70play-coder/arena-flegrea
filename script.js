@@ -2190,6 +2190,9 @@ window.getFattoreLocalita = getFattoreLocalita;
    sistema l'effetto non parte e l'app funziona identica.
    =========================== */
 
+// v0.2.10: 1 = notte piena (pulviscolo visibile), 0 = giorno pieno (pulviscolo spento)
+let FATTORE_NOTTE = 1;
+
 const STELLE_CONFIG = {
     idCanvas: 'cielo-flegrea',
     areaPerAsteroide: 78000,        // px² di viewport per ogni asteroide (calma: pochi)
@@ -2278,7 +2281,8 @@ function avviaStelleCadenti() {
             // Asteroidi: detriti che pulsano con bagliore azzurro
             for (const a of asteroidi) {
                 const scintillio = 0.65 + 0.35 * Math.sin(adesso / 1000 * a.pulsazione * Math.PI * 2 + a.fase);
-                const alpha = a.alphaBase * scintillio;
+                const alpha = a.alphaBase * scintillio * FATTORE_NOTTE;
+                if (alpha < 0.01) continue;
                 ctx.beginPath();
                 ctx.arc(a.x, a.y, a.r, 0, Math.PI * 2);
                 ctx.shadowColor = 'rgba(56, 189, 248, 0.9)';
@@ -2319,3 +2323,166 @@ function avviaStelleCadenti() {
 }
 
 document.addEventListener('DOMContentLoaded', avviaStelleCadenti);
+
+/* ===========================
+   v0.2.10 CICLO NOTTE E GIORNO
+   Un "disco orario": sole e luna si alternano sullo stesso percorso parabolico
+   (sorgono a sinistra, culminano in alto, tramontano a destra). Ritmi: 20 s di
+   traversata per corpo (un quarto della velocita' originale) e 5 s di pausa in
+   notte piena tra il tramonto della luna e l'alba del sole (ciclo di 45 s).
+   Cambiano SOLO i colori del fondo naturale — cielo (var --background),
+   silhouette del Vesuvio, mare, terra costiera, linea d'orizzonte — mentre
+   schede, sezioni interne e testi restano sui colori scuri originali.
+   Prestazioni: la POSIZIONE dei corpi e' aggiornata a ogni fotogramma
+   (movimento fluido, senza scatti); la palette dei colori, piu' pesante,
+   resta throttled a 120 ms.
+   Nei browser senza requestAnimationFrame (jsdom nei test) e con
+   "movimento ridotto" il ciclo non parte: resta la notte statica.
+   =========================== */
+
+const CICLO_CONFIG = {
+    msSole: 20000,            // traversata del sole: 1/4 della velocita' originaria (era 5 s)
+    msLuna: 20000,            // traversata della luna
+    msPausa: 5000,            // pausa in notte piena tra luna e sole (luna -> pausa -> sole)
+    aggioramentoMs: 120,      // frequenza di aggiornamento dei COLORI (posizioni: ogni frame)
+    // parabola: sorgenza DIETRO il Monte Somma (x 490) -> culmine -> mare aperto (x 900).
+    // yu0 = quota orizzonte in unita' utente; i corpi viaggiano SOTTO (alba/tramonto)
+    // cosi' entrano e escono nascosti dietro montagna/mare: mai mozzati dal bordo.
+    inizioX: 490, fineX: 900,
+    yu0: 210,         // quota (unita' utente) della linea d'orizzonte
+    quotaY: 88,       // culmine BASSO, sopra la cupola del Vesuvio (unita' utente)
+    immersione: 26    // capi sotto l'orizzonte (nascosti dietro monte/terra/mare)
+};
+
+function avviaCicloNotteGiorno() {
+    if (typeof window.requestAnimationFrame !== 'function') return;
+    if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    try {
+        const sole = document.getElementById('corpo-sole');
+        const luna = document.getElementById('corpo-luna');
+        const scia = document.querySelector('.scia-luna');
+        const stopVesuvioA = document.getElementById('stop-vesuvio-a');
+        const stopVesuvioB = document.getElementById('stop-vesuvio-b');
+        const stopMareA = document.getElementById('stop-mare-a');
+        const stopMareB = document.getElementById('stop-mare-b');
+        const stopTerraA = document.getElementById('stop-terra-a');
+        const stopTerraB = document.getElementById('stop-terra-b');
+        const orizzonte = document.getElementById('linea-orizzonte');
+        const luci = document.getElementById('luci-costiera');
+        if (!sole || !luna || !stopVesuvioA) return;
+
+        const limita = (v, min, max) => Math.max(min, Math.min(max, v));
+        const mescola = (a, b, t) => a + (b - a) * t;
+        const canale = (esad) => [
+            parseInt(esad.slice(1, 3), 16),
+            parseInt(esad.slice(3, 5), 16),
+            parseInt(esad.slice(5, 7), 16)
+        ];
+        const sfuma = (notte, giorno, t) => {
+            const cn = canale(notte), cg = canale(giorno);
+            return 'rgb(' + Math.round(mescola(cn[0], cg[0], t)) + ','
+                + Math.round(mescola(cn[1], cg[1], t)) + ','
+                + Math.round(mescola(cn[2], cg[2], t)) + ')';
+        };
+
+        // palette: notte (attuale) -> giorno (piu' chiara ma sempre scura abbastanza
+        // da lasciare leggibili testo e schede, che NON vengono toccati)
+        const PAL = {
+            cieloNotte: '#060b16',  cieloGiorno: '#234a6d',
+            vesAnotte: '#16305a',   vesAgiorno: '#153852',
+            vesBnotte: '#0a1630',   vesBgiorno: '#0c2038',
+            terraAnotte: '#16305a', terraAgiorno: '#1d3c57',
+            terraBnotte: '#0a1630', terraBgiorno: '#12283e',
+            orzNotte: '#38bdf8',    orzGiorno: '#bae6fd'
+        };
+
+        let ultimoColore = -Infinity;
+
+        // palette e luci: la parte pesante del ciclo, aggiornata ogni aggioramentoMs
+        function aggiornaColori(giorno) {
+            stopVesuvioA.setAttribute('stop-color', sfuma(PAL.vesAnotte, PAL.vesAgiorno, giorno));
+            stopVesuvioB.setAttribute('stop-color', sfuma(PAL.vesBnotte, PAL.vesBgiorno, giorno));
+            stopMareA.setAttribute('stop-color', sfuma('#38bdf8', '#7dd3fc', giorno));
+            stopMareA.setAttribute('stop-opacity', mescola(0.14, 0.18, giorno).toFixed(3));
+            stopMareB.setAttribute('stop-opacity', mescola(0.03, 0.05, giorno).toFixed(3));
+            stopTerraA.setAttribute('stop-color', sfuma(PAL.terraAnotte, PAL.terraAgiorno, giorno));
+            stopTerraB.setAttribute('stop-color', sfuma(PAL.terraBnotte, PAL.terraBgiorno, giorno));
+            orizzonte.setAttribute('stroke', sfuma(PAL.orzNotte, PAL.orzGiorno, giorno));
+            orizzonte.setAttribute('stroke-opacity', mescola(0.28, 0.40, giorno).toFixed(3));
+            if (luci) luci.setAttribute('opacity', mescola(1, 0.15, giorno).toFixed(3));
+
+            document.documentElement.style.setProperty(
+                '--background', sfuma(PAL.cieloNotte, PAL.cieloGiorno, giorno));
+            FATTORE_NOTTE = 1 - giorno;
+        }
+
+        function aggiornaCiclo(adesso) {
+            // turni in sequenza: SOLE -> LUNA -> PAUSA (notte piena tra luna e sole)
+            const durata = CICLO_CONFIG.msSole + CICLO_CONFIG.msLuna + CICLO_CONFIG.msPausa;
+            const t = adesso % durata;
+            let faseSole = false, inPausa = false, prog;
+            if (t < CICLO_CONFIG.msSole) {
+                faseSole = true;
+                prog = t / CICLO_CONFIG.msSole;             // 0 -> 1 sulla traversata
+            } else if (t < CICLO_CONFIG.msSole + CICLO_CONFIG.msLuna) {
+                prog = (t - CICLO_CONFIG.msSole) / CICLO_CONFIG.msLuna;
+            } else {
+                inPausa = true;
+                prog = 0;
+            }
+            // parabola: sorge dietro il Somma, culmina, tuffa in mare. u = sin(prog*pi):
+            // curva u^1.15: resta bassa rasente l'orizzonte e sale solo al culmine
+            const u = Math.sin(prog * Math.PI);             // 0 -> 1 -> 0
+            const x = mescola(CICLO_CONFIG.inizioX, CICLO_CONFIG.fineX, prog);
+            const y = CICLO_CONFIG.yu0 + CICLO_CONFIG.immersione
+                - Math.pow(u, 1.15) * CICLO_CONFIG.quotaY;
+            // visibilita' legata all'ALTITUDINE del centro sopra l'orizzonte:
+            // il disco affiora, resta pieno in volo e SI SPEGNE DEL TUTTO appena
+            // immerso nel mare (a -16: dentro il layer, mai mozzato al bordo)
+            const alt = CICLO_CONFIG.yu0 - y;
+            const vista = limita((alt + 16) / 18, 0, 1);
+
+            const curva = Math.sin(prog * Math.PI); // 0 ai capi, 1 al culmine
+            // azzurro massimo ESATTAMENTE allo zenit del disco (curva=1), non prima:
+            // curva^1.6 resta bassa a lungo e raggiunge l'intensita' piena solo in cima.
+            // Il giorno esiste SOLO nel turno del sole: ai passaggi di consegne
+            // l'intensita' e' 0 da entrambi i lati (prima la curva della luna lasciava
+            // 0.5 al confine -> flash di cambio colore a fine ciclo)
+            const giorno = faseSole ? Math.pow(curva, 1.6) : 0;
+
+            sole.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')');
+            sole.setAttribute('opacity', (faseSole ? vista : 0).toFixed(3));
+            luna.setAttribute('transform', 'translate(' + (x - 676).toFixed(1) + ',' + (y - 148).toFixed(1) + ')');
+            luna.setAttribute('opacity', (faseSole ? 0 : vista).toFixed(3));
+            if (scia) {
+                scia.setAttribute('transform', 'translate(' + (x - 676).toFixed(1) + ',0)');
+                scia.setAttribute('opacity', (faseSole ? 0 : vista * 0.55).toFixed(3));
+            }
+            // (nota: luna e scia usano lo stesso x,y del sole: gli offset -676/-148
+            // compensano la posizione dei gruppi in markup, vedi index.html)
+
+            // i colori cambiano lentamente: bastano ~8 aggiornamenti al secondo;
+            // le posizioni invece vanno spostate a ogni frame (movimento fluido)
+            if (adesso - ultimoColore >= CICLO_CONFIG.aggioramentoMs) {
+                ultimoColore = adesso;
+                aggiornaColori(giorno);
+            }
+        }
+
+        function cicloCorpo(adesso) {
+            aggiornaCiclo(adesso); // posizioni a ogni frame: disco liscio, zero scatti
+            window.requestAnimationFrame(cicloCorpo);
+        }
+
+        aggiornaCiclo(0);
+        window.requestAnimationFrame(cicloCorpo);
+        if (window.console && console.log) {
+            console.log('☀️ Ciclo notte-giorno attivo: sole ' + CICLO_CONFIG.msSole
+                + ' ms, luna ' + CICLO_CONFIG.msLuna + ' ms, pausa ' + CICLO_CONFIG.msPausa + ' ms');
+        }
+    } catch (errore) {
+        if (window.console && console.warn) console.warn('Ciclo notte-giorno non attivo:', errore);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', avviaCicloNotteGiorno);

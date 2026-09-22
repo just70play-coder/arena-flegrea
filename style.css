@@ -2012,7 +2012,7 @@ header {
 
 /* --- v0.2.9f: dimensioni fisse — 'a montagna nun se stringe c'a fenesta!
    Due layer: il mare (acqua, luci, vele) resta elastico a tutta larghezza,
-   la montagna cu luna e nuvole e' un SVG FISSO 510x220 centrato sul fondo:
+   la montagna cu luna e nuvole e' un SVG FISSO 640x220 centrato sul fondo:
    stessa forma a ogni dimensione della finestra. Le regole piu' su
    (.vesuvio-svg larghezza 100% / height 130-150px) vengono qui sostituite. --- */
 .mare-svg {
@@ -2032,11 +2032,17 @@ header {
     bottom: 0;
     left: 50%;
     transform: translateX(-50%);
-    width: 510px;
+    width: 640px;
     height: 220px;
     max-width: none;
     z-index: 0;
     pointer-events: none;
+}
+
+/* Schermi stretti: il cielo si ridimensiona uniforme (stesse proporzioni,
+   montagna intatta e centrata, mai schiacciata) */
+@media (max-width: 700px) {
+    .vesuvio-svg { width: 510px; }
 }
 
 /* --- v0.2.9g: 'a carna a sotto e 'e maccaruni 'acoppo — SMONTATO!
@@ -2109,3 +2115,30 @@ header::after {
     .glint-2 { animation: none; opacity: 0.3; transform: translate(760px, 232.4px); }
 }
 
+
+/* ===========================
+   v0.2.10 CICLO NOTTE E GIORNO
+   Sole e luna sullo stesso percorso ellittico (un disco orario che si alterna).
+   Il ciclo cambia SOLO i colori del fondo naturale (cielo, Vesuvio, mare,
+   terra): le schede, le sezioni interne e i testi NON vengono toccati e
+   restano sul fondo scuro originale, sempre leggibili.
+   =========================== */
+
+/* Il sole: disco caldo, nascosto quando e' sotto l'orizzonte (lo muove il JS) */
+.corpo-sole {
+    filter: drop-shadow(0 0 14px rgba(255, 194, 71, 0.75));
+    pointer-events: none;
+}
+
+/* Con il ciclo attivo il movimento dei corpi celesti lo guida il JavaScript:
+   le vecchie animazioni CSS di luna e scia vengono disattivate */
+.luna,
+.scia-luna {
+    animation: none;
+}
+
+/* Movimento ridotto: niente ciclo, resta la notte con la luna al suo posto
+   (il JavaScript esce subito, qui nascondiamo solo il sole) */
+@media (prefers-reduced-motion: reduce) {
+    .corpo-sole { display: none; }
+}
