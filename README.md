@@ -12,7 +12,7 @@ una scelta deliberata: niente scraping, niente dipendenze da siti terzi.
   prezzo, peso), ricerca libera, ordinamento, paginazione
 - **Valutatore** — stima del valore di un pezzo:
   `Base di mercato × fattore località (giacimento tipico) × Score qualità × fattore integrità`
-  con scoring fotografico su 6 criteri ponderati e scomposizione trasparente del calcolo
+  con scoring fotografico su 8 criteri ponderati e scomposizione trasparente del calcolo
 - **Statistiche** — distribuzione per mercato, trend temporale, campioni notevoli
 - **Backup** — esportazione e importazione del database in JSON
 
@@ -31,7 +31,7 @@ La suite di test (jsdom) vive in `test/`:
 
     cd test
     npm install
-    node run-tests.js    # 327 asserzioni
+    node run-tests.js    # 329 asserzioni
     node smoke.js        # avvio app senza errori
 
 ## Convenzioni del progetto
@@ -53,3 +53,4 @@ La suite di test (jsdom) vive in `test/`:
 | v0.2.9 | restyling: palette Vesuviano-Partenopeo (dark azzurro + glow cyberpunk) + stelle cadenti con scoppietti, Vesuvio e Monte Somma (profilo a M a dimensioni fisse), luci del golfo, vele e luna che sorge |
 | v0.2.10 | ciclo notte-giorno: sole e luna su ellisse (10 s), solo colori di cielo/Vesuvio/mare |
 | v0.2.11 | alba 3-6, tramonto geometrico 16,6-20 legato all affondamento del sole; dischi densi, stelle nell header; Luna Rossa profonda |
+| v0.3.0 | scoring fotografico v2: estetica fuori, 8 criteri (15/15/15/14/13/12/8/8), totale 100 |

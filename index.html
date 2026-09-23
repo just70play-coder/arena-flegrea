@@ -590,18 +590,18 @@
                             <strong>€<span id="val-eurogrammo">0.00</span>/g</strong>
                         </div>
 
-                        						<!-- PHASE 5: SCORING FOTOGRAFICO (6 criteri ponderati) -->
+                        						<!-- PHASE 5: SCORING FOTOGRAFICO (v0.3.0: 8 criteri ponderati) -->
 						<div class="scoring-box">
 							<div class="scoring-intestazione">
 								<h3>📸 Scoring fotografico</h3>
 								<button type="button" id="score-reset" class="btn-secondary btn-small">Ripristina</button>
 							</div>
-							<p class="subtitle">Vota ogni criterio da 1 a 10: il punteggio è ponderato (25 / 20 / 20 / 15 / 10 / 10)</p>
+							<p class="subtitle">Definisci ogni criterio da 1 a 10</p>
 
 							<div class="scoring-griglia">
 								<div class="scoring-criterio">
 									<label for="score-cristallinita">
-										Cristallinità <span class="scoring-peso">25%</span>
+										Cristallinità <span class="scoring-peso">15%</span>
 									</label>
 									<input type="range" id="score-cristallinita" min="1" max="10" step="1" value="5">
 									<output id="score-valore-cristallinita">5</output>
@@ -609,35 +609,8 @@
 								</div>
 
 								<div class="scoring-criterio">
-									<label for="score-estetica">
-										Estetica <span class="scoring-peso">20%</span>
-									</label>
-									<input type="range" id="score-estetica" min="1" max="10" step="1" value="5">
-									<output id="score-valore-estetica">5</output>
-									<small>Bilanciamento e appeal del pezzo</small>
-								</div>
-
-								<div class="scoring-criterio">
-									<label for="score-rarita">
-										Rarità <span class="scoring-peso">20%</span>
-									</label>
-									<input type="range" id="score-rarita" min="1" max="10" step="1" value="5">
-									<output id="score-valore-rarita">5</output>
-									<small>Frequenza della specie e di questa forma</small>
-								</div>
-
-								<div class="scoring-criterio">
-									<label for="score-dimensioni">
-										Dimensioni <span class="scoring-peso">15%</span>
-									</label>
-									<input type="range" id="score-dimensioni" min="1" max="10" step="1" value="5">
-									<output id="score-valore-dimensioni">5</output>
-									<small>Grandezza rispetto allo standard</small>
-								</div>
-
-								<div class="scoring-criterio">
 									<label for="score-integrita">
-										Integrità <span class="scoring-peso">10%</span>
+										Integrità <span class="scoring-peso">15%</span>
 									</label>
 									<input type="range" id="score-integrita" min="1" max="10" step="1" value="10">
 									<output id="score-valore-integrita">10</output>
@@ -646,21 +619,67 @@
 
 								<div class="scoring-criterio">
 									<label for="score-trasparenza">
-										Trasparenza <span class="scoring-peso">10%</span>
+										Trasparenza <span class="scoring-peso">15%</span>
 									</label>
 									<input type="range" id="score-trasparenza" min="1" max="10" step="1" value="5">
 									<output id="score-valore-trasparenza">5</output>
 									<small>Trasmissione della luce</small>
 								</div>
+
+								<div class="scoring-criterio">
+									<label for="score-fluorescenza">
+										Fluorescenza <span class="scoring-peso">14%</span>
+									</label>
+									<input type="range" id="score-fluorescenza" min="1" max="10" step="1" value="5">
+									<output id="score-valore-fluorescenza">5</output>
+									<small>Colori emessi sotto luce UV</small>
+								</div>
+
+								<div class="scoring-criterio">
+									<label for="score-rarita">
+										Rarità <span class="scoring-peso">13%</span>
+									</label>
+									<input type="range" id="score-rarita" min="1" max="10" step="1" value="5">
+									<output id="score-valore-rarita">5</output>
+									<small>Frequenza della specie e di questa forma</small>
+								</div>
+
+								<div class="scoring-criterio">
+									<label for="score-dimensioni">
+										Dimensioni <span class="scoring-peso">12%</span>
+									</label>
+									<input type="range" id="score-dimensioni" min="1" max="10" step="1" value="5">
+									<output id="score-valore-dimensioni">5</output>
+									<small>Grandezza rispetto allo standard</small>
+								</div>
+
+								<div class="scoring-criterio">
+									<label for="score-iridescenza">
+										Iridescenza <span class="scoring-peso">8%</span>
+									</label>
+									<input type="range" id="score-iridescenza" min="1" max="10" step="1" value="5">
+									<output id="score-valore-iridescenza">5</output>
+									<small>Gioco di colori sulla superficie</small>
+								</div>
+
+								<div class="scoring-criterio">
+									<label for="score-riflessione">
+										Riflessione <span class="scoring-peso">8%</span>
+									</label>
+									<input type="range" id="score-riflessione" min="1" max="10" step="1" value="5">
+									<output id="score-valore-riflessione">5</output>
+									<small>Specchiatura delle facce del cristallo</small>
+								</div>
+
 							</div>
 
 							<div class="scoring-pannello">
 								<div class="scoring-score">
 									<span>Score ponderato</span>
-									<strong><span id="score-valore">5.5</span> / 10</strong>
+									<strong><span id="score-valore">5.8</span> / 10</strong>
 								</div>
 								<div class="scoring-barra">
-									<div class="scoring-barra-riempimento" id="score-barra-riempimento" style="width:55%"></div>
+									<div class="scoring-barra-riempimento" id="score-barra-riempimento" style="width:57.5%"></div>
 								</div>
 								<p class="scoring-hint">
 									Integrità genera anche il fattore <strong id="score-fattore-integrita">1.00</strong> (range 0.60–1.00):
@@ -711,7 +730,7 @@
                     </div>
 
                     <h3>ℹ️ Info Sistema</h3>
-                    <p><strong>Versione:</strong> 0.2.11 - Alba 3-6, azzurro costante (non scurisce) finche' il disco e' in aria e un secondo ancora, poi cede solo nell'ultima parte dell'affondamento, tramonto geometrico che cresce con l'affondamento del disco (16,6-20 s) e brucia alla scomparsa completa; dischi sempre densi al 100% con bagliori circolari e crepuscolo di 1,5 s al passaggio alla luna; stelle nel cielo del golfo; Luna Rossa profonda, alone rosa che cresce con l'altezza, notte che si schiarisce al culmine</p>
+                    <p><strong>Versione:</strong> 0.3.0 - Scoring fotografico v2: estetica fuori, 8 criteri (cristallinita' 15, integrita' 15, trasparenza 15, fluorescenza 14, rarita' 13, dimensioni 12, iridescenza 8, riflessione 8, totale 100); default 5 per ogni criterio (integrita' 10, score 5.8); formula invariata: valore = base di mercato x localita' x (score/10) x fattore integrita'</p>
                     <p><strong>Storage usato:</strong> <span id="storage-size">0 KB</span></p>
                 </div>
             </section>

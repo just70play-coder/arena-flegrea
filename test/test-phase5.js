@@ -12,7 +12,7 @@ const t = creaRunner('test-phase5.js');
 const { window: w, document: doc, app, dialoghi } = caricaApp({ fileDemo: true });
 
 const $ = (sel) => doc.querySelector(sel);
-const CRITERI = ['cristallinita', 'estetica', 'rarita', 'dimensioni', 'integrita', 'trasparenza'];
+const CRITERI = ['cristallinita', 'integrita', 'trasparenza', 'fluorescenza', 'rarita', 'dimensioni', 'iridescenza', 'riflessione'];
 const voti = (v) => Object.fromEntries(CRITERI.map(c => [c, v]));
 
 // ===========================
@@ -20,12 +20,14 @@ t.gruppo('Configurazione dei criteri');
 // ===========================
 const sommaPesi = Object.values(app.CONFIG.scoringCriteri).reduce((s, c) => s + c.peso, 0);
 t.eq('i pesi sommano 100', sommaPesi, 100);
-t.eq('cristallinita 25%', app.CONFIG.scoringCriteri.cristallinita.peso, 25);
-t.eq('estetica 20%', app.CONFIG.scoringCriteri.estetica.peso, 20);
-t.eq('rarita 20%', app.CONFIG.scoringCriteri.rarita.peso, 20);
-t.eq('dimensioni 15%', app.CONFIG.scoringCriteri.dimensioni.peso, 15);
-t.eq('integrita 10%', app.CONFIG.scoringCriteri.integrita.peso, 10);
-t.eq('trasparenza 10%', app.CONFIG.scoringCriteri.trasparenza.peso, 10);
+t.eq('cristallinita 15%', app.CONFIG.scoringCriteri.cristallinita.peso, 15);
+t.eq('integrita 15%', app.CONFIG.scoringCriteri.integrita.peso, 15);
+t.eq('trasparenza 15%', app.CONFIG.scoringCriteri.trasparenza.peso, 15);
+t.eq('fluorescenza 14%', app.CONFIG.scoringCriteri.fluorescenza.peso, 14);
+t.eq('rarita 13%', app.CONFIG.scoringCriteri.rarita.peso, 13);
+t.eq('dimensioni 12%', app.CONFIG.scoringCriteri.dimensioni.peso, 12);
+t.eq('iridescenza 8%', app.CONFIG.scoringCriteri.iridescenza.peso, 8);
+t.eq('riflessione 8%', app.CONFIG.scoringCriteri.riflessione.peso, 8);
 t.eq('fattore integrità minimo 0.60', app.CONFIG.fattoreIntegritaMin, 0.60);
 t.eq('fattore integrità massimo 1.00', app.CONFIG.fattoreIntegritaMax, 1.00);
 t.eq('default integrità = 10 (integrità perfetta)', app.CONFIG.scoringDefaultIntegrita, 10);
@@ -36,17 +38,18 @@ t.gruppo('Score ponderato');
 t.eq('tutti a 5 → 5.0', app.calcolaScore(voti(5)).score, 5.0);
 t.eq('tutti a 10 → 10.0', app.calcolaScore(voti(10)).score, 10.0);
 t.eq('tutti a 1 → 1.0', app.calcolaScore(voti(1)).score, 1.0);
-t.eq('default reale (5 con integrità 10) → 5.5',
-    app.calcolaScore({ ...voti(5), integrita: 10 }).score, 5.5);
+t.eq('default reale (5 con integrità 10) → 5.75',
+    app.calcolaScore({ ...voti(5), integrita: 10 }).score, 5.75);
 t.eq('suDieci = score/10', app.calcolaScore(voti(7)).suDieci, 0.7);
-// Esempio del documento: crist 8, est 7, rar 6, dim 5, tras 7, integrità 3
-t.quasi('esempio doc → 6.35', app.calcolaScore({
-    cristallinita: 8, estetica: 7, rarita: 6, dimensioni: 5, integrita: 3, trasparenza: 7
-}).score, 6.35, 1e-9);
-t.eq('voto fuori scala viene limitato a 10', app.calcolaScore({ ...voti(5), rarita: 42 }).score, 6.0);
-t.eq('voto sotto scala viene limitato a 1', app.calcolaScore({ ...voti(5), rarita: -3 }).score, 4.2);
+// Esempio v0.3.0: crist 8, int 3, tras 7, fluor 6, rar 6, dim 5, irid 7, rifless 4
+t.quasi('esempio doc → 5.8', app.calcolaScore({
+    cristallinita: 8, integrita: 3, trasparenza: 7, fluorescenza: 6,
+    rarita: 6, dimensioni: 5, iridescenza: 7, riflessione: 4
+}).score, 5.8, 1e-9);
+t.eq('voto fuori scala viene limitato a 10', app.calcolaScore({ ...voti(5), rarita: 42 }).score, 5.65);
+t.eq('voto sotto scala viene limitato a 1', app.calcolaScore({ ...voti(5), rarita: -3 }).score, 4.48);
 t.eq('voto mancante → default 5', app.calcolaScore({ cristallinita: 9 }).score,
-    (9 * 25 + 5 * 75) / 100);
+    (9 * 15 + 5 * 85) / 100);
 
 // ===========================
 t.gruppo('Fattore integrità derivato dal voto');
@@ -77,15 +80,15 @@ t.quasi('score 5, integrità 5 → base × 1.4 × 0.5 × 0.778',
     base * 1.4 * mediocre.suDieci * app.fattoreDaIntegrita(5), 1e-6);
 
 // Esempio del documento di passaggio (punta scheggiata → integrità 3)
-const scDoc = app.calcolaScore({ cristallinita: 8, estetica: 7, rarita: 6,
-    dimensioni: 5, integrita: 3, trasparenza: 7 });
+const scDoc = app.calcolaScore({ cristallinita: 8, integrita: 3, trasparenza: 7,
+    fluorescenza: 6, rarita: 6, dimensioni: 5, iridescenza: 7, riflessione: 4 });
 const datiNeutri = { minerale: 'X', localita: 'Cava Fantasia', campioni: dati.campioni, medie: dati.medie };
-t.quasi('esempio doc su media 100 e località 1.0 → €43.74',
+t.quasi('esempio doc su media 100 e località 1.0 → €39.96',
     app.calcolaValoreStimato('X', 'Cava Fantasia', 1, {
         minerale: 'X', localita: 'Cava Fantasia', campioni: [],
         medie: { catawiki: { mediaPrezzo: 100, mediaPeso: 1, mediaPrezzoGrammo: 100, min: 100, max: 100, n: 1 } }
     }, scDoc),
-    100 * 0.635 * app.fattoreDaIntegrita(3), 1e-6);
+    100 * 0.58 * app.fattoreDaIntegrita(3), 1e-6);
 
 // ===========================
 t.gruppo('Retrocompatibilità (chiamate senza score)');
@@ -112,18 +115,18 @@ t.quasi('Sconosciuta / Franklin = 0.7/1.6', ignoto / franklin, 0.7 / 1.6, 1e-9);
 // ===========================
 t.gruppo('Interfaccia: cursori e pannello live');
 // ===========================
-t.eq('6 cursori nel Valutatore', doc.querySelectorAll('#form-valutatore .scoring-criterio input[type="range"]').length, 6);
+t.eq('8 cursori nel Valutatore', doc.querySelectorAll('#form-valutatore .scoring-criterio input[type="range"]').length, 8);
 t.eq('default cristallinita = 5', $('#score-cristallinita').value, '5');
 t.eq('default integrità = 10', $('#score-integrita').value, '10');
-t.eq('pannello score iniziale = 5.5', $('#score-valore').textContent, '5.5');
+t.eq('pannello score iniziale = 5.8', $('#score-valore').textContent, '5.8');
 t.eq('pannello fattore integrità iniziale = 1.00', $('#score-fattore-integrita').textContent, '1.00');
-t.eq('barra iniziale al 55%', $('#score-barra-riempimento').style.width, '55%');
+t.eq('barra iniziale al 57.5%', $('#score-barra-riempimento').style.width, '57.5%');
 
 $('#score-cristallinita').value = '9';
 $('#score-cristallinita').dispatchEvent(new w.Event('input', { bubbles: true }));
 t.eq('output del criterio aggiornato', $('#score-valore-cristallinita').textContent, '9');
-t.eq('score live aggiornato a 6.5', $('#score-valore').textContent, '6.5');
-t.eq('barra aggiornata al 65%', $('#score-barra-riempimento').style.width, '65%');
+t.eq('score live aggiornato a 6.3', $('#score-valore').textContent, '6.3');
+t.eq('barra aggiornata al 63.5%', $('#score-barra-riempimento').style.width, '63.5%');
 
 $('#score-integrita').value = '1';
 $('#score-integrita').dispatchEvent(new w.Event('input', { bubbles: true }));
@@ -132,7 +135,7 @@ t.eq('fattore integrità live = 0.60', $('#score-fattore-integrita').textContent
 $('#score-reset').dispatchEvent(new w.Event('click', { bubbles: true }));
 t.eq('ripristino: cristallinita = 5', $('#score-cristallinita').value, '5');
 t.eq('ripristino: integrità = 10', $('#score-integrita').value, '10');
-t.eq('ripristino: score = 5.5', $('#score-valore').textContent, '5.5');
+t.eq('ripristino: score = 5.8', $('#score-valore').textContent, '5.8');
 t.eq('ripristino: fattore = 1.00', $('#score-fattore-integrita').textContent, '1.00');
 
 // ===========================
@@ -156,7 +159,7 @@ t.contiene('riga fattore località', esito, 'Fattore località');
 t.contiene('riga score qualità', esito, 'Score qualità');
 t.contiene('riga fattore integrità', esito, 'Fattore integrità');
 t.contiene('fattore località 1.40 mostrato', esito, '× 1.40');
-t.contiene('score 6.5 mostrato', esito, '(6.5/10)');
+t.contiene('score 6.3 mostrato', esito, '(6.3/10)');
 t.contiene('totale presente', esito, 'scomposizione-riga totale');
 const atteso = app.calcolaValoreStimato('Sanidino', 'Monte Nuovo', 85, dati,
     app.calcolaScore({ ...voti(5), cristallinita: 9, integrita: 10 }));

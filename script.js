@@ -10,6 +10,9 @@
 // v0.2.8: SCALA — paginazione di griglia e modal, liste dei filtri con tetto,
 //         migrazione canonicalizzante dei gruppi, minerali secondari delle associazioni
 // (Database Prezzi + Modal dettagli)
+// v0.3.0: SCORING FOTOGRAFICO v2 — estetica RIMossa, 8 criteri (15/15/15/14/13/12/8/8):
+//         cristallinita', integrita', trasparenza, fluorescenza, rarita', dimensioni,
+//         iridescenza, riflessione; formula del valore invariata
 // ===========================
 
 // ===========================
@@ -48,20 +51,25 @@ const CONFIG = {
     // la seconda fattoreLocalitaDefault (1.0).
     // ===========================
     // PHASE 5: SCORING FOTOGRAFICO (pesi fissi dalla specifica di Fabio)
+    // v0.3.0: estetica RIMossa; 8 criteri, totale 100 (15/15/15/14/13/12/8/8)
     // ===========================
     scoringCriteri: {
-        cristallinita: { peso: 25, etichetta: 'Cristallinità',
+        cristallinita: { peso: 15, etichetta: 'Cristallinità',
             descrizione: 'Sviluppo e definizione dei cristalli' },
-        estetica: { peso: 20, etichetta: 'Estetica',
-            descrizione: 'Bilanciamento e appeal complessivo del pezzo' },
-        rarita: { peso: 20, etichetta: 'Rarità',
-            descrizione: 'Frequenza della specie e di questa forma' },
-        dimensioni: { peso: 15, etichetta: 'Dimensioni',
-            descrizione: 'Grandezza rispetto allo standard della specie' },
-        integrita: { peso: 10, etichetta: 'Integrità',
+        integrita: { peso: 15, etichetta: 'Integrità',
             descrizione: 'Assenza di rotture, riparazioni e scheggiature' },
-        trasparenza: { peso: 10, etichetta: 'Trasparenza',
-            descrizione: 'Grado di trasmissione della luce' }
+        trasparenza: { peso: 15, etichetta: 'Trasparenza',
+            descrizione: 'Grado di trasmissione della luce' },
+        fluorescenza: { peso: 14, etichetta: 'Fluorescenza',
+            descrizione: 'Colori emessi sotto luce ultravioletta' },
+        rarita: { peso: 13, etichetta: 'Rarità',
+            descrizione: 'Frequenza della specie e di questa forma' },
+        dimensioni: { peso: 12, etichetta: 'Dimensioni',
+            descrizione: 'Grandezza rispetto allo standard della specie' },
+        iridescenza: { peso: 8, etichetta: 'Iridescenza',
+            descrizione: 'Gioco di colori sulla superficie dei cristalli' },
+        riflessione: { peso: 8, etichetta: 'Riflessione',
+            descrizione: 'Brillantezza e specchiatura delle facce' }
     },
     // Voto di default: 5 per tutti i criteri, 10 per Integrità
     // (10 = integrità perfetta: a default lo Score vale 5.5/10 come nella specifica)
@@ -407,7 +415,7 @@ function localitaCanonica(input) {
 // PHASE 5: SCORING FOTOGRAFICO
 // ===========================
 
-// Punteggio ponderato 1-10 sui 6 criteri (pesi dalla specifica: 25/20/20/15/10/10)
+// Punteggio ponderato 1-10 sugli 8 criteri (pesi v0.3.0: 15/15/15/14/13/12/8/8)
 function calcolaScore(voti) {
     let somma = 0;
     let pesoTotale = 0;
@@ -952,7 +960,7 @@ function inizializzaValutatore() {
             return;
         }
         
-        // PHASE 5: lo score ponderato dei 6 criteri entra nella formula
+        // PHASE 5: lo score ponderato degli 8 criteri entra nella formula
         const voti = leggiVotiScoring();
         const score = calcolaScore(voti);
         const scomposizione = generaScomposizione(mineraleNorm, lookup.localitaFattore, peso, lookup.datiDB, score);

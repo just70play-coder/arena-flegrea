@@ -90,7 +90,7 @@ t.eq('nessun alert di errore', dialoghi.alert.join('|'), '');
 const esito = $('#risultato-valutazione').innerHTML;
 t.contiene('risultato renderizzato', esito, 'Valore stimato');
 t.contiene('località canonica mostrata nel risultato', esito, 'Parker Shaft');
-// Dal v0.2.7 il pannello applica lo score di default (5.5/10, integrità 10)
+// Dal v0.2.7 il pannello applica lo score di default (5.75/10, integrità 10)
 const scoreDefault = app.calcolaScore({ cristallinita: 5, estetica: 5, rarita: 5,
     dimensioni: 5, integrita: 10, trasparenza: 5 });
 const attesaDefault = app.calcolaValoreStimato('Hardystonite', CANONICA, 50, gruppoFranklin, scoreDefault);

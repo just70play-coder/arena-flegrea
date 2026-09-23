@@ -127,10 +127,10 @@ t.contiene('raccomandazione presente', esito.innerHTML, 'raccomandazione-');
 const dati = app.trovaDatiGruppo('Sanidino', 'Monte Nuovo').datiDB;
 const stima = app.calcolaValoreStimato('Sanidino', 'Monte Nuovo', 85, dati);
 t.quasi('valore stimato = 21.95 € (formula v0.2.5.1)', stima, 21.9479, 0.01);
-// Dal v0.2.7 il pannello usa lo score di default (5.5/10, integrità 10), non più la legacy
+// Dal v0.2.7 il pannello usa lo score di default (5.75/10, integrità 10), non più la legacy
 const stimaDefault = app.calcolaValoreStimato('Sanidino', 'Monte Nuovo', 85, dati,
     app.calcolaScore({ cristallinita: 5, estetica: 5, rarita: 5, dimensioni: 5, integrita: 10, trasparenza: 5 }));
-t.quasi('valore di default nel pannello = 25.41 €', stimaDefault, 25.4133, 0.01);
+t.quasi('valore di default nel pannello = 26.57 €', stimaDefault, 26.5685, 0.01);
 t.eq('percentuale nel pannello coerente col valore di default',
     Number(($('.valore-riga.percentuale strong').textContent.match(/[\d.]+/)[0])).toFixed(1),
     (30 / stimaDefault * 100).toFixed(1));

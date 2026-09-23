@@ -1,6 +1,6 @@
 const { caricaApp } = require('./harness');
 const { app } = caricaApp({ fileDemo: true });
-const votiDefault = { cristallinita: 5, estetica: 5, rarita: 5, dimensioni: 5, integrita: 10, trasparenza: 5 };
+const votiDefault = { cristallinita: 5, integrita: 10, trasparenza: 5, fluorescenza: 5, rarita: 5, dimensioni: 5, iridescenza: 5, riflessione: 5 };
 const sc = app.calcolaScore(votiDefault);
 console.log('score default =', sc.score, '| suDieci =', sc.suDieci);
 console.log('fattoreDaIntegrita(10) =', app.fattoreDaIntegrita(10));
