@@ -55,7 +55,16 @@ body {
    =========================== */
 
 header {
-    background: linear-gradient(135deg, #18181b 0%, #27272a 100%);
+    /* v0.2.11b: cielo della scena a gradiente verticale pilotato dal ciclo in
+       script.js. I valori dentro var() sono la notte piena (look composto identico
+       al vecchio zinc + velo blu del restyling, pre-miscelati): senza JS o con
+       "movimento ridotto" il cielo resta alla notte statica di sempre. La banda
+       calda vive allo stop 82%: nella fascia visibile sopra il mare */
+    background: linear-gradient(180deg,
+        var(--cielo-alto, #101623) 0%,
+        var(--cielo-medio, #191c25) 48%,
+        var(--cielo-basso, #24242a) 82%,
+        var(--cielo-basso, #24242a) 100%);
     padding: 2rem 0;
     margin-bottom: 2rem;
     border-bottom: 1px solid var(--border-color);
@@ -1838,12 +1847,14 @@ textarea:focus {
 
 /* --- Stelle cadenti: canvas fisso dietro a tutto il contenuto --- */
 #cielo-flegrea {
-    position: fixed;
+    position: absolute; /* v0.2.11d: dentro l'header (era fixed a livello pagina,
+                           sepolto dal cielo ora opaco): primo figlio, quindi sopra
+                           il fondo del cielo e sotto montagna/mare/contenuti */
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    z-index: -1; /* sopra il fondo notturno, sotto ogni contenuto */
+    z-index: 0;
     pointer-events: none; /* mai in mezzo ai clic */
 }
 
@@ -1851,10 +1862,10 @@ textarea:focus {
     #cielo-flegrea { display: none; }
 }
 
-/* --- Header 'o Vesuvio: niente più grigio, la notte passa dietro --- */
-header {
-    background: linear-gradient(180deg, rgba(10, 20, 40, 0.6) 0%, rgba(10, 20, 40, 0.15) 70%, rgba(10, 20, 40, 0) 100%);
-}
+/* --- Header 'o Vesuvio: (v0.2.11b) il velo blu del restyling v0.2.9 e' stato
+   ASSORBITO dalle variabili --cielo-* (i valori notte in script.js sono gia'
+   pre-miscelati con esso): rimossa la sovrascrittura che teneva il cielo
+   costante giorno e notte nonostante il ciclo --- */
 
 header .container {
     position: relative;
@@ -2142,3 +2153,24 @@ header::after {
 @media (prefers-reduced-motion: reduce) {
     .corpo-sole { display: none; }
 }
+
+/* ===========================
+   v0.2.11 ALBA E TRAMONTO
+   Il cielo della scena (header) segue il sole: --cielo-alto, --cielo-medio e
+   --cielo-basso sono aggiornate dal ciclo in script.js. Notte piena = zinc
+   #18181b/#1f1f24/#27272a (identico al vecchio gradiente statico); sole basso
+   = arancio #f59e0b e rosa #fb7185 salgono dall'orizzonte; sole in quota =
+   azzurro pieno solo sulla cima del cielo. La luna non accende colori caldi:
+   il suo turno resta notte. Nessuna regola nuova: il gradiente e' definito
+   nel selettore header piu' su, con valori di riserva sicuri dentro var().
+   v0.2.11b: il velo blu del restyling (rgba(10,20,40,.6->0) sull'header) veniva
+   APPLICATO SOPRA il gradiente e lo soffocava (60% opaco in alto): causa del
+   "non vedo cambiamenti". Rimosso; i suoi valori notturni sono pre-miscelati
+   dentro --cielo-alto (#101623) e --cielo-medio (#191c25): il look notturno
+   composto resta identico a prima. Colori aggiornati a OGNI frame (60 fps
+   come le posizioni) con cambio-detect: si scrive solo cio' che cambia.
+   LUNA ROSSA (v0.2.11): al culmine della luna la notte perde buio — le stesse
+   variabili passano verso blu lunario e violaceo (#1a2438/#212839/#2e2d3c) —
+   mentre l'alone rosa della luna (gradienti in index.html) cresce con l'altezza.
+   =========================== */
+

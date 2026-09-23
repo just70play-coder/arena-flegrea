@@ -52,3 +52,4 @@ La suite di test (jsdom) vive in `test/`:
 | v0.2.8 | scala: paginazione, tetto liste filtri, migrazione canonica, minerali secondari |
 | v0.2.9 | restyling: palette Vesuviano-Partenopeo (dark azzurro + glow cyberpunk) + stelle cadenti con scoppietti, Vesuvio e Monte Somma (profilo a M a dimensioni fisse), luci del golfo, vele e luna che sorge |
 | v0.2.10 | ciclo notte-giorno: sole e luna su ellisse (10 s), solo colori di cielo/Vesuvio/mare |
+| v0.2.11 | alba 3-6, tramonto geometrico 16,6-20 legato all affondamento del sole; dischi densi, stelle nell header; Luna Rossa profonda |

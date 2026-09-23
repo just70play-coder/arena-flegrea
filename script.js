@@ -2253,7 +2253,11 @@ function avviaStelleCadenti() {
         function ridimensionaCielo() {
             const dpr = Math.min(window.devicePixelRatio || 1, 2);
             larghezza = window.innerWidth;
-            altezza = window.innerHeight;
+            // v0.2.11d: il cielo ora vive nell'header: l'altezza da coprire e'
+            // quella del contenitore, non della finestra (fallback: finestra)
+            const zona = canvas.parentElement;
+            altezza = (zona && zona.clientHeight) ? zona.clientHeight
+                                                  : window.innerHeight;
             canvas.width = Math.max(1, Math.round(larghezza * dpr));
             canvas.height = Math.max(1, Math.round(altezza * dpr));
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
@@ -2330,12 +2334,22 @@ document.addEventListener('DOMContentLoaded', avviaStelleCadenti);
    (sorgono a sinistra, culminano in alto, tramontano a destra). Ritmi: 20 s di
    traversata per corpo (un quarto della velocita' originale) e 5 s di pausa in
    notte piena tra il tramonto della luna e l'alba del sole (ciclo di 45 s).
+   v0.2.11: il cielo dell'header segue il sole — FASI precise sulla traversata di
+   20 s: alba (plateau) 3-6, passaggio ad azzurro 7-10, azzurro finché il sole
+   non tocca l'orizzonte (~17 s), poi TRAMONTO GEOMETRICO legato all'affondamento
+   del disco (16,6 -> 20 s, massimo alla scomparsa). BAGLIORI CIRCOLARI.
+   DENSITA': i CERCHI di sole e luna sono sempre al 100% nel proprio turno (la
+   geometria del golfo li copre quando affondano); solo alone, scia e bagliori
+   si spengono sott'acqua, perche' sporgono oltre la linea.
+   LUNA ROSSA: la luna e' tinta di rosso (gradienti in index.html) e nel suo
+   turno schiarisce la notte al culmine, con alone e bagliore rosa che crescono
+   con l'altezza.
    Cambiano SOLO i colori del fondo naturale — cielo (var --background),
    silhouette del Vesuvio, mare, terra costiera, linea d'orizzonte — mentre
    schede, sezioni interne e testi restano sui colori scuri originali.
-   Prestazioni: la POSIZIONE dei corpi e' aggiornata a ogni fotogramma
-   (movimento fluido, senza scatti); la palette dei colori, piu' pesante,
-   resta throttled a 120 ms.
+   Prestazioni: POSIZIONI e COLORI sono aggiornati a ogni fotogramma (60 fps,
+   scena sempre fluida); un cambio-detect salta le scritture invariate, cosi'
+   le notti stabili non costano nulla.
    Nei browser senza requestAnimationFrame (jsdom nei test) e con
    "movimento ridotto" il ciclo non parte: resta la notte statica.
    =========================== */
@@ -2344,7 +2358,9 @@ const CICLO_CONFIG = {
     msSole: 20000,            // traversata del sole: 1/4 della velocita' originaria (era 5 s)
     msLuna: 20000,            // traversata della luna
     msPausa: 5000,            // pausa in notte piena tra luna e sole (luna -> pausa -> sole)
-    aggioramentoMs: 120,      // frequenza di aggiornamento dei COLORI (posizioni: ogni frame)
+    // (storico) aggioramentoMs non e' piu' usato: dalla v0.2.11b anche i colori
+    // corrono a ogni frame, con cambio-detect sulle scritture
+    aggioramentoMs: 120,
     // parabola: sorgenza DIETRO il Monte Somma (x 490) -> culmine -> mare aperto (x 900).
     // yu0 = quota orizzonte in unita' utente; i corpi viaggiano SOTTO (alba/tramonto)
     // cosi' entrano e escono nascosti dietro montagna/mare: mai mozzati dal bordo.
@@ -2361,6 +2377,10 @@ function avviaCicloNotteGiorno() {
         const sole = document.getElementById('corpo-sole');
         const luna = document.getElementById('corpo-luna');
         const scia = document.querySelector('.scia-luna');
+        const aloneLuna = luna ? luna.querySelector('.alone-luna') : null;
+        const aloneSole = sole ? sole.querySelector('.alone-sole') : null;
+        const baglioreSole = document.getElementById('bagliore-sole');
+        const baglioreLuna = document.getElementById('bagliore-luna');
         const stopVesuvioA = document.getElementById('stop-vesuvio-a');
         const stopVesuvioB = document.getElementById('stop-vesuvio-b');
         const stopMareA = document.getElementById('stop-mare-a');
@@ -2384,6 +2404,20 @@ function avviaCicloNotteGiorno() {
                 + Math.round(mescola(cn[1], cg[1], t)) + ','
                 + Math.round(mescola(cn[2], cg[2], t)) + ')';
         };
+        // v0.2.11: doppia miscela — prima notte->giorno, poi la tinta calda sopra
+        const tingi = (notte, giornoHex, tGiorno, caldoHex, tCaldo) => {
+            const cn = canale(notte), cg = canale(giornoHex);
+            let r = Math.round(mescola(cn[0], cg[0], tGiorno));
+            let g = Math.round(mescola(cn[1], cg[1], tGiorno));
+            let b = Math.round(mescola(cn[2], cg[2], tGiorno));
+            if (caldoHex && tCaldo > 0) {
+                const cc = canale(caldoHex);
+                r = Math.round(mescola(r, cc[0], tCaldo));
+                g = Math.round(mescola(g, cc[1], tCaldo));
+                b = Math.round(mescola(b, cc[2], tCaldo));
+            }
+            return 'rgb(' + r + ',' + g + ',' + b + ')';
+        };
 
         // palette: notte (attuale) -> giorno (piu' chiara ma sempre scura abbastanza
         // da lasciare leggibili testo e schede, che NON vengono toccati)
@@ -2393,26 +2427,65 @@ function avviaCicloNotteGiorno() {
             vesBnotte: '#0a1630',   vesBgiorno: '#0c2038',
             terraAnotte: '#16305a', terraAgiorno: '#1d3c57',
             terraBnotte: '#0a1630', terraBgiorno: '#12283e',
-            orzNotte: '#38bdf8',    orzGiorno: '#bae6fd'
+            orzNotte: '#38bdf8',    orzGiorno: '#bae6fd',
+            // v0.2.11b: cielo della scena (header) a gradiente verticale. Notte =
+            // look composto identico a prima (zinc del vecchio statico PRE-MISCELATO
+            // col velo blu del restyling, ormai rimosso dal CSS); giorno = azzurro
+            // che culmina allo zenit; tinte calde da sole basso
+            cieloAltoNotte: '#101623',  cieloAltoGiorno: '#234a6d',
+            cieloMedioNotte: '#191c25', cieloMedioGiorno: '#2c5a85',
+            cieloBassoNotte: '#24242a', cieloBassoGiorno: '#356a99',
+            caldoBasso: '#f59e0b',      // arancio dorato all'orizzonte
+            caldoMedio: '#fb7185',      // rosa che sale dal mare
+            // v0.2.11 LUNA ROSSA: notte al culmine della luna — meno buio, blu
+            // lunario con una punta violacea; il fondo pagina si schiarisce poco
+            lunaAlto: '#1a2438',  lunaMedio: '#212839',
+            lunaBasso: '#2e2d3c', lunaFondo: '#0d1626'
         };
 
-        let ultimoColore = -Infinity;
+        // cambio-detect: mappa chiave -> ultimo valore scritto; se il valore non
+        // cambia (notte stabile, zenit, pausa) nessuna scrittura tocca il DOM
+        const ultimeTinte = new Map();
+        const scriviSeCambia = (chiave, el, attr, val) => {
+            if (ultimeTinte.get(chiave) === val) return;
+            ultimeTinte.set(chiave, val);
+            el.setAttribute(attr, val);
+        };
+        const varSeCambia = (nome, val) => {
+            if (ultimeTinte.get(nome) === val) return;
+            ultimeTinte.set(nome, val);
+            document.documentElement.style.setProperty(nome, val);
+        };
 
-        // palette e luci: la parte pesante del ciclo, aggiornata ogni aggioramentoMs
-        function aggiornaColori(giorno) {
-            stopVesuvioA.setAttribute('stop-color', sfuma(PAL.vesAnotte, PAL.vesAgiorno, giorno));
-            stopVesuvioB.setAttribute('stop-color', sfuma(PAL.vesBnotte, PAL.vesBgiorno, giorno));
-            stopMareA.setAttribute('stop-color', sfuma('#38bdf8', '#7dd3fc', giorno));
-            stopMareA.setAttribute('stop-opacity', mescola(0.14, 0.18, giorno).toFixed(3));
-            stopMareB.setAttribute('stop-opacity', mescola(0.03, 0.05, giorno).toFixed(3));
-            stopTerraA.setAttribute('stop-color', sfuma(PAL.terraAnotte, PAL.terraAgiorno, giorno));
-            stopTerraB.setAttribute('stop-color', sfuma(PAL.terraBnotte, PAL.terraBgiorno, giorno));
-            orizzonte.setAttribute('stroke', sfuma(PAL.orzNotte, PAL.orzGiorno, giorno));
-            orizzonte.setAttribute('stroke-opacity', mescola(0.28, 0.40, giorno).toFixed(3));
-            if (luci) luci.setAttribute('opacity', mescola(1, 0.15, giorno).toFixed(3));
+        // palette e luci: aggiornata a ogni frame, ma scrive solo cio' che cambia
+        function aggiornaColori(giorno, caldo, riflesso) {
+            scriviSeCambia('vesA', stopVesuvioA, 'stop-color', sfuma(PAL.vesAnotte, PAL.vesAgiorno, giorno));
+            scriviSeCambia('vesB', stopVesuvioB, 'stop-color', sfuma(PAL.vesBnotte, PAL.vesBgiorno, giorno));
+            scriviSeCambia('marA', stopMareA, 'stop-color', sfuma('#38bdf8', '#7dd3fc', giorno));
+            scriviSeCambia('marAo', stopMareA, 'stop-opacity', mescola(0.14, 0.18, giorno).toFixed(3));
+            scriviSeCambia('marBo', stopMareB, 'stop-opacity', mescola(0.03, 0.05, giorno).toFixed(3));
+            scriviSeCambia('terA', stopTerraA, 'stop-color', sfuma(PAL.terraAnotte, PAL.terraAgiorno, giorno));
+            scriviSeCambia('terB', stopTerraB, 'stop-color', sfuma(PAL.terraBnotte, PAL.terraBgiorno, giorno));
+            scriviSeCambia('orz', orizzonte, 'stroke', sfuma(PAL.orzNotte, PAL.orzGiorno, giorno));
+            scriviSeCambia('orzo', orizzonte, 'stroke-opacity', mescola(0.28, 0.40, giorno).toFixed(3));
+            if (luci) scriviSeCambia('luci', luci, 'opacity', mescola(1, 0.15, giorno).toFixed(3));
 
-            document.documentElement.style.setProperty(
-                '--background', sfuma(PAL.cieloNotte, PAL.cieloGiorno, giorno));
+            varSeCambia('--background', riflesso > 0
+                ? sfuma(PAL.cieloNotte, PAL.lunaFondo, riflesso)
+                : sfuma(PAL.cieloNotte, PAL.cieloGiorno, giorno));
+            // v0.2.11: il cielo della scena entra nel ciclo — notte = look identico
+            // a prima, sole basso = banda calda all'orizzonte, sole in quota = azzurro.
+            // LUNA ROSSA: con la luna alta la notte perde buio (blu lunario, punta
+            // violacea) invece di restare intoccata
+            varSeCambia('--cielo-alto', riflesso > 0
+                ? tingi(PAL.cieloAltoNotte, PAL.lunaAlto, riflesso, null, 0)
+                : tingi(PAL.cieloAltoNotte, PAL.cieloAltoGiorno, giorno, null, 0));
+            varSeCambia('--cielo-medio', riflesso > 0
+                ? tingi(PAL.cieloMedioNotte, PAL.lunaMedio, riflesso, PAL.caldoMedio, caldo * 0.55)
+                : tingi(PAL.cieloMedioNotte, PAL.cieloMedioGiorno, giorno, PAL.caldoMedio, caldo * 0.55));
+            varSeCambia('--cielo-basso', riflesso > 0
+                ? tingi(PAL.cieloBassoNotte, PAL.lunaBasso, riflesso, PAL.caldoBasso, caldo)
+                : tingi(PAL.cieloBassoNotte, PAL.cieloBassoGiorno, giorno, PAL.caldoBasso, caldo));
             FATTORE_NOTTE = 1 - giorno;
         }
 
@@ -2436,37 +2509,108 @@ function avviaCicloNotteGiorno() {
             const x = mescola(CICLO_CONFIG.inizioX, CICLO_CONFIG.fineX, prog);
             const y = CICLO_CONFIG.yu0 + CICLO_CONFIG.immersione
                 - Math.pow(u, 1.15) * CICLO_CONFIG.quotaY;
-            // visibilita' legata all'ALTITUDINE del centro sopra l'orizzonte:
-            // il disco affiora, resta pieno in volo e SI SPEGNE DEL TUTTO appena
-            // immerso nel mare (a -16: dentro il layer, mai mozzato al bordo)
+            // alt = altitudine del centro sopra l'orizzonte. I CERCHI non hanno
+            // dissolvenza (sempre densi al 100%: la cresta della costiera ~y213
+            // e il Somma li coprono da soli); la vista serve solo ad alone, scia
+            // e bagliori, che sporgono oltre la linea e vanno spenti sott'acqua
+            // PRIMA del limite (a -16: dentro il layer, mai mozzati)
             const alt = CICLO_CONFIG.yu0 - y;
             const vista = limita((alt + 16) / 18, 0, 1);
 
             const curva = Math.sin(prog * Math.PI); // 0 ai capi, 1 al culmine
-            // azzurro massimo ESATTAMENTE allo zenit del disco (curva=1), non prima:
-            // curva^1.6 resta bassa a lungo e raggiunge l'intensita' piena solo in cima.
+            // azzurro massimo ESATTAMENTE allo zenit del disco (curva=1), non prima:
+            // curva^1.6 resta bassa a lungo e raggiunge l'intensita' piena solo in cima
+            // (in discesa vedi il giorno geometrico: pieno fino a ~17,6 s).
             // Il giorno esiste SOLO nel turno del sole: ai passaggi di consegne
             // l'intensita' e' 0 da entrambi i lati (prima la curva della luna lasciava
             // 0.5 al confine -> flash di cambio colore a fine ciclo)
-            const giorno = faseSole ? Math.pow(curva, 1.6) : 0;
+            // il giorno NON scura mentre il disco e' ancora ben visibile (Fabio:
+            // "scurisce quando il cerchio del sole e' ancora presente: fai durare
+            // l'azzurro un secondo in piu'"): in discesa resta pieno fino a
+            // ~17,6 s (centro che sfiora la linea, alt=2: un secondo dopo il tocco
+            // del lembo), poi cede SOLO con l'ultimo tratto di affondamento e tocca
+            // lo zero esattamente alla scomparsa del disco (alt=-26, t=20 s)
+            const giorno = faseSole
+                ? (prog <= 0.5 ? Math.pow(curva, 1.6)
+                               : limita((alt + 26) / 28, 0, 1))
+                : 0;
+
+            // v0.2.11c ALBA E TRAMONTO (Fabio: "riduci il ciclo alba da 3 a 8,
+            // ~10 s switch all'azzurro"): la banda calda vive in una FINESTRA della
+            // traversata — sboccia tra il 2.o e il 3.o secondo, plateau pieno dal
+            // 3.o all'8.o, svanisce entro il 9.o (un secondo prima dello zenit):
+            // azzurro pieno dato dai ~10 secondi. Simmetrica: il tramonto riacende
+            // nella stessa finestra della discesa
+            // v0.2.11e FASI (Fabio): alba 3-6 s, passaggio ad azzurro 7-10 s,
+            // azzurro pieno FINO A 17 s, tramonto 17-20 s (pieno al tuffo).
+            // Niente dipendenza dall'altitudine: i dischi sono densi e la geometria
+            // del golfo copre; il caldo vive solo sulla TEMPOLINEA
+            const dalCulmine = Math.abs(prog - 0.5);           // 0 allo zenit, 0.5 ai capi
+            // ingresso solo sulla salita (accende: 2 s -> 3 s); in discesa il
+            // tramonto e' gestito dalla tenuta
+            const ingresso = prog <= 0.5
+                ? limita((0.40 - dalCulmine) / 0.05, 0, 1)
+                : 1;
+            // tenuta asimmetrica: prima dello zenit il caldo scende 7->10 s;
+            // dopo lo zenit il TRAMONTO E' GEOMETRICO (Fabio: "nella realta' e'
+            // attivo quando il sole e' sull'orizzonte e termina quando e' del
+            // tutto sparito"): si accende quando il LEMBO INFERIORE tocca la
+            // linea (alt = +14: ~16,6 s) e cresce con l'affondamento finché il
+            // centro raggiunge l'immersione completa (alt = -26: t = 20 s),
+            // dove brucia al massimo. Susegue la curva reale del disco
+            const tenuta = prog <= 0.5
+                ? limita(dalCulmine / 0.15, 0, 1)
+                : limita((14 - alt) / 40, 0, 1);
+            // CREPUSCOLO: al passaggio di consegne il tramonto pieno muore in 1,5 s
+            // nel turno della luna (che sorge nel bagliore): nessun flash al confine
+            const caldo = faseSole ? ingresso * tenuta
+                : (!inPausa && t - CICLO_CONFIG.msSole < 1500
+                    ? 1 - (t - CICLO_CONFIG.msSole) / 1500
+                    : 0);
+            // LUNA ROSSA: nel turno della luna la stessa curva schiarisce la notte
+            // al culmine ("riduci il buio") mentre l'alone rosa si allarga
+            const riflessoLuna = faseSole ? 0 : curva;
 
             sole.setAttribute('transform', 'translate(' + x.toFixed(1) + ',' + y.toFixed(1) + ')');
-            sole.setAttribute('opacity', (faseSole ? vista : 0).toFixed(3));
+            // DENSITA' 100%: il cerchio non sfuma mai nel proprio turno (esce solo
+            // per geometria, dietro monte/mare); l'ALONE si spegne sott'acqua
+            scriviSeCambia('so', sole, 'opacity', faseSole ? '1' : '0');
+            if (aloneSole) scriviSeCambia('aso', aloneSole, 'opacity', vista.toFixed(3));
             luna.setAttribute('transform', 'translate(' + (x - 676).toFixed(1) + ',' + (y - 148).toFixed(1) + ')');
-            luna.setAttribute('opacity', (faseSole ? 0 : vista).toFixed(3));
+            scriviSeCambia('lu', luna, 'opacity', faseSole ? '0' : '1');
             if (scia) {
                 scia.setAttribute('transform', 'translate(' + (x - 676).toFixed(1) + ',0)');
                 scia.setAttribute('opacity', (faseSole ? 0 : vista * 0.55).toFixed(3));
             }
+            // LUNA ROSSA: l'alone rosa cresce con l'altezza (raggio 46->60,
+            // presenza 0.6->1): bassa e' discreto, al culmine abbaglia la notte
+            if (aloneLuna && !faseSole) {
+                scriviSeCambia('alr', aloneLuna, 'r', mescola(46, 60, curva).toFixed(1));
+                scriviSeCambia('alo', aloneLuna, 'opacity',
+                    (mescola(0.6, 1, curva) * vista).toFixed(3));
+            }
+            // BAGLIORI CIRCOLARI: gradienti radiali che seguono i dischi (il sole
+            // accende il cielo della sua finestra calda, la luna rossa sparge rosa
+            // quanto piu' e' alta). Visibile ~63 px: sempre dentro la regione
+            if (baglioreSole) {
+                if (faseSole) {
+                    // nel crepuscolo il bagliore resta FERMO al punto del tuffo
+                    scriviSeCambia('bsx', baglioreSole, 'cx', x.toFixed(1));
+                    scriviSeCambia('bsy', baglioreSole, 'cy', y.toFixed(1));
+                }
+                scriviSeCambia('bso', baglioreSole, 'opacity', (caldo * 0.9).toFixed(3));
+            }
+            if (baglioreLuna) {
+                scriviSeCambia('blx', baglioreLuna, 'cx', x.toFixed(1));
+                scriviSeCambia('bly', baglioreLuna, 'cy', y.toFixed(1));
+                scriviSeCambia('blo', baglioreLuna, 'opacity', (faseSole ? 0 : riflessoLuna * 0.75).toFixed(3));
+            }
             // (nota: luna e scia usano lo stesso x,y del sole: gli offset -676/-148
             // compensano la posizione dei gruppi in markup, vedi index.html)
 
-            // i colori cambiano lentamente: bastano ~8 aggiornamenti al secondo;
-            // le posizioni invece vanno spostate a ogni frame (movimento fluido)
-            if (adesso - ultimoColore >= CICLO_CONFIG.aggioramentoMs) {
-                ultimoColore = adesso;
-                aggiornaColori(giorno);
-            }
+            // v0.2.11b: colori a OGNI frame come le posizioni (60 fps): il
+            // cambio-detect dentro aggiornaColori rende il costo quasi nullo
+            aggiornaColori(giorno, caldo, riflessoLuna);
         }
 
         function cicloCorpo(adesso) {

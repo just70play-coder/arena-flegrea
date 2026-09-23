@@ -6,11 +6,14 @@
     <title>Arena Flegrea - Sistema Valutazione Minerali</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <!-- v0.2.9: cielo notturno con pulviscolo stellare (canvas decorativo, vedi script.js) -->
-    <canvas id="cielo-flegrea" aria-hidden="true"></canvas>
-
-    <header>
+<body>
+    <header>
+        <!-- v0.2.9: cielo notturno con pulviscolo stellare (canvas decorativo).
+             v0.2.11d: spostato DENTRO l'header (prima era fisso a livello pagina
+             con z-index -1 e filtrava attraverso il velo semitrasparente: senza
+             velo le stelle restavano sepolte dietro il cielo opaco). Ora e' il
+             primo figlio dell'header: sopra il fondo, sotto montagna e mare -->
+        <canvas id="cielo-flegrea" aria-hidden="true"></canvas>
 
         <!-- v0.2.9: 'o golfo — DUE LAYER: il mare e' elastico a tutta larghezza, ma la
              montagna (cu 'a luna, 'e nuvole e 'o fumatore) ha DIMENSIONI FISSE:
@@ -101,20 +104,35 @@
                     <stop offset="0" stop-color="#7dd3fc" stop-opacity="0.4"/>
                     <stop offset="1" stop-color="#7dd3fc" stop-opacity="0"/>
                 </radialGradient>
+                <!-- v0.2.11 LUNA ROSSA: la luna del golfo si tinge di rosso -->
                 <radialGradient id="luna-alone" cx="0.5" cy="0.5" r="0.5">
-                    <stop offset="0" stop-color="#eaf7ff" stop-opacity="0.5"/>
-                    <stop offset="0.5" stop-color="#bae6fd" stop-opacity="0.18"/>
-                    <stop offset="1" stop-color="#bae6fd" stop-opacity="0"/>
+                    <stop offset="0" stop-color="#ff8f77" stop-opacity="0.6"/>
+                    <stop offset="0.5" stop-color="#ff7263" stop-opacity="0.26"/>
+                    <stop offset="1" stop-color="#ff8577" stop-opacity="0"/>
                 </radialGradient>
                 <radialGradient id="luna-corpo" cx="0.4" cy="0.35" r="0.8">
-                    <stop offset="0" stop-color="#ffffff"/>
-                    <stop offset="0.8" stop-color="#eaf7ff"/>
-                    <stop offset="1" stop-color="#cfeaff"/>
+                    <stop offset="0" stop-color="#ffe8d9"/>
+                    <stop offset="0.7" stop-color="#ffab8e"/>
+                    <stop offset="1" stop-color="#dd5638"/>
                 </radialGradient>
                 <radialGradient id="sole-alone" cx="0.5" cy="0.5" r="0.5">
                     <stop offset="0" stop-color="#ffe08a" stop-opacity="0.55"/>
                     <stop offset="0.5" stop-color="#ffc247" stop-opacity="0.20"/>
                     <stop offset="1" stop-color="#ffc247" stop-opacity="0"/>
+                </radialGradient>
+                <!-- v0.2.11c: bagliori CIRCOLARI nel cielo, centrati sui dischi
+                     (cx/cy aggiornati dal ciclo in script.js; visibile ~63 px) -->
+                <radialGradient id="bagliore-sole" cx="0" cy="0" r="150" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#f59e0b" stop-opacity="0.32"/>
+                    <stop offset="0.42" stop-color="#fb923c" stop-opacity="0.07"/>
+                    <stop offset="0.7" stop-color="#f59e0b" stop-opacity="0"/>
+                    <stop offset="1" stop-color="#f59e0b" stop-opacity="0"/>
+                </radialGradient>
+                <radialGradient id="bagliore-luna" cx="0" cy="0" r="150" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stop-color="#ff7f68" stop-opacity="0.34"/>
+                    <stop offset="0.42" stop-color="#ff9184" stop-opacity="0.08"/>
+                    <stop offset="0.7" stop-color="#ff9184" stop-opacity="0"/>
+                    <stop offset="1" stop-color="#ff9184" stop-opacity="0"/>
                 </radialGradient>
                 <radialGradient id="sole-corpo" cx="0.4" cy="0.35" r="0.8">
                     <stop offset="0" stop-color="#fff7d6"/>
@@ -122,32 +140,34 @@
                     <stop offset="1" stop-color="#ffc247"/>
                 </radialGradient>
                 <linearGradient id="scia-luna" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="0" stop-color="#eaf7ff" stop-opacity="0.5"/>
-                    <stop offset="1" stop-color="#eaf7ff" stop-opacity="0"/>
+                    <stop offset="0" stop-color="#ffd6cb" stop-opacity="0.5"/>
+                    <stop offset="1" stop-color="#ffd6cb" stop-opacity="0"/>
                 </linearGradient>
                 <radialGradient id="nuvola-flegrea" cx="0.5" cy="0.5" r="0.5">
                     <stop offset="0" stop-color="#cfeaff" stop-opacity="0.16"/>
                     <stop offset="1" stop-color="#cfeaff" stop-opacity="0"/>
                 </radialGradient>
             </defs>
-            <!-- v0.2.10: sole e luna sullo stesso percorso ellittico (ciclo notte-giorno, vedi script.js) -->
+            <!-- v0.2.10-11: sole e luna sullo stesso percorso parabolico (ciclo notte-giorno con alba e tramonto, vedi script.js) -->
+            <circle id="bagliore-sole" cx="490" cy="236" r="150" fill="url(#bagliore-sole)" opacity="0"/>
             <g class="corpo-sole" id="corpo-sole" opacity="0">
                 <circle class="alone-sole" cx="0" cy="0" r="42" fill="url(#sole-alone)"/>
                 <circle cx="0" cy="0" r="14" fill="url(#sole-corpo)"/>
             </g>
-            <!-- 'a luna: sorge da dietro 'o fianco d''o cono, sotto 'o sottotitolo, e lascia 'a scia -->
+            <circle id="bagliore-luna" cx="676" cy="148" r="150" fill="url(#bagliore-luna)" opacity="0"/>
+            <!-- 'a luna: sorge da dietro 'o fianco d''o cono, sotto 'o sottotitolo, e lascia 'a scia -->
             <g class="luna" id="corpo-luna">
                 <circle class="alone-luna" cx="676" cy="148" r="46" fill="url(#luna-alone)"/>
                 <circle cx="676" cy="148" r="13" fill="url(#luna-corpo)"/>
-                <circle cx="672" cy="144" r="2.6" fill="#cfeaff" opacity="0.55"/>
-                <circle cx="680" cy="151" r="1.8" fill="#cfeaff" opacity="0.45"/>
-                <circle cx="675" cy="153" r="1.2" fill="#cfeaff" opacity="0.4"/>
+                <circle cx="672" cy="144" r="2.6" fill="#ffb89c" opacity="0.55"/>
+                <circle cx="680" cy="151" r="1.8" fill="#ffb89c" opacity="0.45"/>
+                <circle cx="675" cy="153" r="1.2" fill="#ffb89c" opacity="0.4"/>
             </g>
             <g class="scia-luna">
                 <path d="M668,218 L684,218 L706,237 L658,237 Z" fill="url(#scia-luna)"/>
-                <ellipse cx="676" cy="222" rx="9" ry="1.1" fill="#eaf7ff" opacity="0.28"/>
-                <ellipse cx="684" cy="228" rx="13" ry="1.3" fill="#eaf7ff" opacity="0.2"/>
-                <ellipse cx="690" cy="233" rx="16" ry="1.5" fill="#eaf7ff" opacity="0.14"/>
+                <ellipse cx="676" cy="222" rx="9" ry="1.1" fill="#ffd6cb" opacity="0.28"/>
+                <ellipse cx="684" cy="228" rx="13" ry="1.3" fill="#ffd6cb" opacity="0.2"/>
+                <ellipse cx="690" cy="233" rx="16" ry="1.5" fill="#ffd6cb" opacity="0.14"/>
             </g>
             <!-- nuvole basse attorno alla cima, come nel tramonto di Carrieri -->
             <g class="nuvola nuvola-1">
@@ -691,7 +711,7 @@
                     </div>
 
                     <h3>ℹ️ Info Sistema</h3>
-                    <p><strong>Versione:</strong> 0.2.10 - Ciclo notte e giorno: sole e luna sulla stessa traiettoria (20 s per corpo, 5 s di pausa di notte piena), solo i colori di cielo, Vesuvio e mare</p>
+                    <p><strong>Versione:</strong> 0.2.11 - Alba 3-6, azzurro costante (non scurisce) finche' il disco e' in aria e un secondo ancora, poi cede solo nell'ultima parte dell'affondamento, tramonto geometrico che cresce con l'affondamento del disco (16,6-20 s) e brucia alla scomparsa completa; dischi sempre densi al 100% con bagliori circolari e crepuscolo di 1,5 s al passaggio alla luna; stelle nel cielo del golfo; Luna Rossa profonda, alone rosa che cresce con l'altezza, notte che si schiarisce al culmine</p>
                     <p><strong>Storage usato:</strong> <span id="storage-size">0 KB</span></p>
                 </div>
             </section>
