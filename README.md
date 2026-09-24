@@ -54,3 +54,5 @@ La suite di test (jsdom) vive in `test/`:
 | v0.2.10 | ciclo notte-giorno: sole e luna su ellisse (10 s), solo colori di cielo/Vesuvio/mare |
 | v0.2.11 | alba 3-6, tramonto geometrico 16,6-20 legato all affondamento del sole; dischi densi, stelle nell header; Luna Rossa profonda |
 | v0.3.0 | scoring fotografico v2: estetica fuori, 8 criteri (15/15/15/14/13/12/8/8), totale 100 |
+| v0.3.1 | base opaca a tutta larghezza sotto il livello del mare: il disco di sole/luna scompare alla linea dell'orizzonte in ogni punto |
+| v0.3.2 | fascia del mare e base unificate: un'unica tinta scura (il blu del Vesuvio alla linea d'acqua, anche in fase giorno), sparisce la striscia chiara sotto il monte a ogni larghezza di finestra (anche oltre i 1200 px) |

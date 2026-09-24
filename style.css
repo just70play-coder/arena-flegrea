@@ -2054,6 +2054,7 @@ header {
    montagna intatta e centrata, mai schiacciata) */
 @media (max-width: 700px) {
     .vesuvio-svg { width: 510px; }
+    .base-svg { height: 21.5px; } /* monte a scala 0.797: linea d'acqua 27*0.797 */
 }
 
 /* --- v0.2.9g: 'a carna a sotto e 'e maccaruni 'acoppo — SMONTATO!
@@ -2068,6 +2069,25 @@ header {
 
 .vesuvio-svg {
     z-index: 0; /* 'a montagna nasc 'e rret 'all'acqua */
+}
+
+/* --- v0.3.1: base opaca sotto il livello del mare, a tutta larghezza ---
+   Il monte e' fisso 640x220 (1:1): la sua linea d'acqua sta a 27 px dal fondo.
+   La fascia del mare scala con la larghezza della finestra: sotto i 1200 px
+   restava uno sfasamento di alcuni px in cui il disco di sole/luna, affondando
+   a destra del Vesuvio (x=900, oltre il monte che finisce a x=820), restava
+   visibile sott'acqua. La base (z 0.5: sopra i dischi nel layer monte, sotto
+   luci/vele/riflessi nel layer mare) copre la fascia a ogni larghezza.
+   Stessi colori della fascia terra-costiera: giunzione invisibile. */
+.base-svg {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: 27px;
+    z-index: 0.5;
+    pointer-events: none;
 }
 
 header .container {

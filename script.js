@@ -2395,6 +2395,8 @@ function avviaCicloNotteGiorno() {
         const stopMareB = document.getElementById('stop-mare-b');
         const stopTerraA = document.getElementById('stop-terra-a');
         const stopTerraB = document.getElementById('stop-terra-b');
+        const stopBaseA = document.getElementById('stop-base-a');
+        const stopBaseB = document.getElementById('stop-base-b');
         const orizzonte = document.getElementById('linea-orizzonte');
         const luci = document.getElementById('luci-costiera');
         if (!sole || !luna || !stopVesuvioA) return;
@@ -2433,8 +2435,10 @@ function avviaCicloNotteGiorno() {
             cieloNotte: '#060b16',  cieloGiorno: '#234a6d',
             vesAnotte: '#16305a',   vesAgiorno: '#153852',
             vesBnotte: '#0a1630',   vesBgiorno: '#0c2038',
-            terraAnotte: '#16305a', terraAgiorno: '#1d3c57',
+            terraAnotte: '#0b1935', terraAgiorno: '#0d233b', // v0.3.2: cima fascia = colore del monte alla linea d'acqua (unificata)
             terraBnotte: '#0a1630', terraBgiorno: '#12283e',
+            baseAnotte: '#0b1935', baseAgiorno: '#0d233b',
+            baseBnotte: '#0a1630', baseBgiorno: '#12283e', // v0.3.2: la base segue monte/fascia
             orzNotte: '#38bdf8',    orzGiorno: '#bae6fd',
             // v0.2.11b: cielo della scena (header) a gradiente verticale. Notte =
             // look composto identico a prima (zinc del vecchio statico PRE-MISCELATO
@@ -2474,6 +2478,8 @@ function avviaCicloNotteGiorno() {
             scriviSeCambia('marBo', stopMareB, 'stop-opacity', mescola(0.03, 0.05, giorno).toFixed(3));
             scriviSeCambia('terA', stopTerraA, 'stop-color', sfuma(PAL.terraAnotte, PAL.terraAgiorno, giorno));
             scriviSeCambia('terB', stopTerraB, 'stop-color', sfuma(PAL.terraBnotte, PAL.terraBgiorno, giorno));
+            if (stopBaseA) scriviSeCambia('baseA', stopBaseA, 'stop-color', sfuma(PAL.baseAnotte, PAL.baseAgiorno, giorno));
+            if (stopBaseB) scriviSeCambia('baseB', stopBaseB, 'stop-color', sfuma(PAL.baseBnotte, PAL.baseBgiorno, giorno));
             scriviSeCambia('orz', orizzonte, 'stroke', sfuma(PAL.orzNotte, PAL.orzGiorno, giorno));
             scriviSeCambia('orzo', orizzonte, 'stroke-opacity', mescola(0.28, 0.40, giorno).toFixed(3));
             if (luci) scriviSeCambia('luci', luci, 'opacity', mescola(1, 0.15, giorno).toFixed(3));

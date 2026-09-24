@@ -279,6 +279,6 @@ t.eq('secondari aggiornati tramite modifica',
 // ===========================
 t.gruppo('Versione');
 // ===========================
-t.contiene('versione aggiornata a 0.3.0', doc.body.textContent, '0.3.0 - Scoring');
+t.contiene('versione aggiornata a 0.3.2', doc.body.textContent, '0.3.2 - Unificazione');
 
 t.esci();

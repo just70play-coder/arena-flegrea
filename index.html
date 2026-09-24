@@ -27,7 +27,7 @@
                     <stop id="stop-mare-b" offset="1" stop-color="#38bdf8" stop-opacity="0.03"/>
                 </linearGradient>
                 <linearGradient id="terra-costiera" x1="0" y1="0" x2="0" y2="1">
-                    <stop id="stop-terra-a" offset="0" stop-color="#16305a"/>
+                    <stop id="stop-terra-a" offset="0" stop-color="#0b1935"/>
                     <stop id="stop-terra-b" offset="1" stop-color="#0a1630"/>
                 </linearGradient>
                 <linearGradient id="riflesso-svanisce" x1="0" y1="0" x2="1200" y2="0" gradientUnits="userSpaceOnUse">
@@ -184,6 +184,21 @@
             <!-- lucine sulle falde (casette sul Vesuvio di notte) -->
             <circle class="luce-fiassa" cx="438" cy="206" r="0.9" fill="#7dd3fc" opacity="0.4"/>
             <circle class="luce-fiassa" cx="688" cy="203" r="0.8" fill="#eaf7ff" opacity="0.35"/>
+        </svg>
+
+        <!-- v0.3.1: BASE OPACA A TUTTA LARGHEZZA sotto il livello del mare.
+             Siede tra monte (z0, con i dischi sole/luna) e mare (z1, con luci/
+             vele/riflessi): il disco scompare alla linea d'acqua in ogni punto
+             dell'orizzonte, a qualsiasi larghezza di finestra. L'altezza in CSS
+             eguaglia la linea d'acqua del monte fisso (27 px a scala 1:1). -->
+        <svg class="base-svg" viewBox="0 0 1200 27" preserveAspectRatio="none" aria-hidden="true" focusable="false">
+            <defs>
+                <linearGradient id="base-opaca" x1="0" y1="0" x2="0" y2="1">
+                    <stop id="stop-base-a" offset="0" stop-color="#0b1935"/>
+                    <stop id="stop-base-b" offset="1" stop-color="#0a1630"/>
+                </linearGradient>
+            </defs>
+            <rect x="0" y="0" width="1200" height="27" fill="url(#base-opaca)"/>
         </svg>
 
         <div class="container">
@@ -730,7 +745,7 @@
                     </div>
 
                     <h3>ℹ️ Info Sistema</h3>
-                    <p><strong>Versione:</strong> 0.3.0 - Scoring fotografico v2: estetica fuori, 8 criteri (cristallinita' 15, integrita' 15, trasparenza 15, fluorescenza 14, rarita' 13, dimensioni 12, iridescenza 8, riflessione 8, totale 100); default 5 per ogni criterio (integrita' 10, score 5.8); formula invariata: valore = base di mercato x localita' x (score/10) x fattore integrita'</p>
+                    <p><strong>Versione:</strong> 0.3.2 - Unificazione fascia del mare: base e fascia costiera in un'unica tinta scura (il blu del Vesuvio alla linea d'acqua, in fase notte e giorno): sparisce la striscia chiara sotto il monte a ogni larghezza di finestra, anche oltre i 1200 px; la fascia resta opaca sotto il livello del mare e i dischi di sole e luna restano coperti al tuffo; Monte Somma, Vesuvio e tempistiche del ciclo invariati</p>
                     <p><strong>Storage usato:</strong> <span id="storage-size">0 KB</span></p>
                 </div>
             </section>
